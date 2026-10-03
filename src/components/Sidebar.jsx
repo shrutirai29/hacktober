@@ -24,7 +24,7 @@ export default function Sidebar({
   ];
 
   return (
-    <aside className="w-[240px] bg-[#FBF7F5] border-r border-[#EAE2DC] sticky top-0 h-screen flex flex-col justify-between shrink-0 select-none overflow-y-auto scrollbar-none">
+    <aside className="w-[240px] bg-[#FBF7F5] rounded-3xl border border-[#EAE2DC] shadow-sm flex flex-col justify-between shrink-0 select-none overflow-hidden h-[calc(100vh-2rem)]">
       
       {/* Top Header & Navigation */}
       <div className="flex flex-col">
@@ -79,8 +79,8 @@ export default function Sidebar({
 
       </div>
 
-      {/* Bottom Adorable 3D Illustration - Seamless Edge-to-Edge Artwork as in Reference */}
-      <div className="mt-auto relative w-full overflow-hidden select-none pointer-events-none">
+      {/* Bottom Adorable 3D Illustration - Seamless Edge-to-Edge Artwork clipped by rounded bottom corners */}
+      <div className="mt-auto relative w-full overflow-hidden select-none pointer-events-none rounded-b-3xl">
         <img
           src="/assets/sidebar_cat_decor.png"
           alt="Good Trips, Better Stories"

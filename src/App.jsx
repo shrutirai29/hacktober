@@ -34,7 +34,7 @@ import {
 import { Sparkles, Menu, X } from 'lucide-react';
 
 export default function App() {
-  const friendName = "Shruti";
+  const friendName = "Kanwal";
   const [activeNav, setActiveNav] = useState("Home");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -203,7 +203,7 @@ export default function App() {
             onClick={() => setIsMobileSidebarOpen(false)}
           />
         )}
-        <div className="relative z-50">
+        <div className="relative z-50 p-3 sm:p-4 md:pr-0 sticky top-0 h-screen flex flex-col justify-start">
           <Sidebar
             activeNav={activeNav}
             onSelectNav={(nav) => {
@@ -267,7 +267,7 @@ export default function App() {
                   }}
                   onMarkAllPacked={() => {
                     setItems(prev => prev.map(i => ({ ...i, checked: true })));
-                    showToast("All items marked as packed! Have a great trip, Shruti! 🎒");
+                    showToast("All items marked as packed! Have a great trip, Kanwal! 🎒");
                   }}
                   onTriggerVoice={handleTriggerVoice}
                   isVoicePlaying={isVoicePlaying}
