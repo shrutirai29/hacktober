@@ -179,16 +179,16 @@ export default function Sidebar({
 
       </div>
 
-      {/* Bottom User Card: Alex @ Hostel C-402 */}
+      {/* Bottom User Card: Shruti @ Hostel C-402 */}
       <div className="pt-4 border-t border-[#f0eae0]">
         <div className="bg-[#faf8f5] rounded-2xl p-3 border border-[#ede7dd] flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-500 text-white flex items-center justify-center font-black text-xs shadow-xs shrink-0">
-            AC
+            SH
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between">
               <span className="text-xs font-black text-[#1e1b4b] truncate">
-                Alex Chen
+                Shruti
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             </div>

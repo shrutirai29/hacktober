@@ -34,7 +34,7 @@ import {
 import { Sparkles, Menu, X } from 'lucide-react';
 
 export default function App() {
-  const friendName = "Alex";
+  const friendName = "Shruti";
   const [activeNav, setActiveNav] = useState("Home");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
