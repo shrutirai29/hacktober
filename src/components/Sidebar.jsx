@@ -24,15 +24,15 @@ export default function Sidebar({
   ];
 
   return (
-    <aside className="w-[260px] bg-[#FAF8F5] border-r border-[#ECE6DC] flex flex-col justify-between shrink-0 min-h-screen select-none overflow-hidden">
+    <aside className="w-[260px] bg-[#F6F1EF] border-r border-[#E8DFD7] sticky top-0 h-screen flex flex-col justify-between shrink-0 select-none overflow-y-auto scrollbar-none">
       
       {/* Top Header & Navigation */}
       <div className="flex flex-col">
         
         {/* Brand Header */}
-        <div className="pt-6 pb-4 px-4 flex flex-col items-center text-center">
+        <div className="pt-6 pb-3 px-4 flex flex-col items-center text-center">
           {/* 3D Pastel Suitcase Logo */}
-          <div className="w-20 h-14 flex items-center justify-center">
+          <div className="w-20 h-13 flex items-center justify-center">
             <img 
               src="/assets/sidebar_logo_suitcase.png" 
               alt="CheckMate 3D Suitcase"
@@ -50,7 +50,7 @@ export default function Sidebar({
         </div>
 
         {/* Navigation Menu List */}
-        <nav className="space-y-1.5 px-3 mt-3">
+        <nav className="space-y-1.5 px-3 mt-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeNav === item.id;
@@ -59,10 +59,10 @@ export default function Sidebar({
               <button
                 key={item.id}
                 onClick={() => onSelectNav?.(item.id)}
-                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-xs font-extrabold transition-all duration-150 cursor-pointer ${
+                className={`w-full flex items-center gap-3.5 px-4 py-2.5 rounded-2xl text-xs font-extrabold transition-all duration-150 cursor-pointer ${
                   isActive
                     ? 'bg-[#EBE6FA] text-[#5B21B6] shadow-xs'
-                    : 'text-[#18113C] hover:bg-[#F3EFE8] hover:text-[#18113C]'
+                    : 'text-[#18113C] hover:bg-[#EFE9E4] hover:text-[#18113C]'
                 }`}
               >
                 <Icon 
@@ -79,8 +79,8 @@ export default function Sidebar({
 
       </div>
 
-      {/* Bottom Adorable 3D Illustration (Cat on Suitcases with Sticky Note) */}
-      <div className="mt-auto relative w-full overflow-hidden select-none pointer-events-none">
+      {/* Bottom Adorable 3D Illustration (Seamlessly anchored at the bottom edge) */}
+      <div className="mt-auto relative w-full overflow-hidden select-none pointer-events-none -mb-1">
         <img
           src="/assets/sidebar_cat_decor.png"
           alt="Good Trips, Better Stories"
