@@ -637,7 +637,7 @@ export default function RoomSceneViewer({
       </div>
 
       {/* Main Viewport Container */}
-      <div className="relative w-full aspect-[16/10] sm:aspect-[16/9.5] rounded-2xl overflow-hidden bg-[#F9F6F0] border border-[#e5ded4] shadow-inner select-none">
+      <div className="relative w-full h-[360px] sm:h-[400px] md:h-[430px] rounded-2xl overflow-hidden bg-[#F9F6F0] border border-[#e5ded4] shadow-inner select-none">
         
         {viewMode === "3d" ? (
           <>

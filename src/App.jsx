@@ -220,11 +220,11 @@ export default function App() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col p-4 sm:p-6 lg:p-7 overflow-y-auto max-w-[1440px] w-full">
+      <div className="flex-1 flex flex-col p-4 sm:p-5 lg:p-6 overflow-y-auto max-w-[1380px] mx-auto w-full">
         
         {/* Render View based on activeNav */}
         {activeNav === "Home" && (
-          <div className="space-y-5">
+          <div className="space-y-4">
             <HeaderBanner
               tripType={tripType}
               setTripType={setTripType}
@@ -240,10 +240,10 @@ export default function App() {
               isVoicePlaying={isVoicePlaying}
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-              {/* Left Column: Your Space + 3 Bottom Cards (7 cols) */}
-              <div className="lg:col-span-7 space-y-4">
-                
+            {/* 2-Column Balanced Hero Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+              {/* Left Column: 3D Room Twin (7 cols) */}
+              <div className="lg:col-span-7 flex flex-col">
                 <RoomSceneViewer
                   highlightedItemId={highlightedItemId}
                   onSelectItem={(item) => {
@@ -255,20 +255,10 @@ export default function App() {
                   photoUrl={roomPhotoUrl}
                   roomTitle={roomTitle}
                 />
-
-                <BottomCards
-                  tripType={tripType}
-                  duration={duration}
-                  weather={weather}
-                  mode={mode}
-                  onOpenComparison={() => setIsComparisonOpen(true)}
-                  onOpenMemory={() => setIsMemoryOpen(true)}
-                  onOpenAiInspector={() => setIsAiInspectorOpen(true)}
-                />
               </div>
 
               {/* Right Column: Your Packing Manifest (5 cols) */}
-              <div className="lg:col-span-5 h-full">
+              <div className="lg:col-span-5 flex flex-col">
                 <PackingManifestCard
                   items={items}
                   onToggleItem={(id) => {
@@ -287,6 +277,17 @@ export default function App() {
                 />
               </div>
             </div>
+
+            {/* Full-Width Trip Stats & Scenarios Section */}
+            <BottomCards
+              tripType={tripType}
+              duration={duration}
+              weather={weather}
+              mode={mode}
+              onOpenComparison={() => setIsComparisonOpen(true)}
+              onOpenMemory={() => setIsMemoryOpen(true)}
+              onOpenAiInspector={() => setIsAiInspectorOpen(true)}
+            />
 
             {/* Bottom Cute Doodle Banner Requested by User */}
             <div className="w-full pt-1 pb-2 select-none">

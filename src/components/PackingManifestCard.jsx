@@ -319,7 +319,10 @@ export default function PackingManifestCard({
             Leave Behind ({leaveBehindItems.length})
           </button>
         </div>
+      </div>
 
+      {/* Scrollable Manifest Items Container */}
+      <div className="space-y-2.5 flex-1 overflow-y-auto max-h-[430px] pr-1.5 scrollbar-thin">
         {/* 1. High-Risk Memory Alerts Card (Always shown unless filtering exclusively) */}
         {(activeFilter === "all" || activeFilter === "high_risk") && highRiskItems.length > 0 && (
           <div className="rounded-2xl border border-rose-200 bg-[#fff5f5] p-3.5 space-y-2.5 shadow-2xs animate-in fade-in duration-200">

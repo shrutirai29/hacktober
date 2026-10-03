@@ -28,11 +28,11 @@ export default function HeaderBanner({
     <div className="space-y-3.5">
       
       {/* Top Banner: Exact Artwork Requested by User */}
-      <div className="relative rounded-3xl overflow-hidden border border-[#e8ded1] shadow-sm bg-[#dcd7f2] select-none">
+      <div className="relative rounded-3xl overflow-hidden border border-[#e8ded1] shadow-xs bg-[#dcd7f2] select-none">
         <img
           src="/assets/header_banner.png"
           alt="Hey Shruti! Where are you off to next? Tell me about your trip and I'll create a personalized checklist just for you"
-          className="w-full h-auto object-cover object-center block rounded-3xl"
+          className="w-full h-36 sm:h-44 md:h-48 object-cover object-center block rounded-3xl"
         />
       </div>
 
