@@ -8,6 +8,15 @@ import ComparisonModal from './components/ComparisonModal';
 import MemoryVaultModal from './components/MemoryVaultModal';
 import GemmaInspectorModal from './components/GemmaInspectorModal';
 
+// Dedicated Full-Page Views
+import MemoryVaultView from './views/MemoryVaultView';
+import CompareTripsView from './views/CompareTripsView';
+import AudioCoachView from './views/AudioCoachView';
+import GemmaCoreView from './views/GemmaCoreView';
+import MyChecklistsView from './views/MyChecklistsView';
+import NewTripView from './views/NewTripView';
+import SettingsView from './views/SettingsView';
+
 import { PRESET_SCENARIOS } from './data/presetScenarios';
 import { 
   loadMemory, 
@@ -21,11 +30,12 @@ import {
   generateVoiceBriefingText 
 } from './services/voiceCoach';
 
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Menu, X } from 'lucide-react';
 
 export default function App() {
   const friendName = "Alex";
   const [activeNav, setActiveNav] = useState("Home");
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Scenarios & Context Parameters
   const [scenarios, setScenarios] = useState(PRESET_SCENARIOS);
@@ -124,10 +134,33 @@ export default function App() {
     const target = scenarios.find(s => s.id === scenarioId) || scenarios[0];
     setCurrentScenario(target);
     setTripType(selectedTrip);
+    setActiveNav("Home");
+  };
+
+  const handleStartNewTrip = (tripConfig) => {
+    setTripType(tripConfig.purpose);
+    setDuration(tripConfig.duration);
+    setWeather(tripConfig.weather);
+    setMode(tripConfig.mode || "departure");
+    setActiveNav("Home");
+    showToast(`Started packing for ${tripConfig.name}!`);
+  };
+
+  const handleDeleteMemoryRecord = (id) => {
+    const updated = memoryList.filter(m => m.id !== id);
+    setMemoryList(updated);
+    saveMemory(updated);
+    showToast("Incident record deleted.");
+  };
+
+  const handleResetAllData = () => {
+    const reset = resetMemoryToDefault();
+    setMemoryList(reset);
+    showToast("Reset all memory data to defaults.");
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f5f0] text-slate-800 flex font-sans selection:bg-purple-500 selection:text-white">
+    <div className="min-h-screen bg-[#FFF9F2] text-[#241746] flex flex-col md:flex-row font-sans selection:bg-purple-500 selection:text-white relative">
       
       {/* Toast Notification */}
       {toastMessage && (
@@ -139,78 +172,161 @@ export default function App() {
         </div>
       )}
 
-      {/* Left Sidebar */}
-      <Sidebar
-        activeNav={activeNav}
-        onSelectNav={setActiveNav}
-        onOpenMemory={() => setIsMemoryOpen(true)}
-        onOpenComparison={() => setIsComparisonOpen(true)}
-        onOpenAiInspector={() => setIsAiInspectorOpen(true)}
-        onTriggerVoice={handleTriggerVoice}
-        memoryCount={memoryList.length}
-      />
+      {/* Mobile Top Header (with hamburger button) */}
+      <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-[#ece7de] sticky top-0 z-30">
+        <div className="flex items-center gap-2">
+          <span className="font-black text-lg text-[#1e1b4b]">CheckMate</span>
+        </div>
+        <button
+          onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+          className="p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200"
+        >
+          {isMobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Desktop Persistent Sidebar & Mobile Drawer */}
+      <div className={`
+        ${isMobileSidebarOpen ? 'fixed inset-0 z-40 flex' : 'hidden md:flex shrink-0'}
+      `}>
+        {isMobileSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs md:hidden"
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+        )}
+        <div className="relative z-50">
+          <Sidebar
+            activeNav={activeNav}
+            onSelectNav={(nav) => {
+              setActiveNav(nav);
+              setIsMobileSidebarOpen(false);
+            }}
+            onOpenMemory={() => setIsMemoryOpen(true)}
+            onOpenComparison={() => setIsComparisonOpen(true)}
+            onOpenAiInspector={() => setIsAiInspectorOpen(true)}
+            onTriggerVoice={handleTriggerVoice}
+            memoryCount={memoryList.length}
+          />
+        </div>
+      </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col p-4 sm:p-6 lg:p-7 overflow-y-auto space-y-5 max-w-[1440px]">
+      <div className="flex-1 flex flex-col p-4 sm:p-6 lg:p-7 overflow-y-auto max-w-[1440px] w-full">
         
-        {/* Top Header Banner & Filter Row */}
-        <HeaderBanner
-          tripType={tripType}
-          setTripType={setTripType}
-          duration={duration}
-          setDuration={setDuration}
-          weather={weather}
-          setWeather={setWeather}
-          mode={mode}
-          setMode={setMode}
-          onGenerate={runSynthesis}
-          isGenerating={isGenerating}
-        />
-
-        {/* 2-Column Main Workspace */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          
-          {/* Left Column: Your Space + 3 Bottom Cards (7 cols) */}
-          <div className="lg:col-span-7 space-y-4">
-            <YourSpaceCard
-              scenarios={scenarios}
-              currentScenario={currentScenario}
-              onSelectScenario={setCurrentScenario}
-              onCustomImageUpload={handleCustomImageUpload}
-              highlightedItemId={highlightedItemId}
-              onHoverItem={setHighlightedItemId}
-            />
-
-            <BottomCards
+        {/* Render View based on activeNav */}
+        {activeNav === "Home" && (
+          <div className="space-y-5">
+            <HeaderBanner
               tripType={tripType}
+              setTripType={setTripType}
               duration={duration}
+              setDuration={setDuration}
               weather={weather}
+              setWeather={setWeather}
               mode={mode}
-              onOpenComparison={() => setIsComparisonOpen(true)}
-              onOpenMemory={() => setIsMemoryOpen(true)}
-              onOpenAiInspector={() => setIsAiInspectorOpen(true)}
+              setMode={setMode}
+              onGenerate={runSynthesis}
+              isGenerating={isGenerating}
             />
-          </div>
 
-          {/* Right Column: Your Packing Manifest (5 cols) */}
-          <div className="lg:col-span-5 h-full">
-            <PackingManifestCard
-              items={items}
-              onToggleItem={(id) => {
-                setItems(prev => prev.map(i => i.id === id ? { ...i, checked: !i.checked } : i));
-              }}
-              onMarkAllPacked={() => {
-                setItems(prev => prev.map(i => ({ ...i, checked: true })));
-                showToast("All items marked as packed! Have a great trip, Alex! 🎒");
-              }}
-              onTriggerVoice={handleTriggerVoice}
-              isVoicePlaying={isVoicePlaying}
-              onOpenComparison={() => setIsComparisonOpen(true)}
-              onOpenAiInspector={() => setIsAiInspectorOpen(true)}
-            />
-          </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+              {/* Left Column: Your Space + 3 Bottom Cards (7 cols) */}
+              <div className="lg:col-span-7 space-y-4">
+                <YourSpaceCard
+                  scenarios={scenarios}
+                  currentScenario={currentScenario}
+                  onSelectScenario={setCurrentScenario}
+                  onCustomImageUpload={handleCustomImageUpload}
+                  highlightedItemId={highlightedItemId}
+                  onHoverItem={setHighlightedItemId}
+                />
 
-        </div>
+                <BottomCards
+                  tripType={tripType}
+                  duration={duration}
+                  weather={weather}
+                  mode={mode}
+                  onOpenComparison={() => setIsComparisonOpen(true)}
+                  onOpenMemory={() => setIsMemoryOpen(true)}
+                  onOpenAiInspector={() => setIsAiInspectorOpen(true)}
+                />
+              </div>
+
+              {/* Right Column: Your Packing Manifest (5 cols) */}
+              <div className="lg:col-span-5 h-full">
+                <PackingManifestCard
+                  items={items}
+                  onToggleItem={(id) => {
+                    setItems(prev => prev.map(i => i.id === id ? { ...i, checked: !i.checked } : i));
+                  }}
+                  onMarkAllPacked={() => {
+                    setItems(prev => prev.map(i => ({ ...i, checked: true })));
+                    showToast("All items marked as packed! Have a great trip, Alex! 🎒");
+                  }}
+                  onTriggerVoice={handleTriggerVoice}
+                  isVoicePlaying={isVoicePlaying}
+                  onOpenComparison={() => setIsComparisonOpen(true)}
+                  onOpenAiInspector={() => setIsAiInspectorOpen(true)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeNav === "NewTrip" && (
+          <NewTripView onStartTrip={handleStartNewTrip} />
+        )}
+
+        {activeNav === "MyChecklists" && (
+          <MyChecklistsView
+            onSelectTrip={(trip) => {
+              setTripType(trip.title);
+              setActiveNav("Home");
+            }}
+            onNewTrip={() => setActiveNav("NewTrip")}
+          />
+        )}
+
+        {activeNav === "MemoryVault" && (
+          <MemoryVaultView
+            memoryList={memoryList}
+            onAddIncident={(name, ctx, note, rule) => {
+              const updated = recordForgottenItem(memoryList, name, ctx, note, rule);
+              setMemoryList(updated);
+              showToast(`Recorded incident for "${name}"!`);
+            }}
+            onDeleteRecord={handleDeleteMemoryRecord}
+            onResetMemory={handleResetAllData}
+            friendName={friendName}
+          />
+        )}
+
+        {activeNav === "CompareTrips" && (
+          <CompareTripsView
+            onSelectScenarioAndTrip={handleSelectScenarioAndTrip}
+          />
+        )}
+
+        {activeNav === "AudioCoach" && (
+          <AudioCoachView
+            tripType={tripType}
+            items={items}
+            memoryList={memoryList}
+            friendName={friendName}
+          />
+        )}
+
+        {activeNav === "GemmaCore" && (
+          <GemmaCoreView />
+        )}
+
+        {activeNav === "Settings" && (
+          <SettingsView
+            onResetAllData={handleResetAllData}
+            showToast={showToast}
+          />
+        )}
 
       </div>
 
@@ -228,13 +344,9 @@ export default function App() {
         onAddIncident={(name, ctx, note) => {
           const updated = recordForgottenItem(memoryList, name, ctx, note);
           setMemoryList(updated);
-          showToast(`CheckMate learned: "${name}" marked as high-risk memory alert!`);
+          showToast(`CheckMate learned: "${name}" marked as high-risk alert!`);
         }}
-        onResetMemory={() => {
-          const reset = resetMemoryToDefault();
-          setMemoryList(reset);
-          showToast("Memory reset to initial demo state.");
-        }}
+        onResetMemory={handleResetAllData}
         friendName={friendName}
       />
 
