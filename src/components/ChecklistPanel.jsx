@@ -8,11 +8,10 @@ import {
   ShieldAlert, 
   MapPin, 
   Plus, 
-  X, 
   CheckCircle,
   Eye,
-  CornerDownRight,
-  MinusCircle
+  MinusCircle,
+  Trophy
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -29,22 +28,23 @@ export default function ChecklistPanel({
   mode
 }) {
   const [newItemName, setNewItemName] = useState("");
-  const [activeFilter, setActiveFilter] = useState("all");
 
   const totalCount = items.length;
   const checkedCount = items.filter(i => i.checked).length;
   const progressPercent = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
 
-  // Trigger celebratory confetti if user hits 100%
+  // Trigger celebratory confetti when reaching 100%
   const handleToggle = (id) => {
-    const willBeChecked = !items.find(i => i.id === id)?.checked;
+    const targetItem = items.find(i => i.id === id);
+    const willBeChecked = !targetItem?.checked;
     onToggleItem(id);
 
     if (willBeChecked && checkedCount + 1 === totalCount) {
       confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 }
+        particleCount: 100,
+        spread: 80,
+        origin: { y: 0.55 },
+        colors: ['#22d3ee', '#818cf8', '#f43f5e', '#f59e0b', '#10b981']
       });
     }
   };
@@ -59,65 +59,97 @@ export default function ChecklistPanel({
   const criticalItems = items.filter(i => i.priority === "critical");
   const regularItems = items.filter(i => i.priority !== "critical");
 
+  const getCategoryColor = (cat) => {
+    if (!cat) return "bg-slate-800 text-slate-300 border-slate-700";
+    const lower = cat.toLowerCase();
+    if (lower.includes("tech") || lower.includes("cable") || lower.includes("av")) return "bg-purple-950/80 text-purple-300 border-purple-800/60";
+    if (lower.includes("doc") || lower.includes("pass")) return "bg-emerald-950/80 text-emerald-300 border-emerald-800/60";
+    if (lower.includes("power") || lower.includes("charger")) return "bg-amber-950/80 text-amber-300 border-amber-800/60";
+    if (lower.includes("attire") || lower.includes("footwear")) return "bg-indigo-950/80 text-indigo-300 border-indigo-800/60";
+    return "bg-sky-950/80 text-sky-300 border-sky-800/60";
+  };
+
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col gap-4">
+    <div className="glass-panel rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col gap-4 relative overflow-hidden border border-slate-700/60">
       
       {/* Header & Progress Bar */}
       <div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <CheckSquare className="w-4 h-4 text-emerald-400" />
-                <span>{mode === "departure" ? "Departure Packing Manifest" : "Return Safe Verification"}</span>
+              <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                <CheckSquare className="w-4 h-4" />
+              </div>
+              <h2 className="text-base font-extrabold text-white tracking-tight">
+                {mode === "departure" ? "Departure Packing Manifest" : "Return Safe Verification"}
               </h2>
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                {checkedCount}/{totalCount} Packed
-              </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
               {mode === "departure" 
                 ? "Physical inspection before zipping bag and locking door."
-                : "Verify all items return with you to prevent hostel/hotel loss."}
+                : "Verify all electronics & keys return with you."}
             </p>
           </div>
 
-          {/* Quick Voice Briefing button */}
+          {/* Quick Voice Exit Nudge button */}
           <button
             onClick={onTriggerVoice}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold self-start sm:self-auto transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-bold self-start sm:self-auto transition-all shadow-md active:scale-95 ${
               isVoicePlaying
-                ? 'bg-rose-950 text-rose-300 border-rose-700 animate-pulse'
-                : 'bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border-emerald-800/80'
+                ? 'bg-rose-950 text-rose-200 border-rose-500 animate-pulse'
+                : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white border-emerald-400/40 hover:scale-[1.02]'
             }`}
           >
-            <Volume2 className="w-3.5 h-3.5 text-emerald-400" />
+            <Volume2 className="w-4 h-4" />
             <span>{isVoicePlaying ? "Playing Briefing..." : "Voice Exit Nudge"}</span>
           </button>
         </div>
 
-        {/* Visual Progress Bar */}
-        <div className="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800 relative">
-          <div
-            className={`h-full transition-all duration-500 rounded-full ${
-              progressPercent === 100
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
-                : 'bg-gradient-to-r from-sky-500 to-indigo-500'
-            }`}
-            style={{ width: `${progressPercent}%` }}
-          />
+        {/* Progress Bar Card */}
+        <div className="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/90 flex flex-col gap-2 shadow-inner">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-slate-300 flex items-center gap-1.5">
+              {progressPercent === 100 ? (
+                <>
+                  <Trophy className="w-4 h-4 text-emerald-400" />
+                  <span className="text-emerald-400 font-extrabold">100% Packed! You are fully prepared, Alex!</span>
+                </>
+              ) : (
+                <span>Packing Progress: {checkedCount} of {totalCount} items verified</span>
+              )}
+            </span>
+            <span className="font-mono font-extrabold text-cyan-400 text-sm">
+              {progressPercent}%
+            </span>
+          </div>
+
+          <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800 relative">
+            <div
+              className={`h-full transition-all duration-500 rounded-full shadow-lg ${
+                progressPercent === 100
+                  ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 shadow-emerald-500/50'
+                  : 'bg-gradient-to-r from-cyan-400 via-indigo-500 to-fuchsia-500 shadow-cyan-500/40'
+              }`}
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
         </div>
       </div>
 
       {/* Critical Memory Alerts Section */}
       {criticalItems.length > 0 && (
-        <div className="rounded-xl border border-amber-500/40 bg-amber-950/20 p-3 sm:p-4 flex flex-col gap-2.5">
-          <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
-            <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
-            <span>High-Risk Memory Alerts (Forgotten in Past Trips)</span>
+        <div className="glass-amber-glow rounded-2xl p-4 flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-2 border-b border-amber-600/30 pb-2">
+            <div className="flex items-center gap-2 text-amber-300 text-xs font-black uppercase tracking-wider">
+              <ShieldAlert className="w-4 h-4 text-amber-400 animate-bounce" />
+              <span>High-Risk Memory Alerts (Forgotten in Past Trips)</span>
+            </div>
+            <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold text-[10px]">
+              {criticalItems.length} High Risks
+            </span>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {criticalItems.map((item) => {
               const isHighlighted = highlightedItemId === item.id;
               return (
@@ -125,43 +157,43 @@ export default function ChecklistPanel({
                   key={item.id}
                   onMouseEnter={() => onHoverItem?.(item.id)}
                   onMouseLeave={() => onHoverItem?.(null)}
-                  className={`p-2.5 rounded-xl border transition-all flex items-start justify-between gap-3 ${
+                  className={`p-3 rounded-2xl border transition-all duration-200 flex items-start justify-between gap-3 ${
                     item.checked
-                      ? 'bg-slate-900/50 border-slate-800 opacity-60'
+                      ? 'bg-slate-950/40 border-slate-800 opacity-60'
                       : isHighlighted
-                      ? 'bg-amber-900/40 border-amber-400 shadow-md shadow-amber-500/20'
-                      : 'bg-slate-950/80 border-amber-700/60 hover:border-amber-500'
+                      ? 'bg-amber-950/70 border-amber-400 shadow-lg shadow-amber-500/30 scale-[1.01]'
+                      : 'bg-slate-950/85 border-amber-500/40 hover:border-amber-400'
                   }`}
                 >
-                  <div className="flex items-start gap-2.5 flex-1">
+                  <div className="flex items-start gap-3 flex-1">
                     <button
                       onClick={() => handleToggle(item.id)}
-                      className="mt-0.5 text-amber-400 hover:text-amber-300 transition-colors"
+                      className="mt-0.5 text-amber-400 hover:text-amber-300 transition-transform active:scale-90 cursor-pointer"
                     >
                       {item.checked ? (
-                        <CheckCircle className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle className="w-5 h-5 text-emerald-400 fill-emerald-950" />
                       ) : (
-                        <Square className="w-4 h-4 text-amber-400" />
+                        <Square className="w-5 h-5 text-amber-400" />
                       )}
                     </button>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-xs font-bold ${item.checked ? 'line-through text-slate-400' : 'text-slate-100'}`}>
+                        <span className={`text-xs font-black tracking-tight ${item.checked ? 'line-through text-slate-500' : 'text-white'}`}>
                           {item.name}
                         </span>
-                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                          {item.pastForgottenCount ? `Forgotten ${item.pastForgottenCount}x` : 'Critical'}
+                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-sm">
+                          {item.pastForgottenCount ? `Forgotten ${item.pastForgottenCount}x Prior` : 'Critical'}
                         </span>
                       </div>
                       {item.alertReason && (
-                        <p className="text-[11px] text-amber-200/90 mt-0.5">
+                        <p className="text-[11px] text-amber-200/90 mt-1 leading-snug">
                           {item.alertReason}
                         </p>
                       )}
                       {item.spatialTip && (
-                        <p className="text-[10px] text-sky-400 flex items-center gap-1 mt-1 font-mono">
-                          <MapPin className="w-3 h-3 shrink-0" />
-                          <span>Check: {item.spatialTip}</span>
+                        <p className="text-[11px] text-cyan-300 font-semibold flex items-center gap-1.5 mt-1.5 font-mono bg-cyan-950/50 px-2 py-1 rounded-lg border border-cyan-800/40">
+                          <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                          <span>Spatial Check: {item.spatialTip}</span>
                         </p>
                       )}
                     </div>
@@ -169,10 +201,10 @@ export default function ChecklistPanel({
 
                   <button
                     onClick={() => onMarkForgotten?.(item.name)}
-                    className="text-[10px] text-slate-400 hover:text-rose-400 hover:underline shrink-0 pt-0.5"
-                    title="Report that you forgot this item on a trip"
+                    className="text-[10px] font-bold text-amber-400/80 hover:text-rose-400 hover:underline shrink-0 pt-0.5"
+                    title="Log that Alex forgot this item again"
                   >
-                    Log Incident
+                    + Forgot Again
                   </button>
                 </div>
               );
@@ -183,11 +215,12 @@ export default function ChecklistPanel({
 
       {/* Regular & Vision-Identified Items */}
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          Vision-Detected & Context Essentials ({regularItems.length})
+        <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+          <span>Vision-Detected & Context Essentials ({regularItems.length})</span>
+          <span className="text-[10px] text-slate-500 font-mono">Tap checkbox to verify</span>
         </span>
 
-        <div className="space-y-1.5 max-h-[360px] overflow-y-auto pr-1">
+        <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
           {regularItems.map((item) => {
             const isHighlighted = highlightedItemId === item.id;
             return (
@@ -195,50 +228,50 @@ export default function ChecklistPanel({
                 key={item.id}
                 onMouseEnter={() => onHoverItem?.(item.id)}
                 onMouseLeave={() => onHoverItem?.(null)}
-                className={`p-2.5 rounded-xl border transition-all flex items-start justify-between gap-3 ${
+                className={`p-3 rounded-2xl border transition-all duration-200 flex items-start justify-between gap-3 ${
                   item.checked
-                    ? 'bg-slate-950/40 border-slate-800/80 opacity-60'
+                    ? 'bg-slate-950/30 border-slate-800/80 opacity-55'
                     : isHighlighted
-                    ? 'bg-sky-950/40 border-sky-400 shadow-md shadow-sky-500/10'
-                    : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
+                    ? 'bg-cyan-950/50 border-cyan-400 shadow-lg shadow-cyan-500/20 scale-[1.01]'
+                    : 'bg-slate-950/75 border-slate-800/90 hover:border-slate-700'
                 }`}
               >
-                <div className="flex items-start gap-2.5 flex-1">
+                <div className="flex items-start gap-3 flex-1">
                   <button
                     onClick={() => handleToggle(item.id)}
-                    className="mt-0.5 text-slate-400 hover:text-sky-400 transition-colors"
+                    className="mt-0.5 text-slate-400 hover:text-cyan-400 transition-transform active:scale-90 cursor-pointer"
                   >
                     {item.checked ? (
-                      <CheckCircle className="w-4 h-4 text-emerald-400" />
+                      <CheckCircle className="w-5 h-5 text-emerald-400 fill-emerald-950" />
                     ) : (
-                      <Square className="w-4 h-4 text-slate-500" />
+                      <Square className="w-5 h-5 text-slate-500 hover:text-slate-300" />
                     )}
                   </button>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`text-xs font-semibold ${item.checked ? 'line-through text-slate-400' : 'text-slate-200'}`}>
+                      <span className={`text-xs font-bold tracking-tight ${item.checked ? 'line-through text-slate-500' : 'text-slate-100'}`}>
                         {item.name}
                       </span>
                       {item.category && (
-                        <span className="text-[10px] text-slate-400 font-mono">
-                          [{item.category}]
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getCategoryColor(item.category)}`}>
+                          {item.category}
                         </span>
                       )}
                       {item.source && (
-                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-950 text-indigo-300 border border-indigo-800">
+                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-indigo-950 text-indigo-300 border border-indigo-800">
                           {item.source}
                         </span>
                       )}
                     </div>
                     {item.alertReason && (
-                      <p className="text-[11px] text-slate-400 mt-0.5">
+                      <p className="text-[11px] text-slate-400 mt-1 leading-snug">
                         {item.alertReason}
                       </p>
                     )}
                     {item.spatialTip && (
-                      <p className="text-[10px] text-sky-400 flex items-center gap-1 mt-1 font-mono">
-                        <MapPin className="w-3 h-3 shrink-0" />
-                        <span>{item.spatialTip}</span>
+                      <p className="text-[10px] text-cyan-300 font-medium flex items-center gap-1 mt-1 font-mono">
+                        <MapPin className="w-3 h-3 text-cyan-400 shrink-0" />
+                        <span>Check: {item.spatialTip}</span>
                       </p>
                     )}
                   </div>
@@ -247,7 +280,7 @@ export default function ChecklistPanel({
                 <button
                   onClick={() => onMarkForgotten?.(item.name)}
                   className="text-[10px] text-slate-500 hover:text-amber-400 shrink-0 pt-0.5"
-                  title="Mark as repeatedly forgotten"
+                  title="Mark this item as repeatedly forgotten"
                 >
                   Mark Risk
                 </button>
@@ -258,30 +291,30 @@ export default function ChecklistPanel({
       </div>
 
       {/* Add Custom Item Form */}
-      <form onSubmit={handleAddNew} className="flex items-center gap-2 pt-1 border-t border-slate-800/80">
+      <form onSubmit={handleAddNew} className="flex items-center gap-2 pt-2 border-t border-slate-800/80">
         <input
           type="text"
           value={newItemName}
           onChange={(e) => setNewItemName(e.target.value)}
-          placeholder="+ Add specific item to packing list..."
-          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500"
+          placeholder="+ Add specific item to Alex's packing list..."
+          className="flex-1 bg-slate-950/90 border border-slate-800 hover:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 shadow-inner"
         />
         <button
           type="submit"
-          className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1"
+          className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl text-xs font-extrabold transition-all shadow-md shadow-cyan-600/25 flex items-center gap-1.5 cursor-pointer active:scale-95"
         >
-          <Plus className="w-3.5 h-3.5" />
-          <span>Add</span>
+          <Plus className="w-4 h-4" />
+          <span>Add Item</span>
         </button>
       </form>
 
-      {/* Items to Leave Behind (Anti-Clutter) */}
+      {/* Items to Leave Behind (Anti-Clutter Advice) */}
       {checklistData?.itemsToLeaveBehind?.length > 0 && (
-        <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-[11px] text-slate-400 flex items-start gap-2">
-          <MinusCircle className="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5" />
+        <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 flex items-start gap-2.5 shadow-inner">
+          <MinusCircle className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
           <div>
-            <span className="font-semibold text-slate-300">Gemma Advice (Leave in Room): </span>
-            <span>Do not pack {checklistData.itemsToLeaveBehind.join(", ")}. Avoid unnecessary baggage weight.</span>
+            <span className="font-extrabold text-slate-300">Gemma Spatial Advice (Leave in Room): </span>
+            <span>Do not pack {checklistData.itemsToLeaveBehind.join(", ")}. Avoid carrying unnecessary weight.</span>
           </div>
         </div>
       )}

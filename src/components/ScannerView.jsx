@@ -4,11 +4,13 @@ import {
   Upload, 
   Eye, 
   AlertTriangle, 
-  Sparkles, 
   Crosshair, 
-  Maximize2,
-  RefreshCw,
-  Info
+  Scan,
+  Sparkles,
+  Zap,
+  Info,
+  CheckCircle2,
+  Layers
 } from 'lucide-react';
 
 export default function ScannerView({ 
@@ -21,6 +23,7 @@ export default function ScannerView({
 }) {
   const [activePin, setActivePin] = useState(null);
   const [showBoundingBoxes, setShowBoundingBoxes] = useState(true);
+  const [isScanningActive, setIsScanningActive] = useState(true);
   const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
@@ -34,51 +37,68 @@ export default function ScannerView({
     }
   };
 
+  const presetIcons = {
+    hostel_desk: "🏫",
+    presentation_prep: "💼",
+    weekend_home: "🏡"
+  };
+
   return (
-    <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col gap-4 shadow-xl">
+    <div className="glass-panel-glow rounded-3xl p-4 sm:p-6 flex flex-col gap-4 shadow-2xl relative overflow-hidden">
       
-      {/* Top Header & Presets */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+      {/* Decorative ambient gradient backdrop */}
+      <div className="absolute -top-24 -left-24 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Top Header & Preset Pills */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-800/80 pb-4 relative z-10">
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Camera className="w-4 h-4 text-sky-400" />
-              Room & Desk Spatial Scanner
-            </h2>
-            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
-              Open Vision (PaliGemma)
-            </span>
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-gradient-to-tr from-cyan-500/20 to-sky-500/20 border border-cyan-500/40 text-cyan-400">
+              <Scan className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-extrabold text-white flex items-center gap-2 tracking-tight">
+                <span>Room & Desk Spatial Scanner</span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                  PaliGemma Vision Live
+                </span>
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Pinpoint cables plugged in walls, chargers, and clutter before you zip your bag.
+              </p>
+            </div>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Identify candidate objects, cables plugged into walls, and clutter before you leave.
-          </p>
         </div>
 
-        {/* Preset Selector Buttons */}
+        {/* Scene Presets Selector */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {scenarios.map((sc) => {
             const isSelected = currentScenario.id === sc.id;
+            const emoji = presetIcons[sc.id] || "📍";
             return (
               <button
                 key={sc.id}
                 onClick={() => onSelectScenario(sc)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 active:scale-95 ${
                   isSelected
-                    ? 'bg-sky-600 text-white shadow-md shadow-sky-600/30'
-                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
+                    ? 'bg-gradient-to-r from-cyan-500 to-sky-600 text-white shadow-lg shadow-cyan-500/30 scale-105 border border-cyan-300/40'
+                    : 'bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-700/70 hover:border-slate-600'
                 }`}
               >
-                {sc.title.split(" ")[0]} {sc.title.split(" ")[1]}
+                <span>{emoji}</span>
+                <span>{sc.title.split(" ")[0]}</span>
               </button>
             );
           })}
 
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-dashed border-slate-600 text-xs font-medium transition-all"
-            title="Upload custom room/desk photo"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-dashed border-cyan-500/40 hover:border-cyan-400 text-xs font-bold transition-all active:scale-95 shadow-sm"
+            title="Upload custom room photo from camera or files"
           >
-            <Upload className="w-3.5 h-3.5 text-slate-400" />
+            <Upload className="w-3.5 h-3.5 text-cyan-400" />
             <span>Upload Photo</span>
           </button>
           <input
@@ -91,15 +111,23 @@ export default function ScannerView({
         </div>
       </div>
 
-      {/* Main Image Canvas with Spatial Pins */}
-      <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center group select-none">
+      {/* Main Image Scanner Canvas with Laser Beam and Pins */}
+      <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-2xl overflow-hidden bg-slate-950 border-2 border-slate-800/90 flex items-center justify-center group select-none shadow-2xl">
         
-        {/* Background Room Photo / SVG */}
+        {/* Background Room Photo / Vector Scene */}
         <img
           src={currentScenario.image}
           alt={currentScenario.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.01]"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.015]"
         />
+
+        {/* Ambient Darkened HUD Vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/40 pointer-events-none" />
+
+        {/* Animated Laser Scan Line (The Computer Vision Effect!) */}
+        {isScanningActive && (
+          <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_15px_3px_rgba(34,211,238,0.7)] pointer-events-none animate-scanline z-10" />
+        )}
 
         {/* Spatial Pins & Bounding Overlays */}
         {showBoundingBoxes && currentScenario.detectedItems?.map((item) => {
@@ -123,50 +151,53 @@ export default function ScannerView({
                 onHoverItem?.(null);
               }}
             >
-              {/* Pin indicator */}
+              {/* Sonar Radar Rings */}
               <div className="relative flex items-center justify-center">
                 <span
-                  className={`absolute w-8 h-8 rounded-full animate-ping opacity-75 ${
-                    isCritical ? 'bg-amber-500' : 'bg-sky-400'
+                  className={`absolute w-9 h-9 rounded-full animate-sonar pointer-events-none ${
+                    isCritical ? 'bg-amber-400' : 'bg-cyan-400'
                   }`}
                 />
+                
+                {/* Pin Button */}
                 <button
-                  className={`relative w-7 h-7 rounded-full flex items-center justify-center border-2 shadow-lg transition-transform ${
+                  className={`relative w-8 h-8 rounded-full flex items-center justify-center border-2 shadow-2xl transition-all duration-300 ${
                     isCritical
-                      ? 'bg-amber-500 border-white text-slate-950 scale-110'
+                      ? 'bg-gradient-to-tr from-amber-600 to-orange-500 border-white text-slate-950 scale-110 shadow-amber-500/50'
                       : isHighlighted
-                      ? 'bg-sky-500 border-white text-white scale-125'
-                      : 'bg-slate-900/90 border-sky-400 text-sky-400 hover:scale-110'
+                      ? 'bg-gradient-to-tr from-cyan-400 to-blue-600 border-white text-white scale-125 shadow-cyan-400/60'
+                      : 'bg-slate-900/95 border-cyan-400 text-cyan-400 hover:scale-115 shadow-black/80'
                   }`}
                 >
                   {isCritical ? (
-                    <AlertTriangle className="w-3.5 h-3.5 fill-current" />
+                    <AlertTriangle className="w-4 h-4 fill-current text-white drop-shadow" />
                   ) : (
-                    <Crosshair className="w-3.5 h-3.5" />
+                    <Crosshair className="w-4 h-4 text-cyan-200" />
                   )}
                 </button>
               </div>
 
               {/* Hover Tooltip / Detail Card */}
               {isHighlighted && (
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-9 w-64 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-xl p-2.5 shadow-2xl text-left pointer-events-none z-30 transition-all">
-                  <div className="flex items-start justify-between gap-1 mb-1">
-                    <span className="font-semibold text-xs text-white leading-tight">
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-10 w-72 glass-panel-glow rounded-2xl p-3.5 shadow-2xl text-left pointer-events-none z-30 transition-all animate-in fade-in zoom-in-95 duration-150">
+                  <div className="flex items-start justify-between gap-1.5 mb-1.5">
+                    <span className="font-extrabold text-xs text-white leading-tight">
                       {item.name}
                     </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800">
-                      {(item.confidence * 100).toFixed(0)}%
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-700/60 shrink-0">
+                      {(item.confidence * 100).toFixed(0)}% Match
                     </span>
                   </div>
 
-                  <span className="text-[10px] text-slate-400 block mb-1">
-                    Category: <span className="text-slate-300">{item.category}</span>
-                  </span>
+                  <div className="flex items-center gap-1.5 text-[10px] text-slate-300 mb-2">
+                    <span className="text-slate-400 font-medium">Category:</span>
+                    <span className="px-1.5 py-0.2 rounded bg-slate-800 text-slate-200 font-semibold">{item.category}</span>
+                  </div>
 
                   {item.warning && (
-                    <div className="text-[10px] p-1.5 rounded bg-amber-950/70 border border-amber-800/80 text-amber-200 flex items-start gap-1">
-                      <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" />
-                      <span>{item.warning}</span>
+                    <div className="text-[11px] p-2 rounded-xl bg-amber-950/80 border border-amber-600/80 text-amber-200 flex items-start gap-1.5 shadow-inner">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                      <span className="leading-snug">{item.warning}</span>
                     </div>
                   )}
                 </div>
@@ -175,27 +206,69 @@ export default function ScannerView({
           );
         })}
 
-        {/* Vision Scan Controls Overlay */}
-        <div className="absolute top-3 left-3 flex items-center gap-2 bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-800 text-xs">
-          <Eye className="w-3.5 h-3.5 text-sky-400" />
-          <span className="text-slate-300 font-medium">{currentScenario.detectedItems?.length || 0} objects mapped</span>
+        {/* HUD Overlay Stats (Top Left) */}
+        <div className="absolute top-3.5 left-3.5 flex items-center gap-2 bg-slate-950/85 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-slate-700/80 text-xs shadow-lg">
+          <Eye className="w-3.5 h-3.5 text-cyan-400" />
+          <span className="text-slate-200 font-bold">{currentScenario.detectedItems?.length || 0} objects mapped</span>
         </div>
 
-        <div className="absolute bottom-3 right-3 flex items-center gap-2">
+        {/* HUD Controls (Bottom Right) */}
+        <div className="absolute bottom-3.5 right-3.5 flex items-center gap-2">
+          <button
+            onClick={() => setIsScanningActive(!isScanningActive)}
+            className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all border ${
+              isScanningActive
+                ? 'bg-cyan-950/80 text-cyan-300 border-cyan-600/70 shadow-sm shadow-cyan-500/20'
+                : 'bg-slate-900/80 text-slate-400 border-slate-700'
+            }`}
+          >
+            {isScanningActive ? "Laser Scan: ON" : "Laser Scan: OFF"}
+          </button>
+          
           <button
             onClick={() => setShowBoundingBoxes(!showBoundingBoxes)}
-            className="bg-slate-900/85 hover:bg-slate-800 backdrop-blur-md px-2.5 py-1 rounded-md border border-slate-700 text-[11px] font-medium text-slate-300 transition-all"
+            className="bg-slate-900/85 hover:bg-slate-800 backdrop-blur-md px-3 py-1 rounded-lg border border-slate-700 text-[11px] font-bold text-slate-300 transition-all shadow-sm"
           >
             {showBoundingBoxes ? "Hide Markers" : "Show Markers"}
           </button>
         </div>
       </div>
 
+      {/* Quick Spotted Item Tags (Clickable chips to explore detected items) */}
+      <div className="flex flex-col gap-1.5 relative z-10">
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+          <Layers className="w-3 h-3 text-cyan-400" /> Detected Objects in Room (Hover to inspect on image):
+        </span>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {currentScenario.detectedItems?.map((item) => {
+            const isCritical = item.pastForgottenCount > 0;
+            const isHovered = highlightedItemId === item.id;
+            return (
+              <button
+                key={item.id}
+                onMouseEnter={() => onHoverItem?.(item.id)}
+                onMouseLeave={() => onHoverItem?.(null)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all duration-200 border flex items-center gap-1.5 ${
+                  isHovered
+                    ? 'bg-cyan-500 text-slate-950 border-white shadow-md shadow-cyan-500/30 scale-105'
+                    : isCritical
+                    ? 'bg-amber-950/40 text-amber-300 border-amber-600/50 hover:border-amber-400'
+                    : 'bg-slate-900/70 text-slate-300 border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                {isCritical && <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" />}
+                <span>{item.name.split("(")[0].trim()}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Scenario Context Blurb */}
-      <div className="flex items-center justify-between text-xs px-2 py-1 bg-slate-950/60 rounded-lg border border-slate-800/60 text-slate-400">
-        <div className="flex items-center gap-1.5">
-          <Info className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-          <span><strong className="text-slate-200">Current Scene:</strong> {currentScenario.notes}</span>
+      <div className="flex items-center justify-between text-xs px-3.5 py-2.5 bg-slate-950/70 rounded-xl border border-slate-800/80 text-slate-400 shadow-inner">
+        <div className="flex items-start sm:items-center gap-2">
+          <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5 sm:mt-0" />
+          <span><strong className="text-white">Active Context:</strong> {currentScenario.notes}</span>
         </div>
       </div>
 

@@ -247,33 +247,76 @@ export default function App() {
       />
 
       {/* Hero Banner / Contest Callout */}
-      <section className="bg-gradient-to-b from-slate-900 via-slate-900/60 to-slate-950 border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#0a0f1d] via-[#090d18] to-transparent border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        
+        {/* Ambient floating orbs */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-10 right-1/4 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div className="space-y-2.5 max-w-3xl">
+            
+            {/* Badges row */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
-                Hacktoberfest '26 • Weekend Challenge #1
+              <span className="px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-cyan-500/20 via-sky-500/20 to-indigo-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                Hacktoberfest '26 • Challenge #1
               </span>
-              <span className="text-xs text-slate-400 flex items-center gap-1 font-mono">
-                <Cpu className="w-3.5 h-3.5 text-sky-400" /> Gemma 2 Open-Weight Core
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-900/90 text-slate-300 border border-slate-700/80 flex items-center gap-1.5 shadow-sm">
+                <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                Gemma 2 Open-Weight Core
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 flex items-center gap-1.5 shadow-sm">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                100% Private (Runs on Device)
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-              CheckMate <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-300">— Nothing Gets Left Behind</span>
+
+            {/* Title with energetic gradient */}
+            <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+              Check<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">Mate</span>
+              <span className="text-slate-400 font-medium text-xl sm:text-2xl ml-2 sm:ml-3">
+                — Nothing Gets Left Behind
+              </span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-3xl">
-              Built for <strong className="text-slate-200">{friendName}</strong>, who moves frequently between hostel, home, and college conferences. CheckMate scans desk photos with open vision AI, remembers what was repeatedly left behind in wall outlets, and dynamically adapts checklists.
+
+            {/* Subtext */}
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Crafted with care for <strong className="text-cyan-300 font-bold">{friendName}</strong>, who moves frequently between hostel, home, and college conferences. CheckMate scans room photos with open vision AI, remembers what was repeatedly left behind in wall outlets, and dynamically adapts checklists.
             </p>
+
+            {/* Quick Feature Pills */}
+            <div className="flex items-center gap-2 pt-1 flex-wrap text-[11px] font-semibold text-slate-400">
+              <span className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 flex items-center gap-1">
+                🔌 Wall Socket Radar
+              </span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 flex items-center gap-1">
+                🪪 Gate Pass Lanyard Guard
+              </span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 flex items-center gap-1">
+                🖥️ HDMI Adapter Lifesaver
+              </span>
+              <span className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300 flex items-center gap-1">
+                🎙️ Voice Exit Briefing
+              </span>
+            </div>
           </div>
 
-          {/* Quick Demo Action Buttons */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Quick Demo Action Card */}
+          <div className="shrink-0 flex flex-col sm:flex-row lg:flex-col gap-3">
             <button
               onClick={() => setIsComparisonOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/25 transition-all hover:scale-[1.02]"
+              className="group relative flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-white font-black text-xs sm:text-sm shadow-xl shadow-indigo-600/30 transition-all duration-200 hover:scale-[1.03] active:scale-95 cursor-pointer border border-white/20"
             >
-              <Split className="w-4 h-4" />
-              <span>Launch Trip Comparison Demo</span>
+              <Split className="w-4 h-4 text-indigo-100 group-hover:rotate-12 transition-transform" />
+              <span>Launch Side-by-Side Trip Demo</span>
+            </button>
+
+            <button
+              onClick={() => setIsMemoryOpen(true)}
+              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 text-amber-300 border border-amber-500/40 text-xs font-bold transition-all hover:scale-[1.02] shadow-sm"
+            >
+              <span>Explore Alex's Memory Vault ({memoryList.length} rules)</span>
             </button>
           </div>
         </div>
