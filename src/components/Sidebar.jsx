@@ -24,7 +24,7 @@ export default function Sidebar({
   ];
 
   return (
-    <aside className="w-[260px] bg-[#F6F1EF] border-r border-[#E8DFD7] sticky top-0 h-screen flex flex-col justify-between shrink-0 select-none overflow-y-auto scrollbar-none">
+    <aside className="w-[240px] bg-[#FBF7F5] border-r border-[#EAE2DC] sticky top-0 h-screen flex flex-col justify-between shrink-0 select-none overflow-y-auto scrollbar-none">
       
       {/* Top Header & Navigation */}
       <div className="flex flex-col">
@@ -62,7 +62,7 @@ export default function Sidebar({
                 className={`w-full flex items-center gap-3.5 px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-150 cursor-pointer ${
                   isActive
                     ? 'bg-[#EBE6FA] text-[#5B21B6] shadow-xs'
-                    : 'text-[#18113C] hover:bg-[#EFE9E4] hover:text-[#18113C]'
+                    : 'text-[#18113C] hover:bg-[#F2ECE7] hover:text-[#18113C]'
                 }`}
               >
                 <Icon 
@@ -79,15 +79,13 @@ export default function Sidebar({
 
       </div>
 
-      {/* Bottom Adorable 3D Illustration - Small, Cute & Perfectly Proportioned */}
-      <div className="mt-auto px-4 pb-4 pt-1 flex flex-col items-center select-none pointer-events-none">
-        <div className="w-[125px] sm:w-[135px] rounded-2xl overflow-hidden shadow-xs border border-[#E6DDD4] bg-[#F3EDE8] transition-transform duration-200">
-          <img
-            src="/assets/sidebar_cat_decor.png"
-            alt="Good Trips, Better Stories"
-            className="w-full h-auto block select-none pointer-events-none"
-          />
-        </div>
+      {/* Bottom Adorable 3D Illustration - Seamless Edge-to-Edge Artwork as in Reference */}
+      <div className="mt-auto relative w-full overflow-hidden select-none pointer-events-none">
+        <img
+          src="/assets/sidebar_cat_decor.png"
+          alt="Good Trips, Better Stories"
+          className="w-full h-auto object-cover object-bottom block"
+        />
       </div>
 
     </aside>
