@@ -238,6 +238,8 @@ export default function App() {
               setMode={setMode}
               onGenerate={runSynthesis}
               isGenerating={isGenerating}
+              onTriggerVoice={handleTriggerVoice}
+              isVoicePlaying={isVoicePlaying}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">

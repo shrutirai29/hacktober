@@ -9,116 +9,203 @@ import {
   Cpu, 
   Settings,
   Sparkles,
+  Box,
+  ShieldCheck,
   Luggage,
-  Heart,
-  Box
+  Wand2,
+  CheckCircle2
 } from 'lucide-react';
 
 export default function Sidebar({
   activeNav = "Home",
   onSelectNav,
-  onOpenMemory,
-  onOpenComparison,
-  onOpenAiInspector,
-  onTriggerVoice,
   memoryCount = 4
 }) {
-  const navItems = [
-    { id: "Home", label: "Home", icon: Home, badge: null },
-    { id: "NewRoom", label: "Create 3D Room", icon: Box, badge: "AI" },
-    { id: "NewTrip", label: "New Trip", icon: PlusCircle, badge: null },
-    { id: "MyChecklists", label: "My Checklists", icon: ClipboardList, badge: null },
-    { id: "MemoryVault", label: "Memory Vault", icon: History, badge: memoryCount },
-    { id: "CompareTrips", label: "Compare Trips", icon: Split, badge: null },
-    { id: "AudioCoach", label: "Audio Coach", icon: Volume2, badge: null },
-    { id: "GemmaCore", label: "Gemma Core", icon: Cpu, badge: null },
-    { id: "Settings", label: "Settings", icon: Settings, badge: null },
+  const workspaceNav = [
+    { id: "Home", label: "3D Room Twin", icon: Box, badge: "Hero" },
+    { id: "NewRoom", label: "Scan & Reconstruct", icon: Wand2, badge: "AI" },
+    { id: "NewTrip", label: "Plan New Trip", icon: PlusCircle, badge: null },
+    { id: "MyChecklists", label: "Trip History", icon: ClipboardList, badge: null },
   ];
 
-  const handleNavClick = (id) => {
-    onSelectNav?.(id);
-  };
+  const intelligenceNav = [
+    { id: "MemoryVault", label: "Memory Vault", icon: History, badge: memoryCount },
+    { id: "CompareTrips", label: "Compare Trips", icon: Split, badge: null },
+    { id: "AudioCoach", label: "Voice Exit Coach", icon: Volume2, badge: null },
+    { id: "GemmaCore", label: "Gemma Inspector", icon: Cpu, badge: "Core" },
+  ];
+
+  const systemNav = [
+    { id: "Settings", label: "Settings & Models", icon: Settings, badge: null },
+  ];
 
   return (
-    <aside className="w-64 bg-white border-r border-[#ece7de] flex flex-col justify-between p-4 shrink-0 min-h-screen">
+    <aside className="w-64 bg-white border-r border-[#ece6dc] flex flex-col justify-between p-4 shrink-0 min-h-screen select-none">
       
-      {/* Brand & Menu */}
+      {/* Brand & Menu Container */}
       <div className="space-y-6">
         
         {/* Brand Header */}
-        <div className="flex items-center gap-3 px-2 pt-1">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-purple-500 flex items-center justify-center shadow-md shadow-purple-500/25 text-white">
-            <Luggage className="w-6 h-6" />
+        <div className="px-2 pt-2">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#7054E8] via-[#6366f1] to-purple-400 flex items-center justify-center shadow-md shadow-indigo-500/20 text-white shrink-0">
+              <Luggage className="w-5 h-5 stroke-[2.2]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-black text-lg text-[#1e1b4b] tracking-tight">
+                  Check<span className="text-[#7054E8]">Mate</span>
+                </span>
+                <span className="px-1.5 py-0.2 rounded-md bg-purple-100 text-[#7054E8] text-[9px] font-black uppercase tracking-wider">
+                  v2.2
+                </span>
+              </div>
+              <p className="text-[11px] font-semibold text-slate-400">
+                Pack Smart • Leave Nothing
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-black text-xl text-[#1e1b4b] tracking-tight leading-none flex items-center gap-1">
-              Check<span className="text-[#6366f1]">Mate</span>
-              <Sparkles className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            </h1>
-            <p className="text-[11px] font-semibold text-slate-400 mt-1">
-              Pack Smart, Travel Light
-            </p>
+
+          {/* Engine Status Micro-Pill */}
+          <div className="mt-3 flex items-center gap-2 px-2.5 py-1 rounded-xl bg-[#faf8f5] border border-[#ede7dd] text-[10px] font-bold text-slate-500">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span>Gemma 2.2 + PaliGemma Vision Active</span>
           </div>
         </div>
 
-        {/* Navigation List */}
-        <nav className="space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeNav === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                  isActive
-                    ? 'bg-[#ede9fe] text-[#5b21b6] shadow-sm'
-                    : 'text-slate-600 hover:bg-[#f5f2eb] hover:text-slate-900'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#6366f1]' : 'text-slate-400'}`} />
-                  <span>{item.label}</span>
-                </div>
-                {item.badge && (
-                  <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-[10px] font-extrabold">
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
+        {/* Navigation Sections */}
+        <div className="space-y-4">
+          
+          {/* Group 1: Workspace */}
+          <div className="space-y-1">
+            <span className="px-3 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+              Workspace
+            </span>
+            {workspaceNav.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeNav === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onSelectNav?.(item.id)}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer ${
+                    isActive
+                      ? 'bg-[#ede9fe] text-[#5b21b6] shadow-xs'
+                      : 'text-slate-600 hover:bg-[#faf7f2] hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-[#7054E8]' : 'text-slate-400'}`} />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.badge && (
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold ${
+                      isActive 
+                        ? 'bg-purple-200 text-purple-800' 
+                        : 'bg-purple-100/70 text-purple-700'
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Group 2: Intelligence & Memory */}
+          <div className="space-y-1">
+            <span className="px-3 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+              AI & Memory
+            </span>
+            {intelligenceNav.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeNav === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onSelectNav?.(item.id)}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer ${
+                    isActive
+                      ? 'bg-[#ede9fe] text-[#5b21b6] shadow-xs'
+                      : 'text-slate-600 hover:bg-[#faf7f2] hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-[#7054E8]' : 'text-slate-400'}`} />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.badge && (
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold ${
+                      item.id === "MemoryVault"
+                        ? 'bg-rose-100 text-rose-700'
+                        : 'bg-purple-100/70 text-purple-700'
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Group 3: System */}
+          <div className="space-y-1">
+            <span className="px-3 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+              System
+            </span>
+            {systemNav.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeNav === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onSelectNav?.(item.id)}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer ${
+                    isActive
+                      ? 'bg-[#ede9fe] text-[#5b21b6] shadow-xs'
+                      : 'text-slate-600 hover:bg-[#faf7f2] hover:text-slate-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-[#7054E8]' : 'text-slate-400'}`} />
+                    <span>{item.label}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+        </div>
+
       </div>
 
-      {/* Bottom Sticky Note & Cozy Illustration */}
-      <div className="space-y-3 pt-4 border-t border-[#f0ebe3]">
-        
-        {/* Tilted Sticky Note */}
-        <div className="relative mx-1 transform -rotate-2 hover:rotate-0 transition-transform duration-300">
-          <div className="bg-[#fffbeb] border border-[#fef08a] rounded-xl p-3 shadow-md shadow-amber-900/5 text-center">
-            <div className="text-[11px] font-bold text-slate-700 leading-tight">
-              Same you,
+      {/* Bottom User Card: Alex @ Hostel C-402 */}
+      <div className="pt-4 border-t border-[#f0eae0]">
+        <div className="bg-[#faf8f5] rounded-2xl p-3 border border-[#ede7dd] flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-500 text-white flex items-center justify-center font-black text-xs shadow-xs shrink-0">
+            AC
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-[#1e1b4b] truncate">
+                Alex Chen
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             </div>
-            <div className="text-[11px] font-bold text-slate-700 leading-tight">
-              Fewer
-            </div>
-            <div className="text-xs font-extrabold text-[#7c3aed] mt-0.5 flex items-center justify-center gap-1">
-              <span>'Oops' moments</span>
-              <Heart className="w-3 h-3 text-rose-500 fill-rose-500 inline" />
-            </div>
+            <span className="text-[10px] text-slate-400 font-medium block truncate">
+              Hostel Room C-402
+            </span>
           </div>
         </div>
 
-        {/* Cute Backpack Image */}
-        <div className="relative rounded-2xl overflow-hidden shadow-inner border border-[#ece7de] bg-[#fdfcfa]">
-          <img
-            src="/assets/backpack_decor.jpg"
-            alt="CheckMate backpack"
-            className="w-full h-36 object-cover object-center"
-          />
+        {/* Protection Note */}
+        <div className="mt-2 px-1 flex items-center justify-between text-[10px] font-bold text-slate-400">
+          <span className="flex items-center gap-1 text-emerald-600">
+            <ShieldCheck className="w-3 h-3" />
+            <span>4 items guarded</span>
+          </span>
+          <span className="text-slate-400 font-mono">Local-First</span>
         </div>
-
       </div>
 
     </aside>
