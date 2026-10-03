@@ -17,12 +17,13 @@
 
 @layer base {
   body {
-    background-color: var(--bg-primary);
+    background-color: #F8F3EF;
     color: var(--text-primary);
-    background-image: 
-      radial-gradient(ellipse at 80% 0%, rgba(225, 211, 255, 0.65) 0%, transparent 38%),
-      radial-gradient(ellipse at 10% 70%, rgba(255, 224, 208, 0.42) 0%, transparent 34%);
+    background-image: url('/assets/website_bg.png');
+    background-size: cover;
+    background-position: center;
     background-attachment: fixed;
+    background-repeat: no-repeat;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
   }

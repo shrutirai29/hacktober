@@ -168,7 +168,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFF9F2] text-[#241746] flex flex-col md:flex-row font-sans selection:bg-purple-500 selection:text-white relative">
+    <div className="min-h-screen bg-transparent text-[#241746] flex flex-col md:flex-row font-sans selection:bg-purple-500 selection:text-white relative">
       
       {/* Toast Notification */}
       {toastMessage && (
@@ -181,7 +181,7 @@ export default function App() {
       )}
 
       {/* Mobile Top Header (with hamburger button) */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-[#ece7de] sticky top-0 z-30">
+      <div className="md:hidden flex items-center justify-between p-4 bg-white/90 backdrop-blur-md border-b border-[#ece7de] sticky top-0 z-30">
         <div className="flex items-center gap-2">
           <span className="font-black text-lg text-[#1e1b4b]">CheckMate</span>
         </div>
