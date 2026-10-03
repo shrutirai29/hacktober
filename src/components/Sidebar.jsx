@@ -79,13 +79,15 @@ export default function Sidebar({
 
       </div>
 
-      {/* Bottom Adorable 3D Illustration (Seamlessly anchored at the bottom edge) */}
-      <div className="mt-auto relative w-full overflow-hidden select-none pointer-events-none">
-        <img
-          src="/assets/sidebar_cat_decor.png"
-          alt="Good Trips, Better Stories"
-          className="w-full h-auto max-h-[380px] object-cover object-bottom block"
-        />
+      {/* Bottom Adorable 3D Illustration - Small, Cute & Perfectly Proportioned */}
+      <div className="mt-auto px-4 pb-4 pt-1 flex flex-col items-center select-none pointer-events-none">
+        <div className="w-[125px] sm:w-[135px] rounded-2xl overflow-hidden shadow-xs border border-[#E6DDD4] bg-[#F3EDE8] transition-transform duration-200">
+          <img
+            src="/assets/sidebar_cat_decor.png"
+            alt="Good Trips, Better Stories"
+            className="w-full h-auto block select-none pointer-events-none"
+          />
+        </div>
       </div>
 
     </aside>
