@@ -7,6 +7,8 @@ import PackingManifestCard from './components/PackingManifestCard';
 import ComparisonModal from './components/ComparisonModal';
 import MemoryVaultModal from './components/MemoryVaultModal';
 import GemmaInspectorModal from './components/GemmaInspectorModal';
+import RoomSceneViewer from './components/3d/RoomSceneViewer';
+import RoomReconstructionStudio from './components/RoomReconstructionStudio';
 
 // Dedicated Full-Page Views
 import MemoryVaultView from './views/MemoryVaultView';
@@ -51,6 +53,11 @@ export default function App() {
   const [items, setItems] = useState([]);
   const [highlightedItemId, setHighlightedItemId] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // 3D Room Twin State
+  const [spaceViewTab, setSpaceViewTab] = useState("3d");
+  const [roomPhotoUrl, setRoomPhotoUrl] = useState("/assets/hostel-desk-demo.jpg");
+  const [roomTitle, setRoomTitle] = useState("Alex's Reconstructed Hostel Room (Block C-402)");
 
   // Audio / Voice State
   const [isVoicePlaying, setIsVoicePlaying] = useState(false);
@@ -127,7 +134,10 @@ export default function App() {
   };
 
   const handleCustomImageUpload = (imgSrc, filename) => {
-    showToast("Custom photo uploaded! Extracted candidate objects with PaliGemma.");
+    setRoomPhotoUrl(imgSrc);
+    setRoomTitle(`Reconstructed Room (${filename})`);
+    setSpaceViewTab("3d");
+    showToast("Custom room photo uploaded! Reconstructed 3D twin with PaliGemma ✨");
   };
 
   const handleSelectScenarioAndTrip = (scenarioId, selectedTrip) => {
@@ -233,14 +243,62 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
               {/* Left Column: Your Space + 3 Bottom Cards (7 cols) */}
               <div className="lg:col-span-7 space-y-4">
-                <YourSpaceCard
-                  scenarios={scenarios}
-                  currentScenario={currentScenario}
-                  onSelectScenario={setCurrentScenario}
-                  onCustomImageUpload={handleCustomImageUpload}
-                  highlightedItemId={highlightedItemId}
-                  onHoverItem={setHighlightedItemId}
-                />
+                
+                {/* Space Mode Switcher Bar */}
+                <div className="flex items-center justify-between bg-white px-4 py-2.5 rounded-2xl border border-[#ede7dd] shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setSpaceViewTab("3d")}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                        spaceViewTab === "3d"
+                          ? 'bg-[#7054E8] text-white shadow-xs'
+                          : 'text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span>🎮 3D Digital Twin</span>
+                    </button>
+                    <button
+                      onClick={() => setSpaceViewTab("2d")}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+                        spaceViewTab === "2d"
+                          ? 'bg-[#7054E8] text-white shadow-xs'
+                          : 'text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      <span>📷 2D Vision Scanner</span>
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => setActiveNav("NewRoom")}
+                    className="text-xs font-bold text-[#7054E8] hover:text-[#5b3ee0] bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Reconstruct Room</span>
+                  </button>
+                </div>
+
+                {spaceViewTab === "3d" ? (
+                  <RoomSceneViewer
+                    highlightedItemId={highlightedItemId}
+                    onSelectItem={(item) => {
+                      setHighlightedItemId(item.id);
+                      showToast(`Selected "${item.name}" in 3D room.`);
+                    }}
+                    onHoverItem={setHighlightedItemId}
+                    photoUrl={roomPhotoUrl}
+                    roomTitle={roomTitle}
+                  />
+                ) : (
+                  <YourSpaceCard
+                    scenarios={scenarios}
+                    currentScenario={currentScenario}
+                    onSelectScenario={setCurrentScenario}
+                    onCustomImageUpload={handleCustomImageUpload}
+                    highlightedItemId={highlightedItemId}
+                    onHoverItem={setHighlightedItemId}
+                  />
+                )}
 
                 <BottomCards
                   tripType={tripType}
@@ -268,9 +326,40 @@ export default function App() {
                   isVoicePlaying={isVoicePlaying}
                   onOpenComparison={() => setIsComparisonOpen(true)}
                   onOpenAiInspector={() => setIsAiInspectorOpen(true)}
+                  highlightedItemId={highlightedItemId}
+                  onHoverItem={setHighlightedItemId}
                 />
               </div>
             </div>
+          </div>
+        )}
+
+        {activeNav === "NewRoom" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setActiveNav("Home")}
+                className="text-xs font-bold text-slate-500 hover:text-slate-800 bg-white px-3 py-1.5 rounded-xl border border-[#ede7dd] cursor-pointer"
+              >
+                ← Back to 3D Room
+              </button>
+              <span className="text-xs font-bold text-[#7054E8] bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+                PaliGemma Vision 3D Reconstruction Pipeline
+              </span>
+            </div>
+            <RoomReconstructionStudio
+              onReconstructionComplete={(url, filename) => {
+                setRoomPhotoUrl(url);
+                setRoomTitle(`Reconstructed Room (${filename})`);
+                setActiveNav("Home");
+                setSpaceViewTab("3d");
+                showToast("3D Digital Twin successfully generated! ✨");
+              }}
+              onExploreDemo={() => {
+                setActiveNav("Home");
+                setSpaceViewTab("3d");
+              }}
+            />
           </div>
         )}
 

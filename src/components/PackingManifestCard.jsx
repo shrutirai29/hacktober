@@ -24,7 +24,9 @@ export default function PackingManifestCard({
   onTriggerVoice,
   isVoicePlaying,
   onOpenComparison,
-  onOpenAiInspector
+  onOpenAiInspector,
+  highlightedItemId = null,
+  onHoverItem = null
 }) {
   const [activeFilter, setActiveFilter] = useState("all");
   const [accordionOpen, setAccordionOpen] = useState({
@@ -191,9 +193,13 @@ export default function PackingManifestCard({
           <div className="space-y-1.5">
             
             {/* Item 1: Laptop Charger */}
-            <div className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
-              checkedMap.charger ? 'opacity-60 border-slate-200' : 'border-rose-100'
-            }`}>
+            <div 
+              onMouseEnter={() => onHoverItem?.("charger")}
+              onMouseLeave={() => onHoverItem?.(null)}
+              className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
+                checkedMap.charger ? 'opacity-60 border-slate-200' : 'border-rose-100'
+              } ${highlightedItemId === "charger" ? 'ring-2 ring-[#7054E8] bg-purple-50/70 scale-[1.02]' : ''}`}
+            >
               <div className="flex items-center gap-2.5 min-w-0">
                 <button
                   onClick={() => toggleCheck("charger")}
@@ -232,9 +238,13 @@ export default function PackingManifestCard({
             </div>
 
             {/* Item 2: College ID / Gate Pass */}
-            <div className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
-              checkedMap.id_card ? 'opacity-60 border-slate-200' : 'border-rose-100'
-            }`}>
+            <div 
+              onMouseEnter={() => onHoverItem?.("id_card")}
+              onMouseLeave={() => onHoverItem?.(null)}
+              className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
+                checkedMap.id_card ? 'opacity-60 border-slate-200' : 'border-rose-100'
+              } ${highlightedItemId === "id_card" ? 'ring-2 ring-[#7054E8] bg-purple-50/70 scale-[1.02]' : ''}`}
+            >
               <div className="flex items-center gap-2.5 min-w-0">
                 <button
                   onClick={() => toggleCheck("id_card")}
@@ -273,9 +283,13 @@ export default function PackingManifestCard({
             </div>
 
             {/* Item 3: USB-C to HDMI Adapter */}
-            <div className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
-              checkedMap.hdmi ? 'opacity-60 border-slate-200' : 'border-rose-100'
-            }`}>
+            <div 
+              onMouseEnter={() => onHoverItem?.("hdmi")}
+              onMouseLeave={() => onHoverItem?.(null)}
+              className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
+                checkedMap.hdmi ? 'opacity-60 border-slate-200' : 'border-rose-100'
+              } ${highlightedItemId === "hdmi" ? 'ring-2 ring-[#7054E8] bg-purple-50/70 scale-[1.02]' : ''}`}
+            >
               <div className="flex items-center gap-2.5 min-w-0">
                 <button
                   onClick={() => toggleCheck("hdmi")}
@@ -314,9 +328,13 @@ export default function PackingManifestCard({
             </div>
 
             {/* Item 4: Laptop / Device */}
-            <div className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
-              checkedMap.laptop ? 'opacity-60 border-slate-200' : 'border-slate-100'
-            }`}>
+            <div 
+              onMouseEnter={() => onHoverItem?.("laptop")}
+              onMouseLeave={() => onHoverItem?.(null)}
+              className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
+                checkedMap.laptop ? 'opacity-60 border-slate-200' : 'border-slate-100'
+              } ${highlightedItemId === "laptop" ? 'ring-2 ring-[#7054E8] bg-purple-50/70 scale-[1.02]' : ''}`}
+            >
               <div className="flex items-center gap-2.5 min-w-0">
                 <button
                   onClick={() => toggleCheck("laptop")}

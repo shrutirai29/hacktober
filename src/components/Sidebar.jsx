@@ -10,7 +10,8 @@ import {
   Settings,
   Sparkles,
   Luggage,
-  Heart
+  Heart,
+  Box
 } from 'lucide-react';
 
 export default function Sidebar({
@@ -24,6 +25,7 @@ export default function Sidebar({
 }) {
   const navItems = [
     { id: "Home", label: "Home", icon: Home, badge: null },
+    { id: "NewRoom", label: "Create 3D Room", icon: Box, badge: "AI" },
     { id: "NewTrip", label: "New Trip", icon: PlusCircle, badge: null },
     { id: "MyChecklists", label: "My Checklists", icon: ClipboardList, badge: null },
     { id: "MemoryVault", label: "Memory Vault", icon: History, badge: memoryCount },
@@ -35,10 +37,6 @@ export default function Sidebar({
 
   const handleNavClick = (id) => {
     onSelectNav?.(id);
-    if (id === "MemoryVault") onOpenMemory?.();
-    if (id === "CompareTrips") onOpenComparison?.();
-    if (id === "GemmaCore") onOpenAiInspector?.();
-    if (id === "AudioCoach") onTriggerVoice?.();
   };
 
   return (
