@@ -276,7 +276,7 @@ export default function App() {
                   }}
                   onMarkAllPacked={() => {
                     setItems(prev => prev.map(i => ({ ...i, checked: true })));
-                    showToast("All items marked as packed! Have a great trip, Alex! 🎒");
+                    showToast("All items marked as packed! Have a great trip, Shruti! 🎒");
                   }}
                   onTriggerVoice={handleTriggerVoice}
                   isVoicePlaying={isVoicePlaying}

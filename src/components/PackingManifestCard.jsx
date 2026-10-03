@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   ShieldAlert, 
   Check, 
@@ -6,6 +6,7 @@ import {
   ChevronUp, 
   MoreHorizontal, 
   Volume2, 
+  VolumeX,
   Sparkles,
   Eye,
   MinusCircle,
@@ -13,7 +14,11 @@ import {
   CheckCircle2,
   Plug,
   CreditCard,
-  Tv
+  Tv,
+  Box,
+  Battery,
+  Headphones,
+  FileText
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -22,7 +27,7 @@ export default function PackingManifestCard({
   onToggleItem,
   onMarkAllPacked,
   onTriggerVoice,
-  isVoicePlaying,
+  isVoicePlaying = false,
   onOpenComparison,
   onOpenAiInspector,
   highlightedItemId = null,
@@ -30,40 +35,178 @@ export default function PackingManifestCard({
 }) {
   const [activeFilter, setActiveFilter] = useState("all");
   const [accordionOpen, setAccordionOpen] = useState({
-    vision: false,
+    vision: true,
     suggested: false,
     leaveBehind: false
   });
 
-  const [checkedMap, setCheckedMap] = useState({
-    charger: false,
-    id_card: false,
-    hdmi: false,
-    laptop: false
-  });
+  // Default fallback items if AI reasoner is still initializing
+  const defaultItems = useMemo(() => [
+    {
+      id: "charger",
+      name: "65W Laptop Charger",
+      priority: "critical",
+      forgottenTimes: 3,
+      spatialTip: "Check behind the desk and wall socket!",
+      status: "Detected in room",
+      category: "Tech & Power",
+      checked: false
+    },
+    {
+      id: "id_card",
+      name: "College ID / Gate Pass",
+      priority: "high",
+      forgottenTimes: 2,
+      spatialTip: "Usually kept on desk near laptop lanyard",
+      status: "Detected in room",
+      category: "Documents",
+      checked: false
+    },
+    {
+      id: "hdmi",
+      name: "USB-C to HDMI Adapter",
+      priority: "critical",
+      forgottenTimes: 2,
+      spatialTip: "Essential for auditorium projector hookup",
+      status: "Suggested",
+      category: "AV & Adapters",
+      checked: false
+    },
+    {
+      id: "laptop",
+      name: "MacBook Pro",
+      priority: "normal",
+      forgottenTimes: 1,
+      spatialTip: "Main presentation device on center desk",
+      status: "Detected in room",
+      category: "Tech",
+      checked: false
+    },
+    {
+      id: "powerbank",
+      name: "20,000mAh Power Bank",
+      priority: "normal",
+      status: "Detected in room",
+      spatialTip: "Left corner of study desk",
+      category: "Power",
+      checked: false
+    },
+    {
+      id: "earbuds",
+      name: "Wireless Earbuds Case",
+      priority: "normal",
+      status: "Detected in room",
+      spatialTip: "Front desk center",
+      category: "Audio",
+      checked: false
+    },
+    {
+      id: "water_bottle",
+      name: "Insulated Water Flask",
+      priority: "normal",
+      status: "Detected in room",
+      spatialTip: "Right desk near window",
+      category: "Daily",
+      checked: false
+    },
+    {
+      id: "backpack",
+      name: "Travel Backpack",
+      priority: "normal",
+      status: "Exit Luggage",
+      spatialTip: "Sitting beside chair",
+      category: "Luggage",
+      checked: false
+    },
+    {
+      id: "ai_pres_1",
+      name: "Offline Slides on USB Backup Drive",
+      priority: "high",
+      status: "Gemma Reasoning",
+      spatialTip: "Auditorium Wi-Fi fallback. Keep in front pocket.",
+      category: "Tech & AV",
+      checked: false
+    },
+    {
+      id: "ai_rain_1",
+      name: "Backpack Rain Cover",
+      priority: "high",
+      status: "Weather Trigger",
+      spatialTip: "Rain forecast alert. Stow in bottom pouch.",
+      category: "Weather Protection",
+      checked: false
+    }
+  ], []);
 
-  const toggleCheck = (key) => {
-    setCheckedMap(prev => {
-      const next = { ...prev, [key]: !prev[key] };
-      const allChecked = Object.values(next).every(Boolean);
-      if (allChecked) {
-        confetti({
-          particleCount: 80,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-      }
-      return next;
-    });
+  // Active items list: prioritize items from prop, fallback to defaults
+  const activeItems = useMemo(() => {
+    if (items && items.length > 0) {
+      return items.map(item => {
+        let forgottenTimes = 0;
+        if (item.id === "charger" || item.name.toLowerCase().includes("charger")) forgottenTimes = 3;
+        if (item.id === "id_card" || item.name.toLowerCase().includes("id")) forgottenTimes = 2;
+        if (item.id === "hdmi" || item.name.toLowerCase().includes("hdmi")) forgottenTimes = 2;
+        if (item.id === "laptop" || item.name.toLowerCase().includes("laptop")) forgottenTimes = 1;
+        return {
+          ...item,
+          forgottenTimes: item.forgottenTimes ?? forgottenTimes
+        };
+      });
+    }
+    return defaultItems;
+  }, [items, defaultItems]);
+
+  // Leave behind items to save weight
+  const leaveBehindItems = useMemo(() => [
+    { name: "Heavy Semester Textbooks", note: "Leave on hostel shelf to save 4kg", tag: "Not needed" },
+    { name: "Hostel Dirty Laundry Sack", note: "Wash at hostel laundromat upon return", tag: "Save space" },
+    { name: "Bulky Desk Gaming Headphones", note: "Earbuds are sufficient for commute", tag: "Excess bulk" }
+  ], []);
+
+  // Split into categories for rendering
+  const highRiskItems = useMemo(() => {
+    return activeItems.filter(i => 
+      i.priority === "critical" || 
+      i.priority === "high" || 
+      (i.forgottenTimes && i.forgottenTimes > 0)
+    );
+  }, [activeItems]);
+
+  const visionDetectedItems = useMemo(() => {
+    return activeItems.filter(i => 
+      !highRiskItems.some(hr => hr.id === i.id) &&
+      (i.source === "Vision Detection" || !i.id?.startsWith("ai_"))
+    );
+  }, [activeItems, highRiskItems]);
+
+  const suggestedItems = useMemo(() => {
+    return activeItems.filter(i => 
+      !highRiskItems.some(hr => hr.id === i.id) &&
+      (i.source === "Gemma Reasoning" || i.id?.startsWith("ai_"))
+    );
+  }, [activeItems, highRiskItems]);
+
+  // Dynamic progress calculation
+  const totalCount = activeItems.length;
+  const packedCount = activeItems.filter(i => i.checked).length;
+  const progressPercentage = totalCount > 0 ? Math.round((packedCount / totalCount) * 100) : 0;
+
+  // Toggle item packing
+  const handleToggle = (id) => {
+    onToggleItem?.(id);
+    const item = activeItems.find(i => i.id === id);
+    const nextPackedCount = (item && !item.checked) ? packedCount + 1 : packedCount - 1;
+    if (nextPackedCount === totalCount && totalCount > 0) {
+      confetti({
+        particleCount: 100,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+    }
   };
 
+  // Mark all packed
   const handleMarkAll = () => {
-    setCheckedMap({
-      charger: true,
-      id_card: true,
-      hdmi: true,
-      laptop: true
-    });
     confetti({
       particleCount: 120,
       spread: 90,
@@ -76,13 +219,25 @@ export default function PackingManifestCard({
     setAccordionOpen(prev => ({ ...prev, [sec]: !prev[sec] }));
   };
 
+  const getItemIcon = (name = "") => {
+    const lower = name.toLowerCase();
+    if (lower.includes("charger") || lower.includes("plug")) return <Plug className="w-3.5 h-3.5" />;
+    if (lower.includes("id") || lower.includes("pass")) return <CreditCard className="w-3.5 h-3.5" />;
+    if (lower.includes("hdmi") || lower.includes("adapter")) return <Tv className="w-3.5 h-3.5" />;
+    if (lower.includes("laptop") || lower.includes("macbook")) return <Laptop className="w-3.5 h-3.5" />;
+    if (lower.includes("power") || lower.includes("battery")) return <Battery className="w-3.5 h-3.5" />;
+    if (lower.includes("earbuds") || lower.includes("audio")) return <Headphones className="w-3.5 h-3.5" />;
+    if (lower.includes("drive") || lower.includes("usb") || lower.includes("slides")) return <FileText className="w-3.5 h-3.5" />;
+    return <Box className="w-3.5 h-3.5" />;
+  };
+
   return (
-    <div className="bg-white rounded-3xl p-5 border border-[#ede7dd] shadow-sm flex flex-col justify-between gap-5 h-full">
+    <div className="bg-white rounded-3xl p-5 border border-[#ede7dd] shadow-sm flex flex-col justify-between gap-4 h-full">
       
-      {/* Top Header & Progress Bar */}
+      {/* Top Header & Dynamic Progress Bar */}
       <div className="space-y-3">
         
-        {/* Title & Fraction Progress */}
+        {/* Title & Live Fraction Progress */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-lg">📦</span>
@@ -91,15 +246,18 @@ export default function PackingManifestCard({
             </h3>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-500">
-              6/18 packed
+          <div className="flex items-center gap-2.5">
+            <span className="text-xs font-black text-slate-600 font-mono">
+              {packedCount}/{totalCount} packed
             </span>
-            <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div className="w-1/3 h-full bg-[#6366f1] rounded-full" />
+            <div className="w-24 h-2.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
+              <div 
+                className="h-full bg-gradient-to-r from-indigo-500 to-[#7054E8] rounded-full transition-all duration-300"
+                style={{ width: `${progressPercentage}%` }}
+              />
             </div>
-            <span className="text-xs font-bold text-[#6366f1]">
-              33%
+            <span className="text-xs font-black text-[#7054E8] font-mono min-w-8 text-right">
+              {progressPercentage}%
             </span>
           </div>
         </div>
@@ -108,380 +266,342 @@ export default function PackingManifestCard({
         <div className="flex items-center gap-1.5 flex-wrap text-xs">
           <button
             onClick={() => setActiveFilter("all")}
-            className={`px-3 py-1 rounded-full font-bold transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
               activeFilter === "all"
-                ? 'bg-[#ede9fe] text-[#5b21b6]'
+                ? 'bg-[#ede9fe] text-[#5b21b6] shadow-xs'
                 : 'text-slate-500 hover:bg-slate-100'
             }`}
           >
-            All Items (18)
+            All Items ({totalCount})
           </button>
 
           <button
             onClick={() => setActiveFilter("high_risk")}
-            className={`px-3 py-1 rounded-full font-bold flex items-center gap-1 transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-full font-bold flex items-center gap-1 transition-all cursor-pointer ${
               activeFilter === "high_risk"
-                ? 'bg-rose-100 text-rose-700'
+                ? 'bg-rose-100 text-rose-700 shadow-xs ring-1 ring-rose-300'
                 : 'text-rose-600 hover:bg-rose-50'
             }`}
           >
-            <span>🚨 High-Risk (4)</span>
+            <span>🚨 High-Risk ({highRiskItems.length})</span>
           </button>
 
           <button
             onClick={() => setActiveFilter("detected")}
-            className={`px-3 py-1 rounded-full font-bold transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
               activeFilter === "detected"
-                ? 'bg-[#ede9fe] text-[#5b21b6]'
+                ? 'bg-[#ede9fe] text-[#5b21b6] shadow-xs'
                 : 'text-slate-500 hover:bg-slate-100'
             }`}
           >
-            Detected (6)
+            Detected ({visionDetectedItems.length + (highRiskItems.filter(i => i.status?.includes("room")).length)})
           </button>
 
           <button
             onClick={() => setActiveFilter("suggested")}
-            className={`px-3 py-1 rounded-full font-bold transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
               activeFilter === "suggested"
-                ? 'bg-[#ede9fe] text-[#5b21b6]'
+                ? 'bg-[#ede9fe] text-[#5b21b6] shadow-xs'
                 : 'text-slate-500 hover:bg-slate-100'
             }`}
           >
-            Suggested (5)
+            Suggested ({suggestedItems.length})
           </button>
 
           <button
             onClick={() => setActiveFilter("leave_behind")}
-            className={`px-3 py-1 rounded-full font-bold transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
               activeFilter === "leave_behind"
-                ? 'bg-slate-200 text-slate-800'
+                ? 'bg-slate-200 text-slate-800 shadow-xs'
                 : 'text-slate-500 hover:bg-slate-100'
             }`}
           >
-            Leave Behind (3)
+            Leave Behind ({leaveBehindItems.length})
           </button>
         </div>
 
-        {/* 1. High-Risk Memory Alerts Card */}
-        <div className="rounded-2xl border border-rose-200/90 bg-[#fff5f5] p-3.5 space-y-2.5 shadow-2xs">
-          
-          {/* Card Sub-Header */}
-          <div className="flex items-center justify-between pb-1 border-b border-rose-200/60">
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-md bg-rose-500 text-white flex items-center justify-center">
-                <ShieldAlert className="w-3.5 h-3.5" />
-              </div>
-              <div>
-                <span className="text-xs font-black text-rose-900 block leading-tight">
-                  High-Risk Memory Alerts
-                </span>
-                <span className="text-[10px] text-rose-700/80 font-medium">
-                  Items you've forgotten before
-                </span>
-              </div>
-            </div>
-
-            <button
-              onClick={onOpenComparison}
-              className="text-[10px] font-bold text-rose-700 hover:text-rose-900 bg-rose-100/70 hover:bg-rose-200/70 px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
-            >
-              Why this matters?
-            </button>
-          </div>
-
-          {/* List of High-Risk Items */}
-          <div className="space-y-1.5">
+        {/* 1. High-Risk Memory Alerts Card (Always shown unless filtering exclusively) */}
+        {(activeFilter === "all" || activeFilter === "high_risk") && highRiskItems.length > 0 && (
+          <div className="rounded-2xl border border-rose-200 bg-[#fff5f5] p-3.5 space-y-2.5 shadow-2xs animate-in fade-in duration-200">
             
-            {/* Item 1: Laptop Charger */}
-            <div 
-              onMouseEnter={() => onHoverItem?.("charger")}
-              onMouseLeave={() => onHoverItem?.(null)}
-              className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
-                checkedMap.charger ? 'opacity-60 border-slate-200' : 'border-rose-100'
-              } ${highlightedItemId === "charger" ? 'ring-2 ring-[#7054E8] bg-purple-50/70 scale-[1.02]' : ''}`}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <button
-                  onClick={() => toggleCheck("charger")}
-                  className={`w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer ${
-                    checkedMap.charger ? 'bg-[#6366f1] border-[#6366f1] text-white' : 'border-slate-300 hover:border-slate-400'
-                  }`}
-                >
-                  {checkedMap.charger && <Check className="w-3 h-3 stroke-[3]" />}
-                </button>
-                <div className="p-1 rounded-lg bg-indigo-50 text-indigo-600">
-                  <Plug className="w-3.5 h-3.5" />
+            {/* Card Sub-Header */}
+            <div className="flex items-center justify-between pb-1 border-b border-rose-200/60">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-md bg-rose-500 text-white flex items-center justify-center">
+                  <ShieldAlert className="w-3.5 h-3.5" />
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-xs font-bold leading-tight ${checkedMap.charger ? 'line-through text-slate-400' : 'text-slate-900'}`}>
-                      Laptop Charger
-                    </span>
-                    <span className="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700 font-extrabold text-[9px]">
-                      Forgotten 3x
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-medium block truncate">
-                    Check behind the desk and wall socket!
+                <div>
+                  <span className="text-xs font-black text-rose-900 block leading-tight">
+                    High-Risk Memory Alerts
+                  </span>
+                  <span className="text-[10px] text-rose-700/80 font-medium">
+                    Items you've forgotten on past trips
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold">
-                  Detected in room
-                </span>
-                <button className="text-slate-400 hover:text-slate-600 p-0.5">
-                  <MoreHorizontal className="w-3.5 h-3.5" />
+              {onOpenComparison && (
+                <button
+                  onClick={onOpenComparison}
+                  className="text-[10px] font-bold text-rose-700 hover:text-rose-900 bg-rose-100/80 hover:bg-rose-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                >
+                  Why this matters?
                 </button>
-              </div>
+              )}
             </div>
 
-            {/* Item 2: College ID / Gate Pass */}
-            <div 
-              onMouseEnter={() => onHoverItem?.("id_card")}
-              onMouseLeave={() => onHoverItem?.(null)}
-              className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
-                checkedMap.id_card ? 'opacity-60 border-slate-200' : 'border-rose-100'
-              } ${highlightedItemId === "id_card" ? 'ring-2 ring-[#7054E8] bg-purple-50/70 scale-[1.02]' : ''}`}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <button
-                  onClick={() => toggleCheck("id_card")}
-                  className={`w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer ${
-                    checkedMap.id_card ? 'bg-[#6366f1] border-[#6366f1] text-white' : 'border-slate-300 hover:border-slate-400'
-                  }`}
-                >
-                  {checkedMap.id_card && <Check className="w-3 h-3 stroke-[3]" />}
-                </button>
-                <div className="p-1 rounded-lg bg-purple-50 text-purple-600">
-                  <CreditCard className="w-3.5 h-3.5" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-xs font-bold leading-tight ${checkedMap.id_card ? 'line-through text-slate-400' : 'text-slate-900'}`}>
-                      College ID / Gate Pass
-                    </span>
-                    <span className="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700 font-extrabold text-[9px]">
-                      Forgotten 2x
-                    </span>
+            {/* List of High-Risk Items */}
+            <div className="space-y-1.5">
+              {highRiskItems.map((item) => {
+                const isHighlighted = highlightedItemId === item.id;
+                return (
+                  <div 
+                    key={item.id}
+                    onMouseEnter={() => onHoverItem?.(item.id)}
+                    onMouseLeave={() => onHoverItem?.(null)}
+                    className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
+                      item.checked ? 'opacity-60 border-slate-200' : 'border-rose-100'
+                    } ${isHighlighted ? 'ring-2 ring-[#7054E8] bg-purple-50/70 scale-[1.01]' : ''}`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <button
+                        onClick={() => handleToggle(item.id)}
+                        className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${
+                          item.checked 
+                            ? 'bg-[#7054E8] border-[#7054E8] text-white shadow-xs' 
+                            : 'border-slate-300 hover:border-purple-400 bg-white'
+                        }`}
+                      >
+                        {item.checked && <Check className="w-3 h-3 stroke-[3]" />}
+                      </button>
+
+                      <div className="p-1 rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+                        {getItemIcon(item.name)}
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`text-xs font-bold leading-tight ${item.checked ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+                            {item.name}
+                          </span>
+                          {item.forgottenTimes > 0 && (
+                            <span className="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700 font-extrabold text-[9px]">
+                              Forgotten {item.forgottenTimes}x
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-medium block truncate">
+                          {item.spatialTip || item.alertReason || "Verify in room"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold">
+                        {item.status || "Detected in room"}
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-[10px] text-slate-400 font-medium block truncate">
-                    Usually kept on desk near laptop
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold">
-                  Detected in room
-                </span>
-                <button className="text-slate-400 hover:text-slate-600 p-0.5">
-                  <MoreHorizontal className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Item 3: USB-C to HDMI Adapter */}
-            <div 
-              onMouseEnter={() => onHoverItem?.("hdmi")}
-              onMouseLeave={() => onHoverItem?.(null)}
-              className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
-                checkedMap.hdmi ? 'opacity-60 border-slate-200' : 'border-rose-100'
-              } ${highlightedItemId === "hdmi" ? 'ring-2 ring-[#7054E8] bg-purple-50/70 scale-[1.02]' : ''}`}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <button
-                  onClick={() => toggleCheck("hdmi")}
-                  className={`w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer ${
-                    checkedMap.hdmi ? 'bg-[#6366f1] border-[#6366f1] text-white' : 'border-slate-300 hover:border-slate-400'
-                  }`}
-                >
-                  {checkedMap.hdmi && <Check className="w-3 h-3 stroke-[3]" />}
-                </button>
-                <div className="p-1 rounded-lg bg-emerald-50 text-emerald-600">
-                  <Tv className="w-3.5 h-3.5" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-xs font-bold leading-tight ${checkedMap.hdmi ? 'line-through text-slate-400' : 'text-slate-900'}`}>
-                      USB-C to HDMI Adapter
-                    </span>
-                    <span className="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700 font-extrabold text-[9px]">
-                      Forgotten 2x
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-medium block truncate">
-                    Essential for presentations
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200 text-[9px] font-bold">
-                  Suggested
-                </span>
-                <button className="text-slate-400 hover:text-slate-600 p-0.5">
-                  <MoreHorizontal className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Item 4: Laptop / Device */}
-            <div 
-              onMouseEnter={() => onHoverItem?.("laptop")}
-              onMouseLeave={() => onHoverItem?.(null)}
-              className={`p-2.5 rounded-xl bg-white border transition-all flex items-center justify-between gap-3 shadow-2xs ${
-                checkedMap.laptop ? 'opacity-60 border-slate-200' : 'border-slate-100'
-              } ${highlightedItemId === "laptop" ? 'ring-2 ring-[#7054E8] bg-purple-50/70 scale-[1.02]' : ''}`}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <button
-                  onClick={() => toggleCheck("laptop")}
-                  className={`w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer ${
-                    checkedMap.laptop ? 'bg-[#6366f1] border-[#6366f1] text-white' : 'border-slate-300 hover:border-slate-400'
-                  }`}
-                >
-                  {checkedMap.laptop && <Check className="w-3 h-3 stroke-[3]" />}
-                </button>
-                <div className="p-1 rounded-lg bg-blue-50 text-blue-600">
-                  <Laptop className="w-3.5 h-3.5" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-xs font-bold leading-tight ${checkedMap.laptop ? 'line-through text-slate-400' : 'text-slate-900'}`}>
-                      Laptop / Device
-                    </span>
-                    <span className="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700 font-extrabold text-[9px]">
-                      Forgotten 1x
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-medium block truncate">
-                    Your main device for the presentation
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold">
-                  Detected in room
-                </span>
-                <button className="text-slate-400 hover:text-slate-600 p-0.5">
-                  <MoreHorizontal className="w-3.5 h-3.5" />
-                </button>
-              </div>
+                );
+              })}
             </div>
 
           </div>
-        </div>
+        )}
 
         {/* 2. Vision-Detected & Context Essentials Accordion */}
-        <div className="rounded-2xl border border-[#ede7dd] bg-[#faf8f5] overflow-hidden">
-          <button
-            onClick={() => toggleAccordion("vision")}
-            className="w-full flex items-center justify-between p-3 text-xs font-bold text-slate-700 hover:bg-[#f3ede3] transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <Eye className="w-4 h-4 text-indigo-500" />
-              <span>Vision-Detected & Context Essentials</span>
-              <span className="text-[10px] text-slate-400 font-normal">6 items</span>
-            </div>
-            {accordionOpen.vision ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-          </button>
-          {accordionOpen.vision && (
-            <div className="p-3 bg-white border-t border-[#ede7dd] space-y-2 text-xs text-slate-600">
-              <div className="flex items-center justify-between">
-                <span>Insulated Water Flask</span>
-                <span className="text-[10px] text-emerald-600 font-bold">Detected in room</span>
+        {(activeFilter === "all" || activeFilter === "detected") && (
+          <div className="rounded-2xl border border-[#ede7dd] bg-[#faf8f5] overflow-hidden">
+            <button
+              onClick={() => toggleAccordion("vision")}
+              className="w-full flex items-center justify-between p-3 text-xs font-bold text-slate-700 hover:bg-[#f3ede3] transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 text-indigo-500" />
+                <span>Vision-Detected & Context Essentials</span>
+                <span className="text-[10px] text-slate-400 font-normal">
+                  {visionDetectedItems.length} items
+                </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span>20,000mAh Power Bank</span>
-                <span className="text-[10px] text-emerald-600 font-bold">Detected in room</span>
+              {accordionOpen.vision ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            </button>
+            
+            {accordionOpen.vision && (
+              <div className="p-2.5 bg-white border-t border-[#ede7dd] space-y-1.5">
+                {visionDetectedItems.map((item) => {
+                  const isHighlighted = highlightedItemId === item.id;
+                  return (
+                    <div
+                      key={item.id}
+                      onMouseEnter={() => onHoverItem?.(item.id)}
+                      onMouseLeave={() => onHoverItem?.(null)}
+                      className={`p-2 rounded-xl border transition-all flex items-center justify-between gap-2.5 ${
+                        item.checked ? 'opacity-60 bg-slate-50 border-slate-200' : 'bg-white border-slate-100 hover:border-slate-200'
+                      } ${isHighlighted ? 'ring-2 ring-[#7054E8] bg-purple-50/70' : ''}`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <button
+                          onClick={() => handleToggle(item.id)}
+                          className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${
+                            item.checked ? 'bg-[#7054E8] border-[#7054E8] text-white' : 'border-slate-300 hover:border-purple-400'
+                          }`}
+                        >
+                          {item.checked && <Check className="w-3 h-3 stroke-[3]" />}
+                        </button>
+                        <div className="p-1 rounded-lg bg-slate-100 text-slate-600 shrink-0">
+                          {getItemIcon(item.name)}
+                        </div>
+                        <div className="min-w-0">
+                          <span className={`text-xs font-bold block truncate ${item.checked ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                            {item.name}
+                          </span>
+                          {item.spatialTip && (
+                            <span className="text-[10px] text-slate-400 truncate block">
+                              {item.spatialTip}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 shrink-0">
+                        Detected in room
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="flex items-center justify-between">
-                <span>Wireless Earbuds Case</span>
-                <span className="text-[10px] text-emerald-600 font-bold">Detected in room</span>
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* 3. AI Suggested Based on Trip Accordion */}
-        <div className="rounded-2xl border border-[#ede7dd] bg-[#faf8f5] overflow-hidden">
-          <button
-            onClick={() => toggleAccordion("suggested")}
-            className="w-full flex items-center justify-between p-3 text-xs font-bold text-slate-700 hover:bg-[#f3ede3] transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>AI Suggested Based on Trip</span>
-              <span className="text-[10px] text-slate-400 font-normal">5 items</span>
-            </div>
-            {accordionOpen.suggested ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-          </button>
-          {accordionOpen.suggested && (
-            <div className="p-3 bg-white border-t border-[#ede7dd] space-y-2 text-xs text-slate-600">
-              <div className="flex items-center justify-between">
-                <span>Offline Slides on USB Backup Drive</span>
-                <span className="text-[10px] text-indigo-600 font-bold">Gemma Reasoning</span>
+        {(activeFilter === "all" || activeFilter === "suggested") && (
+          <div className="rounded-2xl border border-[#ede7dd] bg-[#faf8f5] overflow-hidden">
+            <button
+              onClick={() => toggleAccordion("suggested")}
+              className="w-full flex items-center justify-between p-3 text-xs font-bold text-slate-700 hover:bg-[#f3ede3] transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span>AI Suggested Based on Trip</span>
+                <span className="text-[10px] text-slate-400 font-normal">
+                  {suggestedItems.length} items
+                </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span>Backpack Rain Cover (Rain Forecast)</span>
-                <span className="text-[10px] text-cyan-600 font-bold">Weather Trigger</span>
+              {accordionOpen.suggested ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            </button>
+            
+            {accordionOpen.suggested && (
+              <div className="p-2.5 bg-white border-t border-[#ede7dd] space-y-1.5">
+                {suggestedItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`p-2 rounded-xl border transition-all flex items-center justify-between gap-2.5 ${
+                      item.checked ? 'opacity-60 bg-slate-50 border-slate-200' : 'bg-white border-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <button
+                        onClick={() => handleToggle(item.id)}
+                        className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${
+                          item.checked ? 'bg-[#7054E8] border-[#7054E8] text-white' : 'border-slate-300 hover:border-purple-400'
+                        }`}
+                      >
+                        {item.checked && <Check className="w-3 h-3 stroke-[3]" />}
+                      </button>
+                      <div className="p-1 rounded-lg bg-amber-50 text-amber-600 shrink-0">
+                        {getItemIcon(item.name)}
+                      </div>
+                      <div className="min-w-0">
+                        <span className={`text-xs font-bold block truncate ${item.checked ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                          {item.name}
+                        </span>
+                        {item.alertReason && (
+                          <span className="text-[10px] text-slate-400 truncate block">
+                            {item.alertReason}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100 shrink-0">
+                      Gemma Rule
+                    </span>
+                  </div>
+                ))}
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* 4. Leave Behind (Save Space) Accordion */}
-        <div className="rounded-2xl border border-[#ede7dd] bg-[#faf8f5] overflow-hidden">
-          <button
-            onClick={() => toggleAccordion("leaveBehind")}
-            className="w-full flex items-center justify-between p-3 text-xs font-bold text-slate-700 hover:bg-[#f3ede3] transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <MinusCircle className="w-4 h-4 text-rose-500" />
-              <span>Leave Behind (Save Space)</span>
-              <span className="text-[10px] text-slate-400 font-normal">3 items</span>
-            </div>
-            {accordionOpen.leaveBehind ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-          </button>
-          {accordionOpen.leaveBehind && (
-            <div className="p-3 bg-white border-t border-[#ede7dd] space-y-2 text-xs text-slate-500">
-              <div className="flex items-center justify-between">
-                <span>Dirty Laundry Sack</span>
-                <span className="text-[10px] text-rose-500 font-bold">Not needed for presentation</span>
+        {(activeFilter === "all" || activeFilter === "leave_behind") && (
+          <div className="rounded-2xl border border-[#ede7dd] bg-[#faf8f5] overflow-hidden">
+            <button
+              onClick={() => toggleAccordion("leaveBehind")}
+              className="w-full flex items-center justify-between p-3 text-xs font-bold text-slate-700 hover:bg-[#f3ede3] transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <MinusCircle className="w-4 h-4 text-rose-500" />
+                <span>Leave Behind (Save Space)</span>
+                <span className="text-[10px] text-slate-400 font-normal">
+                  {leaveBehindItems.length} items
+                </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span>Heavy Semester Textbooks</span>
-                <span className="text-[10px] text-rose-500 font-bold">Leave on hostel desk</span>
+              {accordionOpen.leaveBehind ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            </button>
+            
+            {accordionOpen.leaveBehind && (
+              <div className="p-2.5 bg-white border-t border-[#ede7dd] space-y-1.5 text-xs text-slate-500">
+                {leaveBehindItems.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-50/70 border border-slate-100">
+                    <div>
+                      <span className="font-bold text-slate-700 block">{item.name}</span>
+                      <span className="text-[10px] text-slate-400">{item.note}</span>
+                    </div>
+                    <span className="text-[9px] text-rose-600 font-extrabold bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+                      {item.tag}
+                    </span>
+                  </div>
+                ))}
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="flex items-center gap-3 pt-2">
-        <button
-          onClick={onTriggerVoice}
-          className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl border text-xs font-extrabold transition-all cursor-pointer ${
-            isVoicePlaying
-              ? 'bg-rose-50 border-rose-300 text-rose-700 animate-pulse'
-              : 'bg-white hover:bg-slate-50 border-[#d8d2c7] text-[#6366f1]'
-          }`}
-        >
-          <Volume2 className="w-4 h-4" />
-          <span>{isVoicePlaying ? "Playing..." : "Voice Exit Nudge"}</span>
-        </button>
+      <div className="flex items-center gap-2.5 pt-3 border-t border-[#f0eae0]">
+        {onTriggerVoice && (
+          <button
+            onClick={onTriggerVoice}
+            className={`flex-1 py-2.5 px-3 rounded-2xl border text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              isVoicePlaying
+                ? 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse'
+                : 'bg-[#faf8f5] hover:bg-[#f3eee5] text-[#241746] border-[#e7e0d3]'
+            }`}
+          >
+            {isVoicePlaying ? (
+              <>
+                <VolumeX className="w-4 h-4 text-rose-500" />
+                <span>Stop Voice Coach</span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-4 h-4 text-[#7054E8]" />
+                <span>Voice Coach Briefing</span>
+              </>
+            )}
+          </button>
+        )}
 
         <button
           onClick={handleMarkAll}
-          className="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-[#6366f1] hover:bg-[#4f46e5] text-white text-xs font-black shadow-md shadow-indigo-500/25 transition-all hover:scale-[1.01] active:scale-95 cursor-pointer"
+          className="flex-1 py-2.5 px-3 rounded-2xl bg-[#7054E8] hover:bg-[#5b3ee0] text-white text-xs font-black flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer whitespace-nowrap"
         >
           <CheckCircle2 className="w-4 h-4 text-emerald-300" />
-          <span>Mark All as Packed</span>
+          <span>Mark All Packed</span>
         </button>
       </div>
 
