@@ -22,16 +22,17 @@ export default function HeaderBanner({
   onGenerate,
   isGenerating,
   onTriggerVoice,
-  isVoicePlaying
+  isVoicePlaying,
+  userName = "Kanwal"
 }) {
   return (
     <div className="space-y-3.5">
       
-      {/* Top Banner: Exact Artwork Requested by User */}
+      {/* Top Banner: Exact Artwork Personalized for User */}
       <div className="relative rounded-3xl overflow-hidden border border-[#e8ded1] shadow-xs bg-[#dcd7f2] select-none">
         <img
           src="/assets/header_banner.png"
-          alt="Hey Shruti! Where are you off to next? Tell me about your trip and I'll create a personalized checklist just for you"
+          alt={`Hey ${userName}! Where are you off to next? Tell me about your trip and I'll create a personalized checklist just for you`}
           className="w-full h-36 sm:h-44 md:h-48 object-cover object-center block rounded-3xl"
         />
       </div>

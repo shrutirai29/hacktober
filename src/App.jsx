@@ -55,7 +55,7 @@ export default function App() {
 
   // 3D Room Twin State
   const [roomPhotoUrl, setRoomPhotoUrl] = useState("/assets/hostel-desk-demo.jpg");
-  const [roomTitle, setRoomTitle] = useState("Alex's Reconstructed Hostel Room (Block C-402)");
+  const [roomTitle, setRoomTitle] = useState("Kanwal's Reconstructed Hostel Room (Block C-402)");
 
   // Audio / Voice State
   const [isVoicePlaying, setIsVoicePlaying] = useState(false);
@@ -238,6 +238,7 @@ export default function App() {
               isGenerating={isGenerating}
               onTriggerVoice={handleTriggerVoice}
               isVoicePlaying={isVoicePlaying}
+              userName={friendName}
             />
 
             {/* 2-Column Balanced Hero Row */}

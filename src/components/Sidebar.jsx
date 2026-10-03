@@ -30,9 +30,9 @@ export default function Sidebar({
       <div className="flex flex-col">
         
         {/* Brand Header */}
-        <div className="pt-6 pb-3 px-4 flex flex-col items-center text-center">
+        <div className="pt-5 pb-2 px-4 flex flex-col items-center text-center">
           {/* 3D Pastel Suitcase Logo */}
-          <div className="w-20 h-13 flex items-center justify-center">
+          <div className="w-16 h-12 flex items-center justify-center">
             <img 
               src="/assets/sidebar_logo_suitcase.png" 
               alt="CheckMate 3D Suitcase"
@@ -44,13 +44,13 @@ export default function Sidebar({
           <h1 className="font-extrabold text-2xl text-[#18113C] tracking-tight mt-1">
             CheckMate
           </h1>
-          <p className="text-xs font-semibold text-slate-400 mt-0.5 tracking-tight">
+          <p className="text-[11px] font-semibold text-slate-400 mt-0.5 tracking-tight">
             Pack Smart, Travel Light
           </p>
         </div>
 
         {/* Navigation Menu List */}
-        <nav className="space-y-1.5 px-3 mt-2">
+        <nav className="space-y-1 px-3 mt-1.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeNav === item.id;
@@ -59,14 +59,14 @@ export default function Sidebar({
               <button
                 key={item.id}
                 onClick={() => onSelectNav?.(item.id)}
-                className={`w-full flex items-center gap-3.5 px-4 py-2.5 rounded-2xl text-xs font-extrabold transition-all duration-150 cursor-pointer ${
+                className={`w-full flex items-center gap-3.5 px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-150 cursor-pointer ${
                   isActive
                     ? 'bg-[#EBE6FA] text-[#5B21B6] shadow-xs'
                     : 'text-[#18113C] hover:bg-[#EFE9E4] hover:text-[#18113C]'
                 }`}
               >
                 <Icon 
-                  className={`w-5 h-5 shrink-0 ${
+                  className={`w-4.5 h-4.5 shrink-0 ${
                     isActive ? 'text-[#5B21B6]' : 'text-[#18113C]'
                   }`} 
                   strokeWidth={2}
@@ -80,11 +80,11 @@ export default function Sidebar({
       </div>
 
       {/* Bottom Adorable 3D Illustration (Seamlessly anchored at the bottom edge) */}
-      <div className="mt-auto relative w-full overflow-hidden select-none pointer-events-none -mb-1">
+      <div className="mt-auto relative w-full overflow-hidden select-none pointer-events-none">
         <img
           src="/assets/sidebar_cat_decor.png"
           alt="Good Trips, Better Stories"
-          className="w-full h-auto object-cover object-bottom block"
+          className="w-full h-auto max-h-[380px] object-cover object-bottom block"
         />
       </div>
 

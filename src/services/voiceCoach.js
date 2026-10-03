@@ -3,7 +3,7 @@
  * Supports ElevenLabs Voice API (Hacktoberfest Category) and browser Web Speech API
  */
 
-export function generateVoiceBriefingText({ friendName = "Alex", tripType, criticalItems, warningItems }) {
+export function generateVoiceBriefingText({ friendName = "Kanwal", tripType, criticalItems, warningItems }) {
   let script = `Hey ${friendName}! CheckMate exit briefing before you step out for your ${tripType}. `;
 
   if (criticalItems && criticalItems.length > 0) {
