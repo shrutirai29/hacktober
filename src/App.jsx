@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import HeaderBanner from './components/HeaderBanner';
-import YourSpaceCard from './components/YourSpaceCard';
 import BottomCards from './components/BottomCards';
 import PackingManifestCard from './components/PackingManifestCard';
 import ComparisonModal from './components/ComparisonModal';
@@ -55,7 +54,6 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   // 3D Room Twin State
-  const [spaceViewTab, setSpaceViewTab] = useState("3d");
   const [roomPhotoUrl, setRoomPhotoUrl] = useState("/assets/hostel-desk-demo.jpg");
   const [roomTitle, setRoomTitle] = useState("Alex's Reconstructed Hostel Room (Block C-402)");
 
@@ -246,61 +244,17 @@ export default function App() {
               {/* Left Column: Your Space + 3 Bottom Cards (7 cols) */}
               <div className="lg:col-span-7 space-y-4">
                 
-                {/* Space Mode Switcher Bar */}
-                <div className="flex items-center justify-between bg-white px-4 py-2.5 rounded-2xl border border-[#ede7dd] shadow-2xs">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setSpaceViewTab("3d")}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                        spaceViewTab === "3d"
-                          ? 'bg-[#7054E8] text-white shadow-xs'
-                          : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <span>🎮 3D Digital Twin</span>
-                    </button>
-                    <button
-                      onClick={() => setSpaceViewTab("2d")}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
-                        spaceViewTab === "2d"
-                          ? 'bg-[#7054E8] text-white shadow-xs'
-                          : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      <span>📷 2D Vision Scanner</span>
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => setActiveNav("NewRoom")}
-                    className="text-xs font-bold text-[#7054E8] hover:text-[#5b3ee0] bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Reconstruct Room</span>
-                  </button>
-                </div>
-
-                {spaceViewTab === "3d" ? (
-                  <RoomSceneViewer
-                    highlightedItemId={highlightedItemId}
-                    onSelectItem={(item) => {
-                      setHighlightedItemId(item.id);
-                      showToast(`Selected "${item.name}" in 3D room.`);
-                    }}
-                    onHoverItem={setHighlightedItemId}
-                    photoUrl={roomPhotoUrl}
-                    roomTitle={roomTitle}
-                  />
-                ) : (
-                  <YourSpaceCard
-                    scenarios={scenarios}
-                    currentScenario={currentScenario}
-                    onSelectScenario={setCurrentScenario}
-                    onCustomImageUpload={handleCustomImageUpload}
-                    highlightedItemId={highlightedItemId}
-                    onHoverItem={setHighlightedItemId}
-                  />
-                )}
+                <RoomSceneViewer
+                  highlightedItemId={highlightedItemId}
+                  onSelectItem={(item) => {
+                    setHighlightedItemId(item.id);
+                    showToast(`Selected "${item.name}" in 3D room.`);
+                  }}
+                  onHoverItem={setHighlightedItemId}
+                  onReconstructRoom={() => setActiveNav("NewRoom")}
+                  photoUrl={roomPhotoUrl}
+                  roomTitle={roomTitle}
+                />
 
                 <BottomCards
                   tripType={tripType}

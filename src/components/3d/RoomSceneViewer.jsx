@@ -11,16 +11,18 @@ import {
   Sparkles, 
   AlertTriangle, 
   Check, 
-  Maximize2 
+  Maximize2,
+  Wand2
 } from 'lucide-react';
 
 export default function RoomSceneViewer({
   highlightedItemId = null,
   onSelectItem = null,
   onHoverItem = null,
+  onReconstructRoom = null,
   photoUrl = "/assets/hostel-desk-demo.jpg",
   roomTitle = "Alex's Reconstructed Hostel Room (Block C-402)",
-  reconstructionStatus = "Room ready"
+  reconstructionStatus = "3D Twin Ready"
 }) {
   const mountRef = useRef(null);
   const [viewMode, setViewMode] = useState("3d"); // "3d" or "photo"
@@ -620,30 +622,17 @@ export default function RoomSceneViewer({
           </div>
         </div>
 
-        {/* View Toggle: 3D Room vs Original 2D Photo */}
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <div className="flex items-center bg-[#f5f2eb] p-1 rounded-2xl border border-[#e5decb]">
+        {/* Action Buttons: Scan & Reconstruct */}
+        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+          {onReconstructRoom && (
             <button
-              onClick={() => setViewMode("3d")}
-              className={`px-3 py-1 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                viewMode === "3d"
-                  ? 'bg-[#7054E8] text-white shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
+              onClick={onReconstructRoom}
+              className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#7054E8] hover:bg-[#5b3ee0] text-white text-xs font-black shadow-md shadow-indigo-600/20 transition-all cursor-pointer hover:scale-[1.02] active:scale-95"
             >
-              Interactive 3D Room
+              <Wand2 className="w-4 h-4 text-amber-300" />
+              <span>Scan & Reconstruct</span>
             </button>
-            <button
-              onClick={() => setViewMode("photo")}
-              className={`px-3 py-1 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                viewMode === "photo"
-                  ? 'bg-[#7054E8] text-white shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              Original Photo
-            </button>
-          </div>
+          )}
         </div>
       </div>
 
@@ -791,6 +780,56 @@ export default function RoomSceneViewer({
           </div>
         </div>
       )}
+
+      {/* 8 Mapped Belongings Quick Focus Strip */}
+      <div className="pt-2.5 border-t border-[#f0eae0] space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-black text-slate-700 flex items-center gap-1.5">
+            <span>Mapped Room Belongings</span>
+            <span className="px-2 py-0.5 rounded-full bg-purple-100 text-[#7054E8] text-[10px] font-extrabold">
+              8 items
+            </span>
+          </span>
+          <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+            Click any item to focus camera in 3D
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {roomItems.map((item) => {
+            const isCritical = item.risk === "critical";
+            const isSelected = selectedObj?.id === item.id || highlightedItemId === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setSelectedObj(item);
+                  onSelectItem?.(item);
+                  if (controlsRef.current) {
+                    controlsRef.current.target.set(item.pos[0], item.pos[1], item.pos[2]);
+                  }
+                }}
+                onMouseEnter={() => onHoverItem?.(item.id)}
+                onMouseLeave={() => onHoverItem?.(null)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
+                  isCritical
+                    ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                    : isSelected
+                    ? 'bg-purple-100 text-[#7054E8] border-purple-300 shadow-xs ring-2 ring-purple-300/40'
+                    : 'bg-[#faf8f5] text-slate-700 border-[#ede7dd] hover:bg-white'
+                }`}
+              >
+                {isCritical ? (
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                ) : (
+                  <span className="w-2 h-2 rounded-full bg-indigo-500 shrink-0" />
+                )}
+                <span>{item.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Footer Instructions */}
       <div className="flex items-center justify-between text-xs text-slate-400 font-medium px-1">
