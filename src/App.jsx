@@ -287,6 +287,18 @@ export default function App() {
                 />
               </div>
             </div>
+
+            {/* Bottom Cute Doodle Banner Requested by User */}
+            <div className="w-full pt-1 pb-2 select-none">
+              <div className="w-full rounded-2xl overflow-hidden shadow-xs border border-[#F3E7D9] bg-[#FFF3E8]">
+                <img
+                  src="/assets/footer_banner.png"
+                  alt="Small checklist. Big peace of mind. Pack Explore Learn Repeat ♡"
+                  className="w-full h-auto object-contain max-h-24 mx-auto block"
+                />
+              </div>
+            </div>
+
           </div>
         )}
 
