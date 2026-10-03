@@ -74,7 +74,7 @@ export default function RoomReconstructionStudio({
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#ede7dd] shadow-sm max-w-4xl mx-auto space-y-6 animate-in fade-in duration-300">
+    <div className="faded-glass rounded-3xl p-6 sm:p-8 max-w-4xl mx-auto space-y-6 animate-in fade-in duration-300">
       
       {/* Title Callout */}
       <div className="text-center space-y-2">

@@ -29,7 +29,7 @@ export default function HeaderBanner({
     <div className="space-y-3.5">
       
       {/* Top Banner: Exact Artwork Personalized for User */}
-      <div className="relative rounded-3xl overflow-hidden border border-[#e8ded1] shadow-xs bg-[#dcd7f2] select-none">
+      <div className="relative rounded-3xl overflow-hidden border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.06)] bg-[#dcd7f2]/70 backdrop-blur-md select-none">
         <img
           src="/assets/header_banner.png"
           alt={`Hey ${userName}! Where are you off to next? Tell me about your trip and I'll create a personalized checklist just for you`}
@@ -38,14 +38,14 @@ export default function HeaderBanner({
       </div>
 
       {/* Horizontal Trip Parameter Strip */}
-      <div className="bg-white rounded-2xl p-3 sm:p-3.5 border border-[#ede6dc] shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+      <div className="faded-glass rounded-2xl p-3 sm:p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         
         {/* Dropdown Selectors Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 flex-1">
           
           {/* 1. Trip Purpose */}
-          <div className="bg-[#faf8f5] hover:bg-white rounded-xl px-3 py-2 border border-[#eee7dc] hover:border-purple-300 transition-colors flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+          <div className="faded-glass-pill hover:bg-white/85 rounded-xl px-3 py-2 transition-all flex items-center gap-2.5 shadow-2xs">
+            <div className="w-7 h-7 rounded-lg bg-indigo-50/80 text-indigo-600 flex items-center justify-center shrink-0">
               <Briefcase className="w-3.5 h-3.5" />
             </div>
             <div className="min-w-0 flex-1">
@@ -66,8 +66,8 @@ export default function HeaderBanner({
           </div>
 
           {/* 2. Duration */}
-          <div className="bg-[#faf8f5] hover:bg-white rounded-xl px-3 py-2 border border-[#eee7dc] hover:border-purple-300 transition-colors flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+          <div className="faded-glass-pill hover:bg-white/85 rounded-xl px-3 py-2 transition-all flex items-center gap-2.5 shadow-2xs">
+            <div className="w-7 h-7 rounded-lg bg-purple-50/80 text-purple-600 flex items-center justify-center shrink-0">
               <Calendar className="w-3.5 h-3.5" />
             </div>
             <div className="min-w-0 flex-1">
@@ -88,8 +88,8 @@ export default function HeaderBanner({
           </div>
 
           {/* 3. Weather */}
-          <div className="bg-[#faf8f5] hover:bg-white rounded-xl px-3 py-2 border border-[#eee7dc] hover:border-purple-300 transition-colors flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+          <div className="faded-glass-pill hover:bg-white/85 rounded-xl px-3 py-2 transition-all flex items-center gap-2.5 shadow-2xs">
+            <div className="w-7 h-7 rounded-lg bg-amber-50/80 text-amber-600 flex items-center justify-center shrink-0">
               {weather.includes("Rain") ? (
                 <CloudRain className="w-3.5 h-3.5" />
               ) : (
@@ -114,8 +114,8 @@ export default function HeaderBanner({
           </div>
 
           {/* 4. Mode */}
-          <div className="bg-[#faf8f5] hover:bg-white rounded-xl px-3 py-2 border border-[#eee7dc] hover:border-purple-300 transition-colors flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+          <div className="faded-glass-pill hover:bg-white/85 rounded-xl px-3 py-2 transition-all flex items-center gap-2.5 shadow-2xs">
+            <div className="w-7 h-7 rounded-lg bg-emerald-50/80 text-emerald-600 flex items-center justify-center shrink-0">
               <RefreshCw className="w-3.5 h-3.5" />
             </div>
             <div className="min-w-0 flex-1">
@@ -140,10 +140,10 @@ export default function HeaderBanner({
           {onTriggerVoice && (
             <button
               onClick={onTriggerVoice}
-              className={`px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition-all cursor-pointer ${
+              className={`px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 isVoicePlaying
-                  ? 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse'
-                  : 'bg-[#faf8f5] hover:bg-[#f2ede4] text-slate-700 border-[#e5ded4]'
+                  ? 'bg-rose-50/90 text-rose-700 border border-rose-200 animate-pulse backdrop-blur-sm'
+                  : 'faded-glass-pill hover:bg-white/90 text-slate-700 shadow-2xs'
               }`}
               title="Departure Audio Briefing"
             >

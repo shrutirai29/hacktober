@@ -96,7 +96,7 @@ Structured recommendations generated...
     <div className="space-y-6 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#ede7dd] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="faded-glass rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-2xl bg-purple-100 text-[#7054E8] flex items-center justify-center font-bold">
             <Cpu className="w-5 h-5" />
@@ -124,7 +124,7 @@ Structured recommendations generated...
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         
         {/* Python Backend Status */}
-        <div className="bg-white rounded-2xl p-4 border border-[#ede7dd] shadow-xs">
+        <div className="faded-glass-pill rounded-2xl p-4">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
             Python Backend Bridge
           </span>
@@ -147,7 +147,7 @@ Structured recommendations generated...
         </div>
 
         {/* Ollama Connection */}
-        <div className="bg-white rounded-2xl p-4 border border-[#ede7dd] shadow-xs">
+        <div className="faded-glass-pill rounded-2xl p-4">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
             Local Ollama Engine
           </span>
@@ -170,7 +170,7 @@ Structured recommendations generated...
         </div>
 
         {/* Configured Model */}
-        <div className="bg-white rounded-2xl p-4 border border-[#ede7dd] shadow-xs">
+        <div className="faded-glass-pill rounded-2xl p-4">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
             Active Reasoning Engine
           </span>
@@ -187,7 +187,7 @@ Structured recommendations generated...
       {/* Four Pillars of Open Innovation */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        <div className="bg-white rounded-2xl p-4 border border-[#ede7dd] shadow-xs space-y-1.5">
+        <div className="faded-glass-pill rounded-2xl p-4 space-y-1.5">
           <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 w-fit">
             <ShieldCheck className="w-4 h-4" />
           </div>
@@ -197,7 +197,7 @@ Structured recommendations generated...
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 border border-[#ede7dd] shadow-xs space-y-1.5">
+        <div className="faded-glass-pill rounded-2xl p-4 space-y-1.5">
           <div className="p-2 rounded-xl bg-purple-50 text-[#7054E8] w-fit">
             <Wifi className="w-4 h-4" />
           </div>
@@ -207,7 +207,7 @@ Structured recommendations generated...
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 border border-[#ede7dd] shadow-xs space-y-1.5">
+        <div className="faded-glass-pill rounded-2xl p-4 space-y-1.5">
           <div className="p-2 rounded-xl bg-amber-50 text-amber-600 w-fit">
             <Coins className="w-4 h-4" />
           </div>
@@ -217,7 +217,7 @@ Structured recommendations generated...
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 border border-[#ede7dd] shadow-xs space-y-1.5">
+        <div className="faded-glass-pill rounded-2xl p-4 space-y-1.5">
           <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 w-fit">
             <Sliders className="w-4 h-4" />
           </div>
@@ -230,7 +230,7 @@ Structured recommendations generated...
       </div>
 
       {/* Prompt Structure Inspector */}
-      <div className="bg-white rounded-3xl p-6 border border-[#ede7dd] shadow-sm space-y-3">
+      <div className="faded-glass rounded-3xl p-6 space-y-3">
         <div className="flex items-center justify-between pb-2 border-b border-[#f0eae0]">
           <div className="flex items-center gap-2 text-[#1e1b4b]">
             <Terminal className="w-4 h-4 text-[#7054E8]" />

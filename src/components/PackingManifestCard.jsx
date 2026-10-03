@@ -232,7 +232,7 @@ export default function PackingManifestCard({
   };
 
   return (
-    <div className="bg-white rounded-3xl p-5 border border-[#ede7dd] shadow-sm flex flex-col justify-between gap-4 h-full">
+    <div className="faded-glass rounded-3xl p-5 flex flex-col justify-between gap-4 h-full">
       
       {/* Top Header & Dynamic Progress Bar */}
       <div className="space-y-3">
@@ -250,7 +250,7 @@ export default function PackingManifestCard({
             <span className="text-xs font-black text-slate-600 font-mono">
               {packedCount}/{totalCount} packed
             </span>
-            <div className="w-24 h-2.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
+            <div className="w-24 h-2.5 bg-white/70 rounded-full overflow-hidden p-0.5 border border-white/80">
               <div 
                 className="h-full bg-gradient-to-r from-indigo-500 to-[#7054E8] rounded-full transition-all duration-300"
                 style={{ width: `${progressPercentage}%` }}

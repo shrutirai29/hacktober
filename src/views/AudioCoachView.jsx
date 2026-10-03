@@ -96,7 +96,7 @@ export default function AudioCoachView({
     <div className="space-y-6 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#ede7dd] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="faded-glass rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
             <Volume2 className="w-5 h-5" />
@@ -142,7 +142,7 @@ export default function AudioCoachView({
         <div className="lg:col-span-7 space-y-4">
           
           {/* Spoken Text Card */}
-          <div className="bg-white rounded-3xl p-6 border border-[#ede7dd] shadow-sm space-y-3">
+          <div className="faded-glass rounded-3xl p-6 space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-[#f0eae0]">
               <div className="flex items-center gap-2 text-[#1e1b4b]">
                 <FileText className="w-4 h-4 text-[#7054E8]" />
@@ -166,7 +166,7 @@ export default function AudioCoachView({
           </div>
 
           {/* High-Risk Verbal Focus */}
-          <div className="bg-white rounded-3xl p-6 border border-[#ede7dd] shadow-sm space-y-3">
+          <div className="faded-glass rounded-3xl p-6 space-y-3">
             <h4 className="font-black text-xs text-[#1e1b4b] uppercase tracking-wider flex items-center gap-1.5">
               <ShieldAlert className="w-4 h-4 text-rose-500" />
               <span>Items Given Verbal Prominence:</span>
@@ -192,7 +192,7 @@ export default function AudioCoachView({
 
         {/* Right Column: Audio & Voice Controls (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white rounded-3xl p-6 border border-[#ede7dd] shadow-sm space-y-4">
+          <div className="faded-glass rounded-3xl p-6 space-y-4">
             <div className="flex items-center gap-2 text-[#1e1b4b] pb-2 border-b border-[#f0eae0]">
               <Sliders className="w-4 h-4 text-[#7054E8]" />
               <h3 className="font-black text-sm">Voice Synthesis Settings</h3>

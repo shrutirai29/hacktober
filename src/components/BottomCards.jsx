@@ -33,7 +33,7 @@ export default function BottomCards({
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       
       {/* 1. Trip Preview Card */}
-      <div className="bg-white rounded-3xl p-4 border border-[#ede7dd] shadow-sm flex flex-col justify-between">
+      <div className="faded-glass soft-card-hover rounded-3xl p-4 flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between gap-1 mb-2.5">
             <span className="text-xs font-black text-rose-500 flex items-center gap-1.5">
@@ -49,7 +49,7 @@ export default function BottomCards({
             <img
               src="/assets/campus_thumb.jpg"
               alt="College Campus"
-              className="w-14 h-14 rounded-2xl object-cover shrink-0 border border-slate-100 shadow-2xs"
+              className="w-14 h-14 rounded-2xl object-cover shrink-0 border border-white/60 shadow-2xs"
             />
             <div className="space-y-0.5 min-w-0">
               <h4 className="font-extrabold text-xs text-[#1e1b4b] truncate">
@@ -67,26 +67,26 @@ export default function BottomCards({
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-[#f4efe6] text-[10px] text-slate-400 font-bold mt-2">
+        <div className="flex items-center justify-between pt-2 border-t border-white/60 text-[10px] text-slate-400 font-bold mt-2">
           <span>{mode === "departure" ? "Departure Packing" : "Return Audit"}</span>
           <span>💼</span>
         </div>
       </div>
 
       {/* 2. Past Trip Stats Card */}
-      <div className="bg-white rounded-3xl p-4 border border-[#ede7dd] shadow-sm flex flex-col justify-between">
+      <div className="faded-glass soft-card-hover rounded-3xl p-4 flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between mb-1">
             <h4 className="text-xs font-extrabold text-[#1e1b4b]">
               Past Trip Stats
             </h4>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[10px] flex items-center gap-0.5">
+            <span className="px-2 py-0.5 rounded-full bg-emerald-100/80 text-emerald-700 font-bold text-[10px] flex items-center gap-0.5 border border-emerald-200/50">
               <TrendingDown className="w-3 h-3" />
               <span>-60%</span>
             </span>
           </div>
 
-          <p className="text-[11px] text-slate-400 font-medium leading-tight mb-2.5">
+          <p className="text-[11px] text-slate-500 font-medium leading-tight mb-2.5">
             You've forgotten 12 items in the last 6 trips 😅
           </p>
 
@@ -96,7 +96,7 @@ export default function BottomCards({
               <div key={item.month} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                 <div
                   style={{ height: item.height }}
-                  className="w-full max-w-[16px] bg-[#fca5a5] hover:bg-[#f87171] rounded-t-md transition-all"
+                  className="w-full max-w-[16px] bg-[#fca5a5]/90 hover:bg-[#f87171] rounded-t-md transition-all shadow-2xs"
                   title={`${item.count} items forgotten in ${item.month}`}
                 />
                 <span className="text-[9px] font-bold text-slate-400">
@@ -109,7 +109,7 @@ export default function BottomCards({
       </div>
 
       {/* 3. Quick Actions Card */}
-      <div className="bg-white rounded-3xl p-4 border border-[#ede7dd] shadow-sm flex flex-col justify-between">
+      <div className="faded-glass soft-card-hover rounded-3xl p-4 flex flex-col justify-between">
         <h4 className="text-xs font-extrabold text-[#1e1b4b] mb-2">
           Quick Actions
         </h4>
@@ -117,7 +117,7 @@ export default function BottomCards({
         <div className="space-y-1.5">
           <button
             onClick={onOpenComparison}
-            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#f5f3ff] hover:bg-[#ede9fe] text-[#5b21b6] text-xs font-bold transition-colors cursor-pointer text-left"
+            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-50/70 hover:bg-purple-100/80 text-[#5b21b6] text-xs font-bold transition-all border border-purple-100/50 cursor-pointer text-left shadow-2xs"
           >
             <Split className="w-3.5 h-3.5 text-[#6366f1]" />
             <span>Demo: Compare Trips</span>
@@ -125,7 +125,7 @@ export default function BottomCards({
 
           <button
             onClick={onOpenMemory}
-            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#f0f9ff] hover:bg-[#e0f2fe] text-[#0369a1] text-xs font-bold transition-colors cursor-pointer text-left"
+            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl bg-sky-50/70 hover:bg-sky-100/80 text-[#0369a1] text-xs font-bold transition-all border border-sky-100/50 cursor-pointer text-left shadow-2xs"
           >
             <History className="w-3.5 h-3.5 text-[#0284c7]" />
             <span>View Memory Vault</span>
@@ -133,7 +133,7 @@ export default function BottomCards({
 
           <button
             onClick={onOpenAiInspector}
-            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#fdf4ff] hover:bg-[#fae8ff] text-[#86198f] text-xs font-bold transition-colors cursor-pointer text-left"
+            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl bg-fuchsia-50/70 hover:bg-fuchsia-100/80 text-[#86198f] text-xs font-bold transition-all border border-fuchsia-100/50 cursor-pointer text-left shadow-2xs"
           >
             <Cpu className="w-3.5 h-3.5 text-[#c026d3]" />
             <span>Gemma Core (How it works)</span>

@@ -35,7 +35,7 @@ export default function SettingsView({ onResetAllData, showToast }) {
     <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#ede7dd] shadow-sm flex items-center gap-3">
+      <div className="faded-glass rounded-3xl p-6 sm:p-7 flex items-center gap-3">
         <div className="w-10 h-10 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
           <Settings className="w-5 h-5" />
         </div>
@@ -50,7 +50,7 @@ export default function SettingsView({ onResetAllData, showToast }) {
       </div>
 
       {/* AI Server Config Form */}
-      <form onSubmit={handleSave} className="bg-white rounded-3xl p-6 sm:p-7 border border-[#ede7dd] shadow-sm space-y-4">
+      <form onSubmit={handleSave} className="faded-glass rounded-3xl p-6 sm:p-7 space-y-4">
         <div className="flex items-center gap-2 pb-2 border-b border-[#f0eae0] text-[#1e1b4b]">
           <Server className="w-4 h-4 text-[#7054E8]" />
           <h3 className="font-black text-sm">Local AI Inference Endpoints</h3>
@@ -109,7 +109,7 @@ export default function SettingsView({ onResetAllData, showToast }) {
       </form>
 
       {/* Storage Reset Section */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#ede7dd] shadow-sm space-y-4">
+      <div className="faded-glass rounded-3xl p-6 sm:p-7 space-y-4">
         <div className="flex items-center gap-2 pb-2 border-b border-[#f0eae0] text-[#1e1b4b]">
           <Database className="w-4 h-4 text-rose-500" />
           <h3 className="font-black text-sm">Demo Data & Storage Reset</h3>

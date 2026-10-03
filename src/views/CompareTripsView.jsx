@@ -64,7 +64,7 @@ export default function CompareTripsView({ onSelectScenarioAndTrip }) {
     <div className="space-y-6 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#ede7dd] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="faded-glass rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-2xl bg-indigo-100 text-[#7054E8] flex items-center justify-center font-bold">
             <Split className="w-5 h-5" />
@@ -84,7 +84,7 @@ export default function CompareTripsView({ onSelectScenarioAndTrip }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         
         {/* Scenario A Card */}
-        <div className="bg-white rounded-3xl p-6 border border-[#ede7dd] shadow-xs flex flex-col justify-between space-y-4">
+        <div className="faded-glass rounded-3xl p-6 flex flex-col justify-between space-y-4">
           <div className="space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#f0eae0]">
               <div className="flex items-center gap-2 text-[#1e1b4b]">
@@ -153,7 +153,7 @@ export default function CompareTripsView({ onSelectScenarioAndTrip }) {
         </div>
 
         {/* Scenario B Card */}
-        <div className="bg-white rounded-3xl p-6 border border-[#ede7dd] shadow-xs flex flex-col justify-between space-y-4">
+        <div className="faded-glass rounded-3xl p-6 flex flex-col justify-between space-y-4">
           <div className="space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#f0eae0]">
               <div className="flex items-center gap-2 text-[#1e1b4b]">
@@ -224,7 +224,7 @@ export default function CompareTripsView({ onSelectScenarioAndTrip }) {
       </div>
 
       {/* Causal Explanation Section */}
-      <div className="bg-white rounded-3xl p-6 border border-[#ede7dd] shadow-sm space-y-3">
+      <div className="faded-glass rounded-3xl p-6 space-y-3">
         <div className="flex items-center gap-2 text-[#7054E8]">
           <Zap className="w-5 h-5" />
           <h3 className="font-black text-base text-[#1e1b4b]">

@@ -24,7 +24,7 @@ export default function Sidebar({
   ];
 
   return (
-    <aside className="w-[240px] bg-[#FBF7F5] rounded-3xl border border-[#EAE2DC] shadow-sm flex flex-col justify-between shrink-0 select-none overflow-hidden h-[calc(100vh-2rem)]">
+    <aside className="w-[240px] faded-glass-sidebar rounded-3xl flex flex-col justify-between shrink-0 select-none overflow-hidden h-[calc(100vh-2rem)]">
       
       {/* Top Header & Navigation */}
       <div className="flex flex-col">
@@ -61,8 +61,8 @@ export default function Sidebar({
                 onClick={() => onSelectNav?.(item.id)}
                 className={`w-full flex items-center gap-3.5 px-3.5 py-2 rounded-2xl text-xs font-extrabold transition-all duration-150 cursor-pointer ${
                   isActive
-                    ? 'bg-[#EBE6FA] text-[#5B21B6] shadow-xs'
-                    : 'text-[#18113C] hover:bg-[#F2ECE7] hover:text-[#18113C]'
+                    ? 'bg-[#EBE6FA]/90 backdrop-blur-xs text-[#5B21B6] shadow-xs border border-white/60'
+                    : 'text-[#18113C] hover:bg-white/50 hover:text-[#18113C]'
                 }`}
               >
                 <Icon 

@@ -35,7 +35,7 @@ export default function NewTripView({ onStartTrip }) {
     <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#ede7dd] shadow-sm text-center space-y-2">
+      <div className="faded-glass rounded-3xl p-6 sm:p-7 text-center space-y-2">
         <div className="w-12 h-12 rounded-2xl bg-purple-100 text-[#7054E8] flex items-center justify-center font-bold mx-auto mb-1">
           <PlusCircle className="w-6 h-6" />
         </div>
@@ -48,7 +48,7 @@ export default function NewTripView({ onStartTrip }) {
       </div>
 
       {/* Form Card */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-6 sm:p-7 border border-[#ede7dd] shadow-sm space-y-5">
+      <form onSubmit={handleSubmit} className="faded-glass rounded-3xl p-6 sm:p-7 space-y-5">
         
         {/* Destination Name */}
         <div>

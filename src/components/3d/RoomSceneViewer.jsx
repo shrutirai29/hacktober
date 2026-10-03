@@ -598,12 +598,12 @@ export default function RoomSceneViewer({
   };
 
   return (
-    <div className="bg-white rounded-3xl p-5 border border-[#ede7dd] shadow-sm flex flex-col gap-4 relative overflow-hidden">
+    <div className="faded-glass rounded-3xl p-5 flex flex-col gap-4 relative overflow-hidden">
       
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#f0eae0]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/60">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-2xl bg-[#ede9fe] text-[#7054E8] flex items-center justify-center font-bold shadow-xs">
+          <div className="w-9 h-9 rounded-2xl bg-[#ede9fe]/90 text-[#7054E8] flex items-center justify-center font-bold shadow-xs">
             <Compass className="w-5 h-5" />
           </div>
           <div>
@@ -611,12 +611,12 @@ export default function RoomSceneViewer({
               <h3 className="font-black text-sm text-[#1e1b4b]">
                 {roomTitle}
               </h3>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black flex items-center gap-1">
+              <span className="px-2 py-0.5 rounded-full bg-emerald-100/90 text-emerald-800 text-[10px] font-black flex items-center gap-1 border border-emerald-200/60">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 {reconstructionStatus}
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium">
+            <p className="text-[11px] text-slate-500 font-medium">
               Interactive 3D reconstruction mapped from room photograph. Orbit, zoom, and click objects to inspect.
             </p>
           </div>
@@ -637,7 +637,7 @@ export default function RoomSceneViewer({
       </div>
 
       {/* Main Viewport Container */}
-      <div className="relative w-full h-[360px] sm:h-[400px] md:h-[430px] rounded-2xl overflow-hidden bg-[#F9F6F0] border border-[#e5ded4] shadow-inner select-none">
+      <div className="relative w-full h-[360px] sm:h-[400px] md:h-[430px] rounded-2xl overflow-hidden bg-[#F9F6F0]/90 border border-white/70 shadow-inner select-none">
         
         {viewMode === "3d" ? (
           <>

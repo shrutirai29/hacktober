@@ -53,7 +53,7 @@ export default function MyChecklistsView({ onSelectTrip, onNewTrip }) {
     <div className="space-y-6 animate-in fade-in duration-300">
       
       {/* Header */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#ede7dd] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="faded-glass rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-2xl bg-indigo-100 text-[#7054E8] flex items-center justify-center font-bold">
             <ClipboardList className="w-5 h-5" />
@@ -87,7 +87,7 @@ export default function MyChecklistsView({ onSelectTrip, onNewTrip }) {
           return (
             <div
               key={trip.id}
-              className="bg-white rounded-3xl p-5 border border-[#ede7dd] shadow-xs flex flex-col justify-between gap-4 hover:shadow-md transition-shadow"
+              className="faded-glass rounded-3xl p-5 flex flex-col justify-between gap-4 hover:shadow-md transition-shadow"
             >
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-2">

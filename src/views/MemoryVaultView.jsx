@@ -52,7 +52,7 @@ export default function MemoryVaultView({
     <div className="space-y-6 animate-in fade-in duration-300">
       
       {/* Header Banner */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#ede7dd] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="faded-glass rounded-3xl p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
@@ -91,7 +91,7 @@ export default function MemoryVaultView({
 
       {/* Metric Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl p-4 border border-[#ede7dd] shadow-xs">
+        <div className="faded-glass-pill rounded-2xl p-4">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
             Active Memory Rules
           </span>
@@ -103,7 +103,7 @@ export default function MemoryVaultView({
           </span>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 border border-[#ede7dd] shadow-xs">
+        <div className="faded-glass-pill rounded-2xl p-4">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
             Highest Risk Hazard
           </span>
@@ -115,7 +115,7 @@ export default function MemoryVaultView({
           </span>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 border border-[#ede7dd] shadow-xs">
+        <div className="faded-glass-pill rounded-2xl p-4">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
             Incident Reduction Rate
           </span>
@@ -129,7 +129,7 @@ export default function MemoryVaultView({
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white rounded-2xl p-3 border border-[#ede7dd] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="faded-glass rounded-2xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-72">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
