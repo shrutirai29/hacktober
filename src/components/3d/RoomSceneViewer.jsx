@@ -131,8 +131,8 @@ export default function RoomSceneViewer({
       name: "Travel Backpack",
       status: "Exit Luggage",
       risk: "normal",
-      note: "Sitting on floor beside chair.",
-      pos: [-4.2, 0.9, 2.4],
+      note: "Standing freely on floor beside creator desk and chair.",
+      pos: [-5.3, 0.9, 2.6],
       color: 0x7c3aed,
       category: "Luggage"
     }
@@ -909,10 +909,19 @@ export default function RoomSceneViewer({
     roomGroup.add(flask);
 
     // 8. High-Detail Realistic Travel Backpack (Bellroy / Herschel Aesthetic)
+    // Soft contact drop shadow beneath backpack
+    const bpShadow = new THREE.Mesh(
+      new THREE.CircleGeometry(0.58, 20),
+      new THREE.MeshBasicMaterial({ color: 0x1e1b4b, transparent: true, opacity: 0.22, depthWrite: false })
+    );
+    bpShadow.rotation.x = -Math.PI / 2;
+    bpShadow.position.set(-5.3, 0.04, 2.6);
+    roomGroup.add(bpShadow);
+
     const backpackGroup = new THREE.Group();
-    backpackGroup.position.set(-4.2, 0.05, 2.4);
-    backpackGroup.rotation.y = 0.35;
-    backpackGroup.rotation.x = 0.08; // Natural casual lean against chair
+    backpackGroup.position.set(-5.3, 0.0, 2.6);
+    backpackGroup.rotation.y = 0.45; // Angled attractively towards viewer
+    backpackGroup.rotation.x = 0; // Stands cleanly upright, zero clipping with chair
 
     // Materials
     const canvasMainMat = new THREE.MeshStandardMaterial({ 
