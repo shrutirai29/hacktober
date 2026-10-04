@@ -57,6 +57,7 @@ export default function App() {
   // 3D Room Twin State
   const [roomPhotoUrl, setRoomPhotoUrl] = useState("/assets/kanwal-room-original.jpg");
   const [roomTitle, setRoomTitle] = useState("Kanwal's Reconstructed Hostel Room (Block C-402)");
+  const [spaceViewTab, setSpaceViewTab] = useState("3d");
 
   // Audio / Voice State
   const [isVoicePlaying, setIsVoicePlaying] = useState(false);

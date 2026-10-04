@@ -1232,6 +1232,28 @@ export default function RoomSceneViewer({
       floatingPins.push({ mesh: pinMesh, baseY: item.pos[1] + 0.45 });
     });
 
+    // -------------------------------------------------------------
+    // FLOATING SUNLIGHT DUST PARTICLES (MAGICAL ATMOSPHERE)
+    // -------------------------------------------------------------
+    const particleCount = 110;
+    const particleGeo = new THREE.BufferGeometry();
+    const particlePositions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      particlePositions[i * 3] = (Math.random() - 0.5) * 14.0;
+      particlePositions[i * 3 + 1] = 0.5 + Math.random() * 6.5;
+      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 14.0;
+    }
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    const particleMat = new THREE.PointsMaterial({
+      color: 0xFFFBEB,
+      size: 0.075,
+      transparent: true,
+      opacity: 0.55,
+      blending: THREE.AdditiveBlending
+    });
+    const dustParticles = new THREE.Points(particleGeo, particleMat);
+    scene.add(dustParticles);
+
     materialsRef.current = {
       windowGlass: windowGlassMat,
       sunBeam: sunBeamMat
