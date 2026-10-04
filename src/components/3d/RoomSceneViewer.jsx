@@ -908,17 +908,152 @@ export default function RoomSceneViewer({
     interactiveMeshes.push(flask);
     roomGroup.add(flask);
 
-    // 8. Travel Backpack by Desk
-    const backpack = new THREE.Mesh(
-      new THREE.BoxGeometry(0.95, 1.45, 0.75),
-      new THREE.MeshStandardMaterial({ color: 0x7C3AED, roughness: 0.7 })
+    // 8. High-Detail Realistic Travel Backpack (Bellroy / Herschel Aesthetic)
+    const backpackGroup = new THREE.Group();
+    backpackGroup.position.set(-1.8, 0.05, 2.2);
+    backpackGroup.rotation.y = 0.35;
+    backpackGroup.rotation.x = 0.08; // Natural casual lean against chair
+
+    // Materials
+    const canvasMainMat = new THREE.MeshStandardMaterial({ 
+      color: 0x334155, // Premium Slate Navy Cordura Canvas
+      roughness: 0.75,
+      metalness: 0.05
+    });
+    const canvasFlapMat = new THREE.MeshStandardMaterial({ 
+      color: 0x1E293B, // Darker Charcoal Pocket & Hood
+      roughness: 0.7 
+    });
+    const leatherTrimMat = new THREE.MeshStandardMaterial({ 
+      color: 0xB45309, // Tan Leather Bottom Boot & Lash Tab
+      roughness: 0.5 
+    });
+    const buckleMat = new THREE.MeshStandardMaterial({ 
+      color: 0xD97706, // Brass Metal Buckle Clips
+      metalness: 0.8,
+      roughness: 0.25 
+    });
+    const strapMat = new THREE.MeshStandardMaterial({ 
+      color: 0x0F172A, // Black Webbing Straps & Top Handle
+      roughness: 0.85 
+    });
+
+    // Main Backpack Body
+    const mainBody = new THREE.Mesh(
+      new THREE.BoxGeometry(0.92, 1.25, 0.62),
+      canvasMainMat
     );
-    backpack.position.set(-1.8, 0.75, 2.2);
-    backpack.rotation.y = 0.35;
-    backpack.castShadow = true;
-    backpack.userData = { id: "backpack", name: "Travel Backpack", risk: "normal" };
-    interactiveMeshes.push(backpack);
-    roomGroup.add(backpack);
+    mainBody.position.y = 0.72;
+    mainBody.castShadow = true;
+    mainBody.userData = { id: "backpack", name: "Travel Backpack", risk: "normal" };
+    backpackGroup.add(mainBody);
+    interactiveMeshes.push(mainBody);
+
+    // Leather Reinforced Bottom Boot
+    const bottomBoot = new THREE.Mesh(
+      new THREE.BoxGeometry(0.94, 0.26, 0.64),
+      leatherTrimMat
+    );
+    bottomBoot.position.y = 0.23;
+    bottomBoot.castShadow = true;
+    backpackGroup.add(bottomBoot);
+
+    // Curved Top Hood / Rolltop
+    const topHood = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.31, 0.31, 0.92, 16, 1, false, 0, Math.PI),
+      canvasFlapMat
+    );
+    topHood.rotation.z = Math.PI / 2;
+    topHood.position.set(0, 1.34, 0);
+    topHood.castShadow = true;
+    backpackGroup.add(topHood);
+
+    // Protruding Front Utility Zipper Pocket
+    const frontPocket = new THREE.Mesh(
+      new THREE.BoxGeometry(0.74, 0.62, 0.22),
+      canvasFlapMat
+    );
+    frontPocket.position.set(0, 0.65, 0.38);
+    frontPocket.castShadow = true;
+    frontPocket.userData = { id: "backpack", name: "Travel Backpack", risk: "normal" };
+    backpackGroup.add(frontPocket);
+    interactiveMeshes.push(frontPocket);
+
+    // Horizontal Zipper Track Strip
+    const zipperTrack = new THREE.Mesh(
+      new THREE.BoxGeometry(0.68, 0.03, 0.02),
+      new THREE.MeshStandardMaterial({ color: 0x94A3B8, metalness: 0.6 })
+    );
+    zipperTrack.position.set(0, 0.82, 0.495);
+    backpackGroup.add(zipperTrack);
+
+    // Heritage Diamond Leather Lash Tab ("Pig Snout" patch)
+    const lashTab = new THREE.Mesh(
+      new THREE.BoxGeometry(0.14, 0.14, 0.02),
+      leatherTrimMat
+    );
+    lashTab.rotation.z = Math.PI / 4;
+    lashTab.position.set(0, 1.15, 0.32);
+    backpackGroup.add(lashTab);
+
+    // Top Webbing Carry Handle Loop
+    const topHandle = new THREE.Mesh(
+      new THREE.TorusGeometry(0.16, 0.03, 8, 16, Math.PI),
+      strapMat
+    );
+    topHandle.rotation.x = Math.PI / 2;
+    topHandle.position.set(0, 1.48, -0.05);
+    backpackGroup.add(topHandle);
+
+    // Dual Padded Curved Shoulder Straps on the back
+    [-0.24, 0.24].forEach((strapX) => {
+      const strapCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(strapX, 1.32, -0.28),
+        new THREE.Vector3(strapX, 0.95, -0.52),
+        new THREE.Vector3(strapX, 0.45, -0.45),
+        new THREE.Vector3(strapX, 0.20, -0.28)
+      ]);
+      const strapGeo = new THREE.TubeGeometry(strapCurve, 20, 0.045, 8, false);
+      const strapMesh = new THREE.Mesh(strapGeo, strapMat);
+      strapMesh.castShadow = true;
+      backpackGroup.add(strapMesh);
+    });
+
+    // Dual Front Compression Webbing Straps with Brass Buckles
+    [-0.22, 0.22].forEach((sx) => {
+      const vStrap = new THREE.Mesh(
+        new THREE.BoxGeometry(0.06, 0.95, 0.02),
+        strapMat
+      );
+      vStrap.position.set(sx, 0.88, 0.33);
+      backpackGroup.add(vStrap);
+
+      const buckle = new THREE.Mesh(
+        new THREE.BoxGeometry(0.09, 0.08, 0.04),
+        buckleMat
+      );
+      buckle.position.set(sx, 1.05, 0.34);
+      backpackGroup.add(buckle);
+    });
+
+    // Side Elastic Pocket with Travel Water Flask
+    const sidePouch = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.16, 0.14, 0.45, 12, 1, false, 0, Math.PI),
+      strapMat
+    );
+    sidePouch.rotation.y = -Math.PI / 2;
+    sidePouch.position.set(0.48, 0.55, 0);
+    backpackGroup.add(sidePouch);
+
+    const sideBottle = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.09, 0.09, 0.42, 12),
+      new THREE.MeshStandardMaterial({ color: 0x10B981, roughness: 0.3, metalness: 0.4 })
+    );
+    sideBottle.position.set(0.48, 0.72, 0);
+    sideBottle.rotation.z = -0.15;
+    backpackGroup.add(sideBottle);
+
+    roomGroup.add(backpackGroup);
 
     interactiveObjectsRef.current = interactiveMeshes;
     beaconRingsRef.current = beaconRings;
