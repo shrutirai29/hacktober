@@ -20,7 +20,9 @@ import {
   Battery,
   Headphones,
   Box,
-  Sun
+  Sun,
+  Sunset,
+  Moon
 } from 'lucide-react';
 
 export default function RoomSceneViewer({
@@ -37,6 +39,8 @@ export default function RoomSceneViewer({
   const [showLabels, setShowLabels] = useState(true);
   const [selectedObj, setSelectedObj] = useState(null);
   const [screenLabels, setScreenLabels] = useState([]);
+  const [lightingMood, setLightingMood] = useState("golden"); // "golden" | "sunset" | "night"
+  const [isAutoRotating, setIsAutoRotating] = useState(false);
 
   // Refs for 3D state
   const sceneRef = useRef(null);
@@ -45,6 +49,8 @@ export default function RoomSceneViewer({
   const controlsRef = useRef(null);
   const interactiveObjectsRef = useRef([]);
   const beaconRingsRef = useRef([]);
+  const lightsRef = useRef({});
+  const materialsRef = useRef({});
   const raycasterRef = useRef(new THREE.Raycaster());
   const mouseRef = useRef(new THREE.Vector2());
 
@@ -132,6 +138,62 @@ export default function RoomSceneViewer({
     }
   ];
 
+  // Dynamically update lighting when mood state changes (without re-rendering scene)
+  useEffect(() => {
+    const lights = lightsRef.current;
+    const mats = materialsRef.current;
+    if (!lights.ambient || !lights.sun || !lights.desk || !lights.rgb) return;
+
+    if (lightingMood === "golden") {
+      lights.ambient.color.setHex(0xfff7ed);
+      lights.ambient.intensity = 0.85;
+      lights.sun.color.setHex(0xffeedb);
+      lights.sun.intensity = 1.35;
+      lights.desk.color.setHex(0xffedd5);
+      lights.desk.intensity = 1.4;
+      lights.rgb.color.setHex(0x818cf8);
+      lights.rgb.intensity = 1.2;
+      if (lights.nightLamp) lights.nightLamp.intensity = 0.2;
+      if (mats.windowGlass) mats.windowGlass.color.setHex(0xbae6fd);
+      if (mats.monGlow) mats.monGlow.emissive.setHex(0x4f46e5);
+      if (mats.sunBeam) mats.sunBeam.opacity = 0.14;
+    } else if (lightingMood === "sunset") {
+      lights.ambient.color.setHex(0xffe4e6);
+      lights.ambient.intensity = 0.75;
+      lights.sun.color.setHex(0xfb923c);
+      lights.sun.intensity = 1.5;
+      lights.desk.color.setHex(0xfef08a);
+      lights.desk.intensity = 1.6;
+      lights.rgb.color.setHex(0xc084fc);
+      lights.rgb.intensity = 1.6;
+      if (lights.nightLamp) lights.nightLamp.intensity = 0.8;
+      if (mats.windowGlass) mats.windowGlass.color.setHex(0xfecdd3);
+      if (mats.monGlow) mats.monGlow.emissive.setHex(0x7c3aed);
+      if (mats.sunBeam) mats.sunBeam.opacity = 0.22;
+    } else if (lightingMood === "night") {
+      lights.ambient.color.setHex(0x1e1b4b);
+      lights.ambient.intensity = 0.45;
+      lights.sun.color.setHex(0x818cf8);
+      lights.sun.intensity = 0.55;
+      lights.desk.color.setHex(0xf59e0b);
+      lights.desk.intensity = 2.4;
+      lights.rgb.color.setHex(0x06b6d4);
+      lights.rgb.intensity = 1.9;
+      if (lights.nightLamp) lights.nightLamp.intensity = 2.0;
+      if (mats.windowGlass) mats.windowGlass.color.setHex(0x312e81);
+      if (mats.monGlow) mats.monGlow.emissive.setHex(0x38bdf8);
+      if (mats.sunBeam) mats.sunBeam.opacity = 0.05;
+    }
+  }, [lightingMood]);
+
+  // Handle auto rotation
+  useEffect(() => {
+    if (controlsRef.current) {
+      controlsRef.current.autoRotate = isAutoRotating;
+      controlsRef.current.autoRotateSpeed = 1.1;
+    }
+  }, [isAutoRotating]);
+
   useEffect(() => {
     if (!mountRef.current || viewMode !== "3d") return;
 
@@ -140,7 +202,7 @@ export default function RoomSceneViewer({
 
     // 1. Scene
     const scene = new THREE.Scene();
-    scene.background = null; // Transparent scene for seamless glassmorphic blending
+    scene.background = null; // Transparent for seamless glassmorphic layering
     sceneRef.current = scene;
 
     // 2. Camera (Isometric Perspective)
@@ -155,7 +217,7 @@ export default function RoomSceneViewer({
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.18;
     renderer.setClearColor(0x000000, 0); // Pure transparent alpha
     rendererRef.current = renderer;
 
@@ -170,14 +232,14 @@ export default function RoomSceneViewer({
     controls.minDistance = 5.5;
     controls.maxDistance = 28;
     controls.target.set(0, 1.8, 0);
+    controls.autoRotate = isAutoRotating;
+    controls.autoRotateSpeed = 1.1;
     controlsRef.current = controls;
 
     // 5. Cinematic Studio Lighting
-    // Soft ambient room sky fill
-    const ambientLight = new THREE.AmbientLight(0xfff5eb, 0.85);
+    const ambientLight = new THREE.AmbientLight(0xfff7ed, 0.85);
     scene.add(ambientLight);
 
-    // Golden Sunlight from Window (Cast soft shadows)
     const sunLight = new THREE.DirectionalLight(0xffeedb, 1.35);
     sunLight.position.set(12, 17, 8);
     sunLight.castShadow = true;
@@ -192,20 +254,31 @@ export default function RoomSceneViewer({
     sunLight.shadow.bias = -0.0008;
     scene.add(sunLight);
 
-    // Soft sky rim light from left
     const windowRim = new THREE.DirectionalLight(0xc7d2fe, 0.45);
     windowRim.position.set(-11, 9, -10);
     scene.add(windowRim);
 
-    // Warm desk lamp / monitor task light
-    const deskTaskLight = new THREE.PointLight(0xffedd5, 1.6, 6);
+    const deskTaskLight = new THREE.PointLight(0xffedd5, 1.4, 6);
     deskTaskLight.position.set(-1.2, 3.6, 0.2);
     scene.add(deskTaskLight);
 
-    // Ambient LED Back-Light Strip behind desk (Sunset/Violet RGB glow against wood slats)
-    const rgbBacklight = new THREE.PointLight(0x818cf8, 1.4, 5.5);
+    const rgbBacklight = new THREE.PointLight(0x818cf8, 1.2, 5.5);
     rgbBacklight.position.set(-1.2, 2.4, -0.9);
     scene.add(rgbBacklight);
+
+    // Bedside Cozy Mushroom Lamp Light
+    const nightLamp = new THREE.PointLight(0xf59e0b, 0.4, 4.5);
+    nightLamp.position.set(4.8, 2.2, -4.2);
+    scene.add(nightLamp);
+
+    lightsRef.current = {
+      ambient: ambientLight,
+      sun: sunLight,
+      rim: windowRim,
+      desk: deskTaskLight,
+      rgb: rgbBacklight,
+      nightLamp: nightLamp
+    };
 
     // -------------------------------------------------------------
     // BUILD HIGH-END ARCHITECTURAL DIORAMA
@@ -252,6 +325,27 @@ export default function RoomSceneViewer({
       metalness: 0.85 
     });
 
+    // 0. Soft Radial Contact Drop Shadow under Pedestal
+    const shadowCanvas = document.createElement('canvas');
+    shadowCanvas.width = 256;
+    shadowCanvas.height = 256;
+    const ctx = shadowCanvas.getContext('2d');
+    const radGrad = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+    radGrad.addColorStop(0, 'rgba(30, 27, 75, 0.32)');
+    radGrad.addColorStop(0.55, 'rgba(30, 27, 75, 0.12)');
+    radGrad.addColorStop(1, 'rgba(30, 27, 75, 0)');
+    ctx.fillStyle = radGrad;
+    ctx.fillRect(0, 0, 256, 256);
+    const shadowTex = new THREE.CanvasTexture(shadowCanvas);
+
+    const groundShadow = new THREE.Mesh(
+      new THREE.PlaneGeometry(14.5, 14.5),
+      new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false })
+    );
+    groundShadow.rotation.x = -Math.PI / 2;
+    groundShadow.position.y = -0.44;
+    scene.add(groundShadow);
+
     // 1. Beveled Floating Diorama Pedestal Base
     const pedestalBase = new THREE.Mesh(
       new THREE.BoxGeometry(11.2, 0.4, 11.2),
@@ -270,7 +364,7 @@ export default function RoomSceneViewer({
     floorMesh.receiveShadow = true;
     roomGroup.add(floorMesh);
 
-    // Subtle parquet tile grid lines on floor
+    // Parquet tile grid lines on floor
     const parquetGrid = new THREE.GridHelper(10.8, 14, 0xD4C5B5, 0xE4D8CC);
     parquetGrid.position.y = 0.03;
     roomGroup.add(parquetGrid);
@@ -358,10 +452,25 @@ export default function RoomSceneViewer({
     mullionH.position.set(1.6, 3.2, -5.05);
     roomGroup.add(mullionH);
 
+    // Translucent angled volumetric sunbeam light shaft from window
+    const sunBeamMat = new THREE.MeshBasicMaterial({
+      color: 0xffedd5,
+      transparent: true,
+      opacity: 0.14,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const sunBeam = new THREE.Mesh(new THREE.ConeGeometry(3.6, 7.2, 16, 1, true), sunBeamMat);
+    sunBeam.rotation.x = Math.PI / 3.4;
+    sunBeam.rotation.z = -Math.PI / 4.2;
+    sunBeam.position.set(1.6, 3.4, -4.5);
+    roomGroup.add(sunBeam);
+
     // -------------------------------------------------------------
     // HIGH-END CREATOR DESK & WORKSTATION SETUP
     // -------------------------------------------------------------
-    // 1. Desk Top (Natural White Oak with beveled chamfer)
+    // Desk Top (Natural White Oak with beveled chamfer)
     const deskTop = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.18, 2.6), deskTopMat);
     deskTop.position.set(-1.2, 1.9, 0.4);
     deskTop.castShadow = true;
@@ -399,11 +508,10 @@ export default function RoomSceneViewer({
     deskMat.receiveShadow = true;
     roomGroup.add(deskMat);
 
-    // 2. Studio Ultrawide Monitor on Aluminum Stand
+    // Studio Ultrawide Monitor on Aluminum Stand
     const monitorGroup = new THREE.Group();
     monitorGroup.position.set(-1.2, 2.02, -0.4);
 
-    // Aluminum Stand & Base
     const monBase = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.04, 0.8), aluminumMat);
     monBase.position.y = 0.02;
     monitorGroup.add(monBase);
@@ -411,33 +519,28 @@ export default function RoomSceneViewer({
     monStem.position.set(0, 0.6, 0);
     monitorGroup.add(monStem);
 
-    // Ultrawide Screen Frame
     const monScreen = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.3, 0.08), matteBlackMat);
     monScreen.position.set(0, 1.2, 0);
     monScreen.castShadow = true;
     monitorGroup.add(monScreen);
 
-    // Illuminated Screen Surface (macOS / Travel Dashboard Wallpaper)
-    const monGlow = new THREE.Mesh(
-      new THREE.PlaneGeometry(3.1, 1.22),
-      new THREE.MeshStandardMaterial({ 
-        color: 0x312E81, 
-        emissive: 0x4F46E5, 
-        emissiveIntensity: 0.35, 
-        roughness: 0.2 
-      })
-    );
+    const monGlowMat = new THREE.MeshStandardMaterial({ 
+      color: 0x312E81, 
+      emissive: 0x4F46E5, 
+      emissiveIntensity: 0.35, 
+      roughness: 0.2 
+    });
+    const monGlow = new THREE.Mesh(new THREE.PlaneGeometry(3.1, 1.22), monGlowMat);
     monGlow.position.set(0, 1.2, 0.045);
     monitorGroup.add(monGlow);
 
-    // Sleek LED Screenbar Lamp on top of monitor
     const screenbar = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.4, 12), matteBlackMat);
     screenbar.rotation.z = Math.PI / 2;
     screenbar.position.set(0, 1.88, 0.06);
     monitorGroup.add(screenbar);
     roomGroup.add(monitorGroup);
 
-    // 3. Compact Custom Mechanical Keyboard & Wireless Mouse
+    // Compact Custom Mechanical Keyboard & Wireless Mouse
     const keyboard = new THREE.Mesh(
       new THREE.BoxGeometry(1.4, 0.05, 0.5),
       new THREE.MeshStandardMaterial({ color: 0xF8FAFC, roughness: 0.4 })
@@ -491,7 +594,6 @@ export default function RoomSceneViewer({
     const chairGroup = new THREE.Group();
     chairGroup.position.set(-1.2, 0, 2.2);
 
-    // Contoured Mesh Seat
     const chairSeat = new THREE.Mesh(
       new THREE.CylinderGeometry(0.85, 0.85, 0.14, 24),
       new THREE.MeshStandardMaterial({ color: 0x7054E8, roughness: 0.7 })
@@ -500,7 +602,6 @@ export default function RoomSceneViewer({
     chairSeat.castShadow = true;
     chairGroup.add(chairSeat);
 
-    // Ergonomic Arched Mesh Backrest with Lumbar Curve
     const chairBack = new THREE.Mesh(
       new THREE.BoxGeometry(1.2, 1.3, 0.1),
       new THREE.MeshStandardMaterial({ color: 0x5B21B6, roughness: 0.6 })
@@ -510,7 +611,6 @@ export default function RoomSceneViewer({
     chairBack.castShadow = true;
     chairGroup.add(chairBack);
 
-    // Pneumatic Chrome Cylinder & 5-Star Spider Base
     const chairStem = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.0, 12), aluminumMat);
     chairStem.position.y = 0.55;
     chairGroup.add(chairStem);
@@ -524,18 +624,16 @@ export default function RoomSceneViewer({
     roomGroup.add(chairGroup);
 
     // -------------------------------------------------------------
-    // DAYBED & COZY NOOK
+    // DAYBED & COZY NOOK WITH MUSHROOM LAMP
     // -------------------------------------------------------------
     const bedGroup = new THREE.Group();
     bedGroup.position.set(3.5, 0, -2.5);
 
-    // Low Oak Bed Plinth Base
     const bedBase = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.45, 4.9), deskTopMat);
     bedBase.position.y = 0.22;
     bedBase.castShadow = true;
     bedGroup.add(bedBase);
 
-    // Fluffy Layered Mattress
     const bedMattress = new THREE.Mesh(
       new THREE.BoxGeometry(3.0, 0.55, 4.6),
       new THREE.MeshStandardMaterial({ color: 0xF8FAFC, roughness: 0.8 })
@@ -543,7 +641,6 @@ export default function RoomSceneViewer({
     bedMattress.position.y = 0.65;
     bedGroup.add(bedMattress);
 
-    // Textured Sage Linen Duvet
     const bedDuvet = new THREE.Mesh(
       new THREE.BoxGeometry(3.04, 0.3, 3.2),
       new THREE.MeshStandardMaterial({ color: 0xC084FC, roughness: 0.85 })
@@ -551,16 +648,44 @@ export default function RoomSceneViewer({
     bedDuvet.position.set(0, 0.88, 0.6);
     bedGroup.add(bedDuvet);
 
-    // Plush Sleeping Pillows
     const pillow = new THREE.Mesh(
       new THREE.BoxGeometry(2.2, 0.26, 0.95),
       new THREE.MeshStandardMaterial({ color: 0xA7F3D0, roughness: 0.9 })
     );
     pillow.position.set(0, 1.05, -1.6);
     bedGroup.add(pillow);
+
+    // Bedside Nightstand Table
+    const nightstand = new THREE.Mesh(
+      new THREE.BoxGeometry(1.0, 0.85, 1.0),
+      deskTopMat
+    );
+    nightstand.position.set(1.3, 0.42, -1.7);
+    bedGroup.add(nightstand);
+
+    // Glowing Scandinavian Mushroom Night Lamp
+    const lampStem = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.08, 0.1, 0.3, 16),
+      matteBlackMat
+    );
+    lampStem.position.set(1.3, 1.0, -1.7);
+    bedGroup.add(lampStem);
+
+    const lampShade = new THREE.Mesh(
+      new THREE.SphereGeometry(0.24, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+      new THREE.MeshStandardMaterial({ 
+        color: 0xFBBF24, 
+        emissive: 0xF59E0B, 
+        emissiveIntensity: 0.6, 
+        roughness: 0.2 
+      })
+    );
+    lampShade.position.set(1.3, 1.15, -1.7);
+    bedGroup.add(lampShade);
+
     roomGroup.add(bedGroup);
 
-    // Floating Bookshelf with Curated Books
+    // Floating Bookshelf with Curated Books & Trailing Ivy Plant
     const shelf = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.08, 0.5), deskTopMat);
     shelf.position.set(-1.5, 4.3, -5.05);
     roomGroup.add(shelf);
@@ -575,13 +700,52 @@ export default function RoomSceneViewer({
       roomGroup.add(book);
     });
 
+    // Trailing Ivy Vine cascading from shelf
+    const ivyPot = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.18, 0.14, 0.26, 12),
+      new THREE.MeshStandardMaterial({ color: 0xFFFFFF })
+    );
+    ivyPot.position.set(-0.2, 4.47, -5.05);
+    roomGroup.add(ivyPot);
+
+    // Cascading ivy leaf clusters
+    [-4.1, -3.8, -3.5].forEach((yLeaf, i) => {
+      const leafCluster = new THREE.Mesh(
+        new THREE.SphereGeometry(0.14 - (i * 0.02), 8, 8),
+        new THREE.MeshStandardMaterial({ color: 0x10B981, roughness: 0.7 })
+      );
+      leafCluster.position.set(-0.2 + (Math.sin(i) * 0.06), yLeaf, -4.95);
+      roomGroup.add(leafCluster);
+    });
+
+    // -------------------------------------------------------------
+    // FLOATING SUNLIGHT DUST PARTICLES (MAGICAL ATMOSPHERE)
+    // -------------------------------------------------------------
+    const particleCount = 75;
+    const particleGeo = new THREE.BufferGeometry();
+    const particlePositions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      particlePositions[i * 3] = (Math.random() - 0.5) * 8.5; // X
+      particlePositions[i * 3 + 1] = 0.5 + Math.random() * 4.8; // Y
+      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 8.5; // Z
+    }
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    const particleMat = new THREE.PointsMaterial({
+      color: 0xFFFBEB,
+      size: 0.075,
+      transparent: true,
+      opacity: 0.55,
+      blending: THREE.AdditiveBlending
+    });
+    const dustParticles = new THREE.Points(particleGeo, particleMat);
+    scene.add(dustParticles);
+
     // -------------------------------------------------------------
     // INTERACTIVE BELONGINGS & ANIMATED GLOW RINGS
     // -------------------------------------------------------------
     const interactiveMeshes = [];
     const beaconRings = [];
 
-    // Helper: Pulsing Holographic Radar Ring beneath critical objects
     const createBeaconRing = (x, y, z, color = 0xef4444) => {
       const ringGeo = new THREE.RingGeometry(0.2, 0.36, 24);
       const ringMat = new THREE.MeshBasicMaterial({ 
@@ -599,7 +763,6 @@ export default function RoomSceneViewer({
     };
 
     // 1. Wall Outlet & 65W Laptop Charger (CRITICAL ALERT TRAP!)
-    // Dual Wall Socket Outlet Plate
     const outletPlate = new THREE.Mesh(
       new THREE.BoxGeometry(0.08, 0.7, 0.7),
       new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.3 })
@@ -607,7 +770,6 @@ export default function RoomSceneViewer({
     outletPlate.position.set(-5.15, 2.3, -1.2);
     roomGroup.add(outletPlate);
 
-    // Glowing status LED indicator on wall socket
     const socketLed = new THREE.Mesh(
       new THREE.SphereGeometry(0.03, 8, 8),
       new THREE.MeshBasicMaterial({ color: 0xEF4444 })
@@ -615,7 +777,6 @@ export default function RoomSceneViewer({
     socketLed.position.set(-5.1, 2.55, -1.2);
     roomGroup.add(socketLed);
 
-    // 65W GaN Fast Charger Brick
     const chargerBrickGeo = new THREE.BoxGeometry(0.38, 0.32, 0.45);
     const chargerBrickMat = new THREE.MeshStandardMaterial({ 
       color: 0x4F46E5, 
@@ -630,10 +791,8 @@ export default function RoomSceneViewer({
     roomGroup.add(chargerBrick);
     interactiveMeshes.push(chargerBrick);
 
-    // Pulsing Beacon on Wall below charger
     createBeaconRing(-4.9, 1.8, -1.2, 0xEF4444);
 
-    // Real Braided Spline Cable snaking from wall to laptop on desk!
     const cableCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(-4.8, 2.2, -1.2),
       new THREE.Vector3(-4.0, 1.7, -0.6),
@@ -653,7 +812,6 @@ export default function RoomSceneViewer({
     laptopBase.castShadow = true;
     laptopGroup.add(laptopBase);
 
-    // Chiclet Keyboard Well & Trackpad
     const keyboardWell = new THREE.Mesh(
       new THREE.BoxGeometry(1.2, 0.01, 0.5),
       new THREE.MeshStandardMaterial({ color: 0x0F172A, roughness: 0.7 })
@@ -668,13 +826,11 @@ export default function RoomSceneViewer({
     trackpad.position.set(0, 0.026, 0.25);
     laptopGroup.add(trackpad);
 
-    // Open Screen Assembly
     const laptopScreen = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.92, 0.04), aluminumMat);
     laptopScreen.position.set(0, 0.46, -0.45);
     laptopScreen.rotation.x = -0.26;
     laptopGroup.add(laptopScreen);
 
-    // Crisp Display Screen Glow
     const displayGlow = new THREE.Mesh(
       new THREE.PlaneGeometry(1.3, 0.8),
       new THREE.MeshBasicMaterial({ color: 0x93C5FD })
@@ -710,7 +866,6 @@ export default function RoomSceneViewer({
     interactiveMeshes.push(idCard);
     roomGroup.add(idCard);
 
-    // Lanyard ribbon draped off desk edge
     const lanyard = new THREE.Mesh(
       new THREE.TorusGeometry(0.32, 0.02, 8, 24, Math.PI * 1.5),
       new THREE.MeshBasicMaterial({ color: 0xEF4444 })
@@ -764,6 +919,11 @@ export default function RoomSceneViewer({
 
     interactiveObjectsRef.current = interactiveMeshes;
     beaconRingsRef.current = beaconRings;
+    materialsRef.current = {
+      windowGlass: windowGlassMat,
+      monGlow: monGlowMat,
+      sunBeam: sunBeamMat
+    };
 
     // -------------------------------------------------------------
     // RAYCASTING & INTERACTION HANDLERS
@@ -838,6 +998,15 @@ export default function RoomSceneViewer({
         r.scale.set(s, s, s);
       });
 
+      // Animate floating dust motes upwards gently
+      const posArray = particleGeo.attributes.position.array;
+      for (let i = 0; i < particleCount; i++) {
+        posArray[i * 3 + 1] += 0.003;
+        if (posArray[i * 3 + 1] > 5.0) posArray[i * 3 + 1] = 0.6;
+        posArray[i * 3] += Math.sin(elapsed * 0.5 + i) * 0.001;
+      }
+      particleGeo.attributes.position.needsUpdate = true;
+
       controls.update();
       renderer.render(scene, camera);
 
@@ -888,8 +1057,11 @@ export default function RoomSceneViewer({
       cameraRef.current.position.set(0, 18, 0.1);
       controlsRef.current.target.set(0, 1, 0);
     } else if (mode === "desk") {
-      cameraRef.current.position.set(-1.2, 4.4, 3.6);
+      cameraRef.current.position.set(-1.2, 4.2, 3.4);
       controlsRef.current.target.set(-1.2, 2.05, 0.3);
+    } else if (mode === "bed") {
+      cameraRef.current.position.set(4.2, 5.0, 2.2);
+      controlsRef.current.target.set(2.8, 1.5, -2.0);
     }
   };
 
@@ -941,7 +1113,7 @@ export default function RoomSceneViewer({
       </div>
 
       {/* Main Viewport Container */}
-      <div className="relative w-full h-[360px] sm:h-[400px] md:h-[440px] rounded-2xl overflow-hidden bg-gradient-to-b from-white/70 via-slate-50/40 to-indigo-50/30 backdrop-blur-md border border-white/80 shadow-inner select-none">
+      <div className="relative w-full h-[370px] sm:h-[410px] md:h-[450px] rounded-2xl overflow-hidden bg-gradient-to-b from-white/75 via-slate-50/40 to-indigo-50/25 backdrop-blur-md border border-white/80 shadow-inner select-none">
         
         {viewMode === "3d" ? (
           <>
@@ -983,25 +1155,92 @@ export default function RoomSceneViewer({
               );
             })}
 
+            {/* Top Right Floating Toolbar: Mood Presets & Auto-Orbit */}
+            <div className="absolute top-3 right-3 z-30 flex items-center gap-2">
+              
+              {/* Lighting Mood Pill Selector */}
+              <div className="flex items-center gap-1 bg-white/85 backdrop-blur-md p-1 rounded-2xl border border-white/80 shadow-xs">
+                <button
+                  onClick={() => setLightingMood("golden")}
+                  title="Golden Daylight"
+                  className={`px-2 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                    lightingMood === "golden"
+                      ? 'bg-amber-100 text-amber-800 shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <Sun className="w-3 h-3 text-amber-500" />
+                  <span className="hidden sm:inline">Day</span>
+                </button>
+
+                <button
+                  onClick={() => setLightingMood("sunset")}
+                  title="Sunset Golden Hour"
+                  className={`px-2 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                    lightingMood === "sunset"
+                      ? 'bg-rose-100 text-rose-800 shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <Sunset className="w-3 h-3 text-rose-500" />
+                  <span className="hidden sm:inline">Sunset</span>
+                </button>
+
+                <button
+                  onClick={() => setLightingMood("night")}
+                  title="Lo-Fi Cozy Midnight"
+                  className={`px-2 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                    lightingMood === "night"
+                      ? 'bg-indigo-900 text-indigo-100 shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <Moon className="w-3 h-3 text-indigo-400" />
+                  <span className="hidden sm:inline">Night</span>
+                </button>
+              </div>
+
+              {/* Auto Orbit Toggle */}
+              <button
+                onClick={() => setIsAutoRotating(!isAutoRotating)}
+                title="Turntable Auto Rotation"
+                className={`p-1.5 sm:px-2.5 sm:py-1 rounded-2xl border text-[10px] font-bold backdrop-blur-md flex items-center gap-1 shadow-xs transition-all cursor-pointer ${
+                  isAutoRotating
+                    ? 'bg-[#7054E8] text-white border-purple-400 shadow-indigo-600/20'
+                    : 'bg-white/85 text-slate-700 border-white/80 hover:bg-white'
+                }`}
+              >
+                <Sparkles className={`w-3 h-3 ${isAutoRotating ? 'text-amber-300 animate-spin' : 'text-[#7054E8]'}`} />
+                <span className="hidden sm:inline">{isAutoRotating ? 'Auto-Orbiting' : 'Auto-Orbit'}</span>
+              </button>
+
+            </div>
+
             {/* 3D Camera Controls Overlay (Bottom Left) */}
             <div className="absolute bottom-3 left-3 z-30 flex items-center gap-1.5 bg-white/90 backdrop-blur-md p-1.5 rounded-2xl border border-white/80 shadow-sm">
               <button
                 onClick={() => setCameraAngle("iso")}
                 className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-[#ede9fe] hover:text-[#7054E8] text-slate-700 text-[10px] font-bold transition-colors cursor-pointer"
               >
-                Isometric
+                ✦ Isometric
               </button>
               <button
                 onClick={() => setCameraAngle("desk")}
                 className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-[#ede9fe] hover:text-[#7054E8] text-slate-700 text-[10px] font-bold transition-colors cursor-pointer"
               >
-                Desk Focus
+                💻 Desk Close-up
+              </button>
+              <button
+                onClick={() => setCameraAngle("bed")}
+                className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-[#ede9fe] hover:text-[#7054E8] text-slate-700 text-[10px] font-bold transition-colors cursor-pointer"
+              >
+                🛏️ Cozy Nook
               </button>
               <button
                 onClick={() => setCameraAngle("top")}
                 className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-[#ede9fe] hover:text-[#7054E8] text-slate-700 text-[10px] font-bold transition-colors cursor-pointer"
               >
-                Top View
+                📐 Top View
               </button>
             </div>
 
