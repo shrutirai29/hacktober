@@ -12,6 +12,7 @@ REST API:
 - POST /api/audio/briefing
 """
 
+import os
 import json
 import argparse
 import time
@@ -21,8 +22,8 @@ import urllib.request
 import urllib.error
 import sponsor_engine
 
-DEFAULT_PORT = 5050
-OLLAMA_ENDPOINT = "http://localhost:11434/api/generate"
+DEFAULT_PORT = int(os.environ.get("PORT", 5050))
+OLLAMA_ENDPOINT = os.environ.get("OLLAMA_ENDPOINT", "http://localhost:11434/api/generate")
 
 # In-memory reconstruction jobs database
 RECONSTRUCTION_JOBS = {}
