@@ -148,6 +148,26 @@ export default function RoomSceneViewer({
       pos: [-5.3, 0.9, 2.6],
       color: 0x7c3aed,
       category: "Luggage"
+    },
+    {
+      id: "plushie",
+      name: "Cozy Bed Plushie",
+      status: "Personal Comfort",
+      risk: "normal",
+      note: "Cute chubby seal plushie doll resting peacefully on the lavender bed duvet.",
+      pos: [4.4, 1.25, -2.4],
+      color: 0xec4899,
+      category: "Personal"
+    },
+    {
+      id: "guitar",
+      name: "Acoustic Jam Guitar",
+      status: "Hostel Jam Session",
+      risk: "normal",
+      note: "Natural spruce acoustic guitar resting in the bedroom corner.",
+      pos: [7.1, 2.0, -6.6],
+      color: 0xd97706,
+      category: "Music & Hobby"
     }
   ];
 
@@ -420,19 +440,191 @@ export default function RoomSceneViewer({
       roomGroup.add(slat);
     }
 
-    // Modern Framed Gallery Art on Left Wall
-    const frameGeo = new THREE.BoxGeometry(0.04, 2.0, 1.4);
-    const frameMesh = new THREE.Mesh(frameGeo, matteBlackMat);
-    frameMesh.position.set(-7.63, 5.0, 5.2);
-    roomGroup.add(frameMesh);
+    // -------------------------------------------------------------
+    // LEFT WALL ARCHITECTURAL ELEMENTS: WOODEN DOOR & FULL-LENGTH MIRROR
+    // -------------------------------------------------------------
+    // 1. Rich Teak Wood Bedroom Door (matching Kanwal's real room photo)
+    const doorGroup = new THREE.Group();
+    doorGroup.position.set(-7.66, 3.3, 5.7);
 
-    const artPlane = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.3, 1.9),
-      new THREE.MeshStandardMaterial({ color: 0xFDE68A, roughness: 0.7 })
+    // Dark walnut door casing/frame
+    const doorFrame = new THREE.Mesh(
+      new THREE.BoxGeometry(0.08, 6.6, 2.7),
+      new THREE.MeshStandardMaterial({ color: 0x451A03, roughness: 0.6 })
     );
-    artPlane.position.set(-7.60, 5.0, 5.2);
-    artPlane.rotation.y = Math.PI / 2;
-    roomGroup.add(artPlane);
+    doorGroup.add(doorFrame);
+
+    // Warm teak door leaf
+    const doorLeafMat = new THREE.MeshStandardMaterial({ 
+      color: 0x9A633D, 
+      roughness: 0.45,
+      metalness: 0.05 
+    });
+    const doorLeaf = new THREE.Mesh(new THREE.BoxGeometry(0.06, 6.4, 2.5), doorLeafMat);
+    doorLeaf.castShadow = true;
+    doorGroup.add(doorLeaf);
+
+    // Molded inset bevels on door panel for architectural realism
+    [-1.5, 1.5].forEach((yOffset) => {
+      const panelInset = new THREE.Mesh(
+        new THREE.BoxGeometry(0.07, 2.4, 1.9),
+        new THREE.MeshStandardMaterial({ color: 0x854D27, roughness: 0.5 })
+      );
+      panelInset.position.set(0.005, yOffset, 0);
+      doorGroup.add(panelInset);
+    });
+
+    // Silver metallic door lever handle & rosette
+    const handleRosette = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.06, 0.06, 0.04, 16),
+      aluminumMat
+    );
+    handleRosette.rotation.z = Math.PI / 2;
+    handleRosette.position.set(0.05, -0.4, -0.9);
+    doorGroup.add(handleRosette);
+
+    const doorLever = new THREE.Mesh(
+      new THREE.BoxGeometry(0.03, 0.04, 0.32),
+      aluminumMat
+    );
+    doorLever.position.set(0.07, -0.4, -0.76);
+    doorGroup.add(doorLever);
+
+    // Dual silver coat hooks at top of door
+    [-0.35, 0.35].forEach((zHook) => {
+      const hookBase = new THREE.Mesh(
+        new THREE.BoxGeometry(0.03, 0.1, 0.06),
+        aluminumMat
+      );
+      hookBase.position.set(0.045, 1.8, zHook);
+      doorGroup.add(hookBase);
+
+      const hookPeg = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.02, 0.02, 0.12, 8),
+        aluminumMat
+      );
+      hookPeg.rotation.z = Math.PI / 3;
+      hookPeg.position.set(0.08, 1.84, zHook);
+      doorGroup.add(hookPeg);
+    });
+
+    // Draped College Hoodie hanging on the door hook
+    const hoodieGroup = new THREE.Group();
+    hoodieGroup.position.set(0.08, 1.6, 0.35);
+
+    const hoodieMat = new THREE.MeshStandardMaterial({ color: 0x1E3A8A, roughness: 0.85 }); // Cobalt college hoodie
+    const hoodMesh = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), hoodieMat);
+    hoodMesh.scale.set(0.7, 1.1, 0.8);
+    hoodieGroup.add(hoodMesh);
+
+    const hoodieTorso = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.35, 1.2, 12), hoodieMat);
+    hoodieTorso.position.set(0.02, -0.65, 0);
+    hoodieTorso.scale.set(0.6, 1.0, 0.9);
+    hoodieTorso.castShadow = true;
+    hoodieGroup.add(hoodieTorso);
+    doorGroup.add(hoodieGroup);
+
+    roomGroup.add(doorGroup);
+
+    // 2. Full-Length Wall Mirror next to Door (matching Kanwal's real room photo)
+    const mirrorGroup = new THREE.Group();
+    mirrorGroup.position.set(-7.66, 3.2, 3.6);
+
+    const mirrorFrame = new THREE.Mesh(
+      new THREE.BoxGeometry(0.04, 4.6, 1.4),
+      matteBlackMat
+    );
+    mirrorGroup.add(mirrorFrame);
+
+    const mirrorGlass = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.28, 4.48),
+      new THREE.MeshStandardMaterial({ 
+        color: 0xEEF2FF, 
+        roughness: 0.08, 
+        metalness: 0.96 
+      })
+    );
+    mirrorGlass.rotation.y = Math.PI / 2;
+    mirrorGlass.position.x = 0.022;
+    mirrorGroup.add(mirrorGlass);
+
+    // Mini wooden plant bracket beside mirror with trailing pothos plant
+    const plantBracket = new THREE.Mesh(
+      new THREE.BoxGeometry(0.05, 0.06, 0.45),
+      woodSlatMat
+    );
+    plantBracket.position.set(0.03, 2.5, 0);
+    mirrorGroup.add(plantBracket);
+
+    const mirrorPot = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.14, 0.1, 0.22, 12),
+      new THREE.MeshStandardMaterial({ color: 0xFFFFFF })
+    );
+    mirrorPot.position.set(0.08, 2.64, 0);
+    mirrorGroup.add(mirrorPot);
+
+    // Trailing leafy pothos vines cascading down the side of the mirror
+    [2.35, 1.95, 1.55, 1.15].forEach((yLeaf, idx) => {
+      const pothosLeaf = new THREE.Mesh(
+        new THREE.SphereGeometry(0.12 - (idx * 0.015), 8, 8),
+        new THREE.MeshStandardMaterial({ color: 0x15803D, roughness: 0.6 })
+      );
+      pothosLeaf.position.set(0.1 + (Math.sin(idx * 2) * 0.04), yLeaf, 0.12 + idx * 0.05);
+      mirrorGroup.add(pothosLeaf);
+    });
+
+    roomGroup.add(mirrorGroup);
+
+    // 3. Lush Corner Floor Plant (Monstera Deliciosa in Fluted Ceramic Pot)
+    const floorPlantGroup = new THREE.Group();
+    floorPlantGroup.position.set(-6.8, 0, 7.1);
+
+    const bigPot = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.44, 0.32, 0.88, 20),
+      new THREE.MeshStandardMaterial({ color: 0xF8FAFC, roughness: 0.3 })
+    );
+    bigPot.position.y = 0.44;
+    bigPot.castShadow = true;
+    floorPlantGroup.add(bigPot);
+
+    const potSoil = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.42, 0.42, 0.04, 16),
+      new THREE.MeshStandardMaterial({ color: 0x271B12, roughness: 0.9 })
+    );
+    potSoil.position.y = 0.86;
+    floorPlantGroup.add(potSoil);
+
+    // Broad sculptural monstera leaves
+    for (let l = 0; l < 7; l++) {
+      const leafAngle = (l / 7) * Math.PI * 2;
+      const leafStem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.02, 0.03, 1.1, 8),
+        new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.7 })
+      );
+      leafStem.position.set(
+        Math.cos(leafAngle) * 0.22,
+        1.25 + (l * 0.08),
+        Math.sin(leafAngle) * 0.22
+      );
+      leafStem.rotation.x = Math.sin(leafAngle) * 0.45;
+      leafStem.rotation.z = -Math.cos(leafAngle) * 0.45;
+      floorPlantGroup.add(leafStem);
+
+      const leafFan = new THREE.Mesh(
+        new THREE.SphereGeometry(0.38, 8, 8),
+        new THREE.MeshStandardMaterial({ color: 0x15803D, roughness: 0.55 })
+      );
+      leafFan.scale.set(0.9, 0.08, 1.4);
+      leafFan.position.set(
+        Math.cos(leafAngle) * 0.55,
+        1.75 + (l * 0.08),
+        Math.sin(leafAngle) * 0.55
+      );
+      leafFan.rotation.y = leafAngle;
+      leafFan.rotation.x = 0.4;
+      floorPlantGroup.add(leafFan);
+    }
+    roomGroup.add(floorPlantGroup);
 
     // 3. Right Wall with Large Loft Window
     const rightWallGeo = new THREE.BoxGeometry(16.0, 8.2, 0.35);
@@ -465,23 +657,116 @@ export default function RoomSceneViewer({
     mullionV.position.set(3.2, 4.2, -7.54);
     roomGroup.add(mullionV);
     const mullionH = new THREE.Mesh(new THREE.BoxGeometry(6.8, 0.1, 0.1), windowFrameMat);
-    mullionH.position.set(3.2, 4.2, -7.54);
-    roomGroup.add(mullionH);
+    // Window Roller Blind Cassette Housing & Fabric Drop
+    const blindCassette = new THREE.Mesh(
+      new THREE.BoxGeometry(7.1, 0.3, 0.22),
+      new THREE.MeshStandardMaterial({ color: 0xF8FAFC, roughness: 0.4 })
+    );
+    blindCassette.position.set(3.2, 6.8, -7.52);
+    roomGroup.add(blindCassette);
 
-    // Translucent angled volumetric sunbeam light shaft from window
-    const sunBeamMat = new THREE.MeshBasicMaterial({
-      color: 0xffedd5,
-      transparent: true,
-      opacity: 0.14,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
+    const blindFabric = new THREE.Mesh(
+      new THREE.BoxGeometry(6.8, 0.75, 0.03),
+      new THREE.MeshStandardMaterial({ color: 0xE2E8F0, roughness: 0.85 })
+    );
+    blindFabric.position.set(3.2, 6.35, -7.53);
+    roomGroup.add(blindFabric);
+
+    // Deep architectural window sill with potted succulents
+    const windowSill = new THREE.Mesh(
+      new THREE.BoxGeometry(7.4, 0.14, 0.52),
+      deskTopMat
+    );
+    windowSill.position.set(3.2, 1.62, -7.42);
+    roomGroup.add(windowSill);
+
+    // Window sill mini succulents (matching hostel windowsill life)
+    const sillCactusPot = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12, 0.09, 0.18, 12),
+      new THREE.MeshStandardMaterial({ color: 0xEA580C }) // terracotta
+    );
+    sillCactusPot.position.set(0.8, 1.78, -7.42);
+    roomGroup.add(sillCactusPot);
+
+    const sillCactus = new THREE.Mesh(
+      new THREE.SphereGeometry(0.11, 8, 8),
+      new THREE.MeshStandardMaterial({ color: 0x15803D, roughness: 0.6 })
+    );
+    sillCactus.scale.set(0.8, 1.3, 0.8);
+    sillCactus.position.set(0.8, 1.95, -7.42);
+    roomGroup.add(sillCactus);
+
+    const sillJadePot = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.11, 0.08, 0.16, 12),
+      new THREE.MeshStandardMaterial({ color: 0x38BDF8 }) // sky blue glazed
+    );
+    sillJadePot.position.set(5.6, 1.77, -7.42);
+    roomGroup.add(sillJadePot);
+
+    const sillJade = new THREE.Mesh(
+      new THREE.DodecahedronGeometry(0.1, 0),
+      new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.5 })
+    );
+    sillJade.position.set(5.6, 1.92, -7.42);
+    roomGroup.add(sillJade);
+
+    // -------------------------------------------------------------
+    // MEMORY POLAROID WALL & ART PRINT GALLERIES (MATCHING PHOTO)
+    // -------------------------------------------------------------
+    // Gallery A: Polaroid travel photo prints & sticky notes behind study desk
+    const deskPolaroids = [
+      { x: -4.8, y: 4.4, w: 0.45, h: 0.55, rot: 0.06, color: 0xFEF08A },  // Yellow sticky note
+      { x: -4.1, y: 4.2, w: 0.5, h: 0.65, rot: -0.05, color: 0x93C5FD },  // Sky postcard
+      { x: -3.3, y: 4.5, w: 0.52, h: 0.68, rot: 0.03, color: 0xFCA5A5 },  // Sunset polaroid
+      { x: -2.5, y: 4.3, w: 0.46, h: 0.58, rot: -0.04, color: 0x86EFAC },  // Meadow print
+      { x: -1.8, y: 4.55, w: 0.42, h: 0.42, rot: 0.08, color: 0xFDE047 }, // Mini reminder note
+    ];
+    deskPolaroids.forEach(p => {
+      const pinBack = new THREE.Mesh(
+        new THREE.BoxGeometry(p.w, p.h, 0.02),
+        new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.7 })
+      );
+      pinBack.position.set(p.x, p.y, -7.66);
+      pinBack.rotation.z = p.rot;
+      roomGroup.add(pinBack);
+
+      const pinArt = new THREE.Mesh(
+        new THREE.PlaneGeometry(p.w * 0.84, p.h * 0.78),
+        new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.6 })
+      );
+      pinArt.position.set(p.x, p.y + (p.h * 0.05), -7.648);
+      pinArt.rotation.z = p.rot;
+      roomGroup.add(pinArt);
+
+      // Cute tiny push-pin head
+      const pinHead = new THREE.Mesh(
+        new THREE.SphereGeometry(0.02, 6, 6),
+        new THREE.MeshBasicMaterial({ color: 0xEF4444 })
+      );
+      pinHead.position.set(p.x, p.y + (p.h * 0.44), -7.635);
+      roomGroup.add(pinHead);
     });
-    const sunBeam = new THREE.Mesh(new THREE.ConeGeometry(5.0, 10.0, 16, 1, true), sunBeamMat);
-    sunBeam.rotation.x = Math.PI / 3.4;
-    sunBeam.rotation.z = -Math.PI / 4.2;
-    sunBeam.position.set(3.2, 4.4, -6.8);
-    roomGroup.add(sunBeam);
+
+    // Gallery B: 8-Photo Aesthetic Wall Collage above bed (from Kanwal's bedroom photo)
+    const bedGalleryPhotos = [
+      { x: 3.0, y: 6.4, c: 0x38BDF8 }, { x: 3.9, y: 6.4, c: 0xFB7185 }, { x: 4.8, y: 6.4, c: 0xA78BFA }, { x: 5.7, y: 6.4, c: 0xFBBF24 },
+      { x: 3.0, y: 5.4, c: 0x34D399 }, { x: 3.9, y: 5.4, c: 0xF472B6 }, { x: 4.8, y: 5.4, c: 0x60A5FA }, { x: 5.7, y: 5.4, c: 0xCBD5E1 }
+    ];
+    bedGalleryPhotos.forEach((bg) => {
+      const photoCard = new THREE.Mesh(
+        new THREE.BoxGeometry(0.65, 0.8, 0.015),
+        new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.8 })
+      );
+      photoCard.position.set(bg.x, bg.y, -7.66);
+      roomGroup.add(photoCard);
+
+      const photoInner = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.55, 0.65),
+        new THREE.MeshStandardMaterial({ color: bg.c, roughness: 0.5 })
+      );
+      photoInner.position.set(bg.x, bg.y + 0.03, -7.65);
+      roomGroup.add(photoInner);
+    });
 
     // -------------------------------------------------------------
     // HIGH-END CREATOR DESK & WORKSTATION SETUP
@@ -605,6 +890,147 @@ export default function RoomSceneViewer({
     roomGroup.add(plantLeaves);
 
     // -------------------------------------------------------------
+    // AUTHENTIC STUDY DESK ACCESSORIES (FROM KANWAL'S ROOM PHOTO)
+    // -------------------------------------------------------------
+    // 1. Warm Nordic Task Lamp with articulated gooseneck arm
+    const lampGroup = new THREE.Group();
+    lampGroup.position.set(-5.0, 2.01, -0.45);
+
+    const lampBase = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.22, 0.22, 0.04, 16),
+      matteBlackMat
+    );
+    lampBase.castShadow = true;
+    lampGroup.add(lampBase);
+
+    // Lower stem
+    const lampArm1 = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.75, 8), woodSlatMat);
+    lampArm1.position.set(0, 0.38, 0.08);
+    lampArm1.rotation.x = 0.25;
+    lampGroup.add(lampArm1);
+
+    // Brass elbow hinge
+    const lampHinge = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), aluminumMat);
+    lampHinge.position.set(0, 0.74, 0.18);
+    lampGroup.add(lampHinge);
+
+    // Upper arm
+    const lampArm2 = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.65, 8), woodSlatMat);
+    lampArm2.position.set(0, 0.98, 0.32);
+    lampArm2.rotation.x = -0.55;
+    lampGroup.add(lampArm2);
+
+    // Conical lamp shade head pointing down toward the laptop
+    const lampHead = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.08, 0.22, 0.32, 16),
+      new THREE.MeshStandardMaterial({ color: 0xF8FAFC, roughness: 0.3 })
+    );
+    lampHead.position.set(0, 1.22, 0.52);
+    lampHead.rotation.x = Math.PI / 1.35;
+    lampHead.castShadow = true;
+    lampGroup.add(lampHead);
+
+    // Warm luminous bulb inside shade
+    const lampBulb = new THREE.Mesh(
+      new THREE.SphereGeometry(0.08, 8, 8),
+      new THREE.MeshBasicMaterial({ color: 0xFFFBEB })
+    );
+    lampBulb.position.set(0, 1.18, 0.56);
+    lampGroup.add(lampBulb);
+    roomGroup.add(lampGroup);
+
+    // 2. Dual Stationery Pen Holders with Pens & Stylus (matching photo)
+    const penCup1 = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12, 0.1, 0.28, 16),
+      new THREE.MeshStandardMaterial({ color: 0x1E293B, roughness: 0.4 })
+    );
+    penCup1.position.set(-4.95, 2.15, 0.5);
+    roomGroup.add(penCup1);
+
+    // Colorful pens/pencils sticking out
+    const penColors = [0xEF4444, 0x3B82F6, 0x10B981, 0xF59E0B, 0x8B5CF6];
+    penColors.forEach((pc, idx) => {
+      const pen = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.012, 0.012, 0.34, 6),
+        new THREE.MeshStandardMaterial({ color: pc })
+      );
+      pen.position.set(-4.95 + (Math.sin(idx) * 0.05), 2.34, 0.5 + (Math.cos(idx) * 0.05));
+      pen.rotation.z = (idx - 2) * 0.12;
+      roomGroup.add(pen);
+    });
+
+    // 3. Second cup: Wooden organizer with scissors and ruler
+    const penCup2 = new THREE.Mesh(
+      new THREE.BoxGeometry(0.2, 0.24, 0.2),
+      woodSlatMat
+    );
+    penCup2.position.set(-5.2, 2.13, 0.8);
+    roomGroup.add(penCup2);
+
+    const ruler = new THREE.Mesh(
+      new THREE.BoxGeometry(0.02, 0.4, 0.06),
+      new THREE.MeshStandardMaterial({ color: 0xFDE047 })
+    );
+    ruler.position.set(-5.2, 2.33, 0.8);
+    ruler.rotation.z = -0.15;
+    roomGroup.add(ruler);
+
+    // 4. College Engineering Textbooks & Sticky Notes Stack
+    const bookStackGroup = new THREE.Group();
+    bookStackGroup.position.set(-1.15, 2.01, 0.25);
+
+    const book1 = new THREE.Mesh(
+      new THREE.BoxGeometry(0.85, 0.08, 1.15),
+      new THREE.MeshStandardMaterial({ color: 0x065F46, roughness: 0.6 }) // Deep emerald textbook
+    );
+    book1.position.y = 0.04;
+    book1.castShadow = true;
+    bookStackGroup.add(book1);
+
+    const book2 = new THREE.Mesh(
+      new THREE.BoxGeometry(0.82, 0.07, 1.1),
+      new THREE.MeshStandardMaterial({ color: 0xBE185D, roughness: 0.6 }) // Berry red notebook
+    );
+    book2.position.set(0.02, 0.115, 0.02);
+    book2.rotation.y = 0.08;
+    bookStackGroup.add(book2);
+
+    const book3 = new THREE.Mesh(
+      new THREE.BoxGeometry(0.78, 0.06, 1.05),
+      new THREE.MeshStandardMaterial({ color: 0x1E40AF, roughness: 0.6 }) // Navy binder
+    );
+    book3.position.set(-0.01, 0.18, -0.01);
+    book3.rotation.y = -0.04;
+    bookStackGroup.add(book3);
+
+    // Yellow sticky note pad on top of stack
+    const stickyPad = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, 0.02, 0.3),
+      new THREE.MeshStandardMaterial({ color: 0xFEF08A })
+    );
+    stickyPad.position.set(0.05, 0.22, 0.1);
+    bookStackGroup.add(stickyPad);
+
+    // Silver pen resting on the notebook
+    const restingPen = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.012, 0.012, 0.42, 6),
+      aluminumMat
+    );
+    restingPen.rotation.z = Math.PI / 2;
+    restingPen.position.set(0.05, 0.235, -0.15);
+    bookStackGroup.add(restingPen);
+    roomGroup.add(bookStackGroup);
+
+    // 5. Minimalist Mesh Wastebasket under Left Desk Edge (matching photo)
+    const binMesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.28, 0.22, 0.82, 16),
+      new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.7 })
+    );
+    binMesh.position.set(-5.5, 0.41, -0.15);
+    binMesh.castShadow = true;
+    roomGroup.add(binMesh);
+
+    // -------------------------------------------------------------
     // HERMAN MILLER STYLE ERGONOMIC MESH CHAIR
     // -------------------------------------------------------------
     const chairGroup = new THREE.Group();
@@ -671,6 +1097,59 @@ export default function RoomSceneViewer({
     pillow.position.set(0, 1.05, -2.1);
     bedGroup.add(pillow);
 
+    // 1. Cute Chubby Seal Plushie Companion on Bed (from Kanwal's real photo)
+    const plushieGroup = new THREE.Group();
+    plushieGroup.position.set(-0.4, 1.15, -1.4);
+
+    const plushieMat = new THREE.MeshStandardMaterial({ 
+      color: 0xFAFAFA, 
+      roughness: 0.95 
+    }); // Soft white fleece
+    const plushieBody = new THREE.Mesh(
+      new THREE.SphereGeometry(0.34, 16, 16),
+      plushieMat
+    );
+    plushieBody.scale.set(1.15, 0.9, 1.25);
+    plushieBody.castShadow = true;
+    plushieBody.userData = { id: "plushie", name: "Cozy Bed Plushie", risk: "normal" };
+    plushieGroup.add(plushieBody);
+    interactiveMeshes.push(plushieBody);
+
+    // Cute tiny ears
+    [-0.2, 0.2].forEach((ex) => {
+      const ear = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), plushieMat);
+      ear.position.set(ex, 0.28, -0.15);
+      plushieGroup.add(ear);
+    });
+
+    // Dark bead eyes
+    [-0.12, 0.12].forEach((eyex) => {
+      const eye = new THREE.Mesh(
+        new THREE.SphereGeometry(0.035, 8, 8),
+        new THREE.MeshBasicMaterial({ color: 0x0F172A })
+      );
+      eye.position.set(eyex, 0.12, 0.32);
+      plushieGroup.add(eye);
+    });
+
+    // Pink embroidered snout
+    const nose = new THREE.Mesh(
+      new THREE.SphereGeometry(0.03, 8, 8),
+      new THREE.MeshBasicMaterial({ color: 0xF472B6 })
+    );
+    nose.position.set(0, 0.06, 0.36);
+    plushieGroup.add(nose);
+
+    // Side flippers
+    [-0.34, 0.34].forEach((fx) => {
+      const flipper = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), plushieMat);
+      flipper.scale.set(1.3, 0.4, 0.9);
+      flipper.position.set(fx, -0.05, 0.05);
+      plushieGroup.add(flipper);
+    });
+
+    bedGroup.add(plushieGroup);
+
     // Bedside Nightstand Table
     const nightstand = new THREE.Mesh(
       new THREE.BoxGeometry(1.2, 0.85, 1.2),
@@ -701,6 +1180,84 @@ export default function RoomSceneViewer({
 
     roomGroup.add(bedGroup);
 
+    // 2. Cozy Bedroom Slides / Slippers on Parquet Floor beside Bed
+    const slipperMat = new THREE.MeshStandardMaterial({ color: 0xE0E7FF, roughness: 0.7 });
+    [-0.2, 0.2].forEach((sx) => {
+      const slipper = new THREE.Mesh(
+        new THREE.BoxGeometry(0.24, 0.06, 0.52),
+        slipperMat
+      );
+      slipper.position.set(2.4 + sx, 0.04, -1.8);
+      slipper.rotation.y = 0.15;
+      slipper.receiveShadow = true;
+      roomGroup.add(slipper);
+
+      const strap = new THREE.Mesh(
+        new THREE.TorusGeometry(0.11, 0.025, 6, 12, Math.PI),
+        new THREE.MeshStandardMaterial({ color: 0xA5B4FC })
+      );
+      strap.rotation.x = Math.PI / 2;
+      strap.position.set(2.4 + sx, 0.08, -1.75);
+      roomGroup.add(strap);
+    });
+
+    // 3. Handcrafted Acoustic Guitar leaning in Bedroom Corner
+    const guitarGroup = new THREE.Group();
+    guitarGroup.position.set(7.1, 0.1, -6.6);
+    guitarGroup.rotation.y = -Math.PI / 3.8;
+    guitarGroup.rotation.z = -0.15; // Gently leaning against the wall
+
+    // Acoustic Guitar Body (Hourglass figure)
+    const guitarTopMat = new THREE.MeshStandardMaterial({ color: 0xD97706, roughness: 0.4 }); // Spruce wood top
+    const guitarSideMat = new THREE.MeshStandardMaterial({ color: 0x78350F, roughness: 0.5 }); // Dark mahogany back
+    
+    const lowerBout = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.24, 16), guitarSideMat);
+    lowerBout.rotation.x = Math.PI / 2;
+    lowerBout.position.y = 0.9;
+    guitarGroup.add(lowerBout);
+
+    const upperBout = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.24, 16), guitarSideMat);
+    upperBout.rotation.x = Math.PI / 2;
+    upperBout.position.y = 1.6;
+    guitarGroup.add(upperBout);
+
+    // Soundhole
+    const soundhole = new THREE.Mesh(
+      new THREE.CircleGeometry(0.14, 16),
+      new THREE.MeshBasicMaterial({ color: 0x1E1B4B })
+    );
+    soundhole.position.set(0, 1.45, 0.125);
+    guitarGroup.add(soundhole);
+
+    // Guitar Neck & Headstock
+    const neck = new THREE.Mesh(
+      new THREE.BoxGeometry(0.1, 1.4, 0.06),
+      new THREE.MeshStandardMaterial({ color: 0x451A03, roughness: 0.5 })
+    );
+    neck.position.set(0, 2.45, 0);
+    guitarGroup.add(neck);
+
+    const headstock = new THREE.Mesh(
+      new THREE.BoxGeometry(0.14, 0.38, 0.05),
+      guitarSideMat
+    );
+    headstock.position.set(0, 3.25, 0);
+    guitarGroup.add(headstock);
+
+    // Tuning pegs
+    for (let tp = 0; tp < 3; tp++) {
+      [-0.09, 0.09].forEach(tpx => {
+        const peg = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.06, 6), aluminumMat);
+        peg.rotation.z = Math.PI / 2;
+        peg.position.set(tpx, 3.15 + (tp * 0.09), 0);
+        guitarGroup.add(peg);
+      });
+    }
+
+    lowerBout.userData = { id: "guitar", name: "Acoustic Jam Guitar", risk: "normal" };
+    interactiveMeshes.push(lowerBout);
+    roomGroup.add(guitarGroup);
+
     // Floating Bookshelf with Curated Books & Trailing Ivy Plant
     const shelf = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.1, 0.6), deskTopMat);
     shelf.position.set(-3.2, 5.4, -7.55);
@@ -716,6 +1273,47 @@ export default function RoomSceneViewer({
       roomGroup.add(book);
     });
 
+    // Cute Panda Figurine on Bookshelf (from Kanwal's bedroom photo)
+    const pandaGroup = new THREE.Group();
+    pandaGroup.position.set(-2.2, 5.62, -7.52);
+
+    const pandaMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.8 });
+    const pandaBlackMat = new THREE.MeshStandardMaterial({ color: 0x0F172A, roughness: 0.7 });
+
+    const pandaBody = new THREE.Mesh(new THREE.SphereGeometry(0.15, 12, 12), pandaMat);
+    pandaGroup.add(pandaBody);
+
+    const pandaHead = new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 12), pandaMat);
+    pandaHead.position.set(0, 0.18, 0);
+    pandaGroup.add(pandaHead);
+
+    // Panda black ears
+    [-0.09, 0.09].forEach(pex => {
+      const pEar = new THREE.Mesh(new THREE.SphereGeometry(0.045, 6, 6), pandaBlackMat);
+      pEar.position.set(pex, 0.28, 0);
+      pandaGroup.add(pEar);
+    });
+
+    // Panda eye patches
+    [-0.05, 0.05].forEach(pex => {
+      const eyePatch = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 6), pandaBlackMat);
+      eyePatch.position.set(pex, 0.2, 0.09);
+      pandaGroup.add(eyePatch);
+    });
+    roomGroup.add(pandaGroup);
+
+    // Warm Golden Fairy Light Garland running along the bookshelf
+    for (let f = 0; f < 12; f++) {
+      const fairyBulb = new THREE.Mesh(
+        new THREE.SphereGeometry(0.026, 6, 6),
+        new THREE.MeshBasicMaterial({ color: 0xFDE047 })
+      );
+      const fx = -5.2 + (f * 0.4);
+      const fy = 5.34 + Math.sin(f * 0.8) * 0.04;
+      fairyBulb.position.set(fx, fy, -7.38);
+      roomGroup.add(fairyBulb);
+    }
+
     // Trailing Ivy Vine cascading from shelf
     const ivyPot = new THREE.Mesh(
       new THREE.CylinderGeometry(0.22, 0.16, 0.3, 12),
@@ -725,9 +1323,9 @@ export default function RoomSceneViewer({
     roomGroup.add(ivyPot);
 
     // Cascading ivy leaf clusters
-    [5.0, 4.6, 4.2].forEach((yLeaf, i) => {
+    [5.0, 4.6, 4.2, 3.8].forEach((yLeaf, i) => {
       const leafCluster = new THREE.Mesh(
-        new THREE.SphereGeometry(0.18 - (i * 0.03), 8, 8),
+        new THREE.SphereGeometry(0.18 - (i * 0.025), 8, 8),
         new THREE.MeshStandardMaterial({ color: 0x10B981, roughness: 0.7 })
       );
       leafCluster.position.set(-1.4 + (Math.sin(i) * 0.08), yLeaf, -7.45);
@@ -1249,6 +1847,9 @@ export default function RoomSceneViewer({
     } else if (mode === "bed") {
       cameraRef.current.position.set(5.8, 5.4, -0.5);
       controlsRef.current.target.set(4.8, 1.5, -3.8);
+    } else if (mode === "door") {
+      cameraRef.current.position.set(-1.8, 5.0, 9.8);
+      controlsRef.current.target.set(-6.5, 3.2, 4.8);
     }
   };
 
@@ -1405,7 +2006,7 @@ export default function RoomSceneViewer({
             </div>
 
             {/* 3D Camera Controls Overlay (Bottom Left) */}
-            <div className="absolute bottom-3 left-3 z-30 flex items-center gap-1.5 bg-white/90 backdrop-blur-md p-1.5 rounded-2xl border border-white/80 shadow-sm">
+            <div className="absolute bottom-3 left-3 z-30 flex items-center gap-1.5 bg-white/90 backdrop-blur-md p-1.5 rounded-2xl border border-white/80 shadow-sm flex-wrap max-w-[90%] sm:max-w-none">
               <button
                 onClick={() => setCameraAngle("iso")}
                 className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-[#ede9fe] hover:text-[#7054E8] text-slate-700 text-[10px] font-bold transition-colors cursor-pointer"
@@ -1416,13 +2017,19 @@ export default function RoomSceneViewer({
                 onClick={() => setCameraAngle("desk")}
                 className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-[#ede9fe] hover:text-[#7054E8] text-slate-700 text-[10px] font-bold transition-colors cursor-pointer"
               >
-                💻 Desk Close-up
+                💻 Desk View
               </button>
               <button
                 onClick={() => setCameraAngle("bed")}
                 className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-[#ede9fe] hover:text-[#7054E8] text-slate-700 text-[10px] font-bold transition-colors cursor-pointer"
               >
                 🛏️ Cozy Nook
+              </button>
+              <button
+                onClick={() => setCameraAngle("door")}
+                className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-[#ede9fe] hover:text-[#7054E8] text-slate-700 text-[10px] font-bold transition-colors cursor-pointer"
+              >
+                🚪 Door & Mirror
               </button>
               <button
                 onClick={() => setCameraAngle("top")}
@@ -1604,8 +2211,11 @@ export default function RoomSceneViewer({
                 { name: "MacBook", icon: "💻", id: "laptop", view: "desk" },
                 { name: "65W Charger", icon: "⚡", id: "charger", view: "desk", critical: true },
                 { name: "Backpack", icon: "🎒", id: "backpack", view: "iso" },
+                { name: "Plushie", icon: "🧸", id: "plushie", view: "bed" },
+                { name: "Guitar", icon: "🎸", id: "guitar", view: "bed" },
                 { name: "Purple Chair", icon: "🪑", id: null, view: "desk" },
                 { name: "Lavender Bed", icon: "🛏️", id: null, view: "bed" },
+                { name: "Door & Mirror", icon: "🚪", id: null, view: "door" }
               ].map((item, idx) => (
                 <button
                   key={idx}
