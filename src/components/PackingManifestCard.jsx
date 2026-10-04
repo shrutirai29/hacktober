@@ -232,10 +232,10 @@ export default function PackingManifestCard({
   };
 
   return (
-    <div className="faded-glass rounded-3xl p-5 flex flex-col justify-between gap-4 h-full">
+    <div className="faded-glass rounded-3xl p-5 flex flex-col gap-4 min-h-[560px] lg:h-full overflow-hidden shadow-sm border border-white/80">
       
       {/* Top Header & Dynamic Progress Bar */}
-      <div className="space-y-3">
+      <div className="space-y-3 shrink-0">
         
         {/* Title & Live Fraction Progress */}
         <div className="flex items-center justify-between">
@@ -262,14 +262,14 @@ export default function PackingManifestCard({
           </div>
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 flex-wrap text-xs">
+        {/* Filter Pills - Clean Horizontal Scroll Row */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none flex-nowrap text-xs">
           <button
             onClick={() => setActiveFilter("all")}
-            className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-full font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeFilter === "all"
-                ? 'bg-[#ede9fe] text-[#5b21b6] shadow-xs'
-                : 'text-slate-500 hover:bg-slate-100'
+                ? 'bg-[#ede9fe] text-[#5b21b6] shadow-xs ring-1 ring-purple-300'
+                : 'bg-white/70 text-slate-600 hover:bg-white border border-slate-200/60'
             }`}
           >
             All Items ({totalCount})
@@ -277,10 +277,10 @@ export default function PackingManifestCard({
 
           <button
             onClick={() => setActiveFilter("high_risk")}
-            className={`px-3 py-1 rounded-full font-bold flex items-center gap-1 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-full font-bold flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeFilter === "high_risk"
                 ? 'bg-rose-100 text-rose-700 shadow-xs ring-1 ring-rose-300'
-                : 'text-rose-600 hover:bg-rose-50'
+                : 'bg-white/70 text-rose-600 hover:bg-rose-50 border border-rose-200/60'
             }`}
           >
             <span>🚨 High-Risk ({highRiskItems.length})</span>
@@ -288,10 +288,10 @@ export default function PackingManifestCard({
 
           <button
             onClick={() => setActiveFilter("detected")}
-            className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-full font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeFilter === "detected"
-                ? 'bg-[#ede9fe] text-[#5b21b6] shadow-xs'
-                : 'text-slate-500 hover:bg-slate-100'
+                ? 'bg-[#ede9fe] text-[#5b21b6] shadow-xs ring-1 ring-purple-300'
+                : 'bg-white/70 text-slate-600 hover:bg-white border border-slate-200/60'
             }`}
           >
             Detected ({visionDetectedItems.length + (highRiskItems.filter(i => i.status?.includes("room")).length)})
@@ -299,10 +299,10 @@ export default function PackingManifestCard({
 
           <button
             onClick={() => setActiveFilter("suggested")}
-            className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-full font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeFilter === "suggested"
-                ? 'bg-[#ede9fe] text-[#5b21b6] shadow-xs'
-                : 'text-slate-500 hover:bg-slate-100'
+                ? 'bg-[#ede9fe] text-[#5b21b6] shadow-xs ring-1 ring-purple-300'
+                : 'bg-white/70 text-slate-600 hover:bg-white border border-slate-200/60'
             }`}
           >
             Suggested ({suggestedItems.length})
@@ -310,10 +310,10 @@ export default function PackingManifestCard({
 
           <button
             onClick={() => setActiveFilter("leave_behind")}
-            className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-full font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
               activeFilter === "leave_behind"
-                ? 'bg-slate-200 text-slate-800 shadow-xs'
-                : 'text-slate-500 hover:bg-slate-100'
+                ? 'bg-slate-200 text-slate-800 shadow-xs ring-1 ring-slate-300'
+                : 'bg-white/70 text-slate-600 hover:bg-white border border-slate-200/60'
             }`}
           >
             Leave Behind ({leaveBehindItems.length})
@@ -322,7 +322,7 @@ export default function PackingManifestCard({
       </div>
 
       {/* Scrollable Manifest Items Container */}
-      <div className="space-y-2.5 flex-1 overflow-y-auto max-h-[430px] pr-1.5 scrollbar-thin">
+      <div className="space-y-2.5 flex-1 min-h-0 overflow-y-auto pr-1.5 scrollbar-thin">
         {/* 1. High-Risk Memory Alerts Card (Always shown unless filtering exclusively) */}
         {(activeFilter === "all" || activeFilter === "high_risk") && highRiskItems.length > 0 && (
           <div className="rounded-2xl border border-rose-200 bg-[#fff5f5] p-3.5 space-y-2.5 shadow-2xs animate-in fade-in duration-200">
@@ -575,7 +575,7 @@ export default function PackingManifestCard({
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="flex items-center gap-2.5 pt-3 border-t border-[#f0eae0]">
+      <div className="flex items-center gap-2.5 pt-3 border-t border-[#f0eae0] shrink-0 mt-auto">
         {onTriggerVoice && (
           <button
             onClick={onTriggerVoice}

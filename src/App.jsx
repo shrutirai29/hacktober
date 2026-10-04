@@ -267,7 +267,7 @@ export default function App() {
             {/* 2-Column Balanced Hero Row */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
               {/* Left Column: 3D Room Twin (7 cols) */}
-              <div className="lg:col-span-7 flex flex-col">
+              <div className="lg:col-span-7 flex flex-col min-h-[560px]">
                 <RoomSceneViewer
                   highlightedItemId={highlightedItemId}
                   onSelectItem={(item) => {
@@ -282,7 +282,7 @@ export default function App() {
               </div>
 
               {/* Right Column: Your Packing Manifest (5 cols) */}
-              <div className="lg:col-span-5 flex flex-col">
+              <div className="lg:col-span-5 flex flex-col min-h-[560px]">
                 <PackingManifestCard
                   items={items}
                   onToggleItem={(id) => {
