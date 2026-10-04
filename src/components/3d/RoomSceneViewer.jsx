@@ -30,17 +30,30 @@ export default function RoomSceneViewer({
   onSelectItem = null,
   onHoverItem = null,
   onReconstructRoom = null,
-  photoUrl = "/assets/hostel-desk-demo.jpg",
+  photoUrl = "/assets/kanwal-room-original.jpg",
   roomTitle = "Kanwal's Reconstructed Hostel Room (Block C-402)",
   reconstructionStatus = "3D Twin Ready"
 }) {
   const mountRef = useRef(null);
   const [viewMode, setViewMode] = useState("3d"); // "3d" or "photo"
   const [showLabels, setShowLabels] = useState(true);
+  const [showPhotoLabels, setShowPhotoLabels] = useState(true);
   const [selectedObj, setSelectedObj] = useState(null);
   const [screenLabels, setScreenLabels] = useState([]);
   const [lightingMood, setLightingMood] = useState("golden"); // "golden" | "sunset" | "night"
   const [isAutoRotating, setIsAutoRotating] = useState(true);
+
+  // Sync refs so Three.js render loop doesn't re-initialize on state toggles
+  const viewModeRef = useRef(viewMode);
+  const showLabelsRef = useRef(showLabels);
+
+  useEffect(() => {
+    viewModeRef.current = viewMode;
+  }, [viewMode]);
+
+  useEffect(() => {
+    showLabelsRef.current = showLabels;
+  }, [showLabels]);
 
   // Refs for 3D state
   const sceneRef = useRef(null);
@@ -195,7 +208,7 @@ export default function RoomSceneViewer({
   }, [isAutoRotating]);
 
   useEffect(() => {
-    if (!mountRef.current || viewMode !== "3d") return;
+    if (!mountRef.current) return;
 
     const width = mountRef.current.clientWidth;
     const height = mountRef.current.clientHeight || 460;
@@ -1179,20 +1192,22 @@ export default function RoomSceneViewer({
         p.mesh.position.y = p.baseY + Math.sin(elapsed * 3.2 + idx) * 0.05;
       });
 
-      controls.update();
-      renderer.render(scene, camera);
+      if (viewModeRef.current === "3d") {
+        controls.update();
+        renderer.render(scene, camera);
 
-      // Project 3D item positions to 2D screen coordinates for floating tags
-      if (showLabels && camera && mountRef.current) {
-        const projected = roomItems.map(item => {
-          const v = new THREE.Vector3(...item.pos);
-          v.project(camera);
-          const x = (v.x * 0.5 + 0.5) * width;
-          const y = (-(v.y * 0.5) + 0.5) * height;
-          const isVisible = v.z < 1; // within frustum
-          return { ...item, screenX: x, screenY: y, isVisible };
-        });
-        setScreenLabels(projected);
+        // Project 3D item positions to 2D screen coordinates for floating tags
+        if (showLabelsRef.current && camera && mountRef.current) {
+          const projected = roomItems.map(item => {
+            const v = new THREE.Vector3(...item.pos);
+            v.project(camera);
+            const x = (v.x * 0.5 + 0.5) * width;
+            const y = (-(v.y * 0.5) + 0.5) * height;
+            const isVisible = v.z < 1; // within frustum
+            return { ...item, screenX: x, screenY: y, isVisible };
+          });
+          setScreenLabels(projected);
+        }
       }
     };
     animate();
@@ -1217,7 +1232,7 @@ export default function RoomSceneViewer({
       }
       renderer.dispose();
     };
-  }, [viewMode, showLabels]);
+  }, []);
 
   // Camera preset switches
   const setCameraAngle = (mode) => {
@@ -1287,11 +1302,12 @@ export default function RoomSceneViewer({
       {/* Main Viewport Container */}
       <div className="relative w-full h-[500px] sm:h-[580px] md:h-[640px] rounded-2xl overflow-hidden bg-gradient-to-b from-white/75 via-slate-50/40 to-indigo-50/25 backdrop-blur-md border border-white/80 shadow-inner select-none">
         
-        {viewMode === "3d" ? (
-          <>
-            {/* Three.js Canvas Container */}
-            <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+        {/* Three.js Canvas Container (Always stays mounted to prevent context loss / canvas split glitches) */}
+        <div ref={mountRef} className={`w-full h-full cursor-grab active:cursor-grabbing ${viewMode === "3d" ? "block" : "hidden"}`} />
 
+        {/* 3D Mode Interactive Overlays */}
+        {viewMode === "3d" && (
+          <>
             {/* Floating 3D Object Screen Badges */}
             {showLabels && screenLabels.map((lbl) => {
               if (!lbl.isVisible) return null;
@@ -1430,17 +1446,191 @@ export default function RoomSceneViewer({
               </button>
             </div>
           </>
-        ) : (
-          /* 2D Original Photo View */
-          <div className="relative w-full h-full flex items-center justify-center bg-slate-950">
-            <img
-              src={photoUrl}
-              alt="Room source photograph"
-              className="w-full h-full object-cover object-center"
-            />
-            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 shadow-sm">
-              Original Room Photograph (Reference)
+        )}
+
+        {/* 2D Original Photo View (Clean, Light Faded Glass, Centered & Non-destructive) */}
+        {viewMode === "photo" && (
+          <div className="relative w-full h-full flex flex-col items-center justify-between p-3 sm:p-4 bg-gradient-to-br from-[#f8f9fc] via-[#f1f0fb] to-[#ede9fe]/40 backdrop-blur-md overflow-hidden">
+            
+            {/* Top Toolbar */}
+            <div className="w-full flex items-center justify-between gap-2 z-20 shrink-0">
+              <div className="flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/80 shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-black text-[#1e1b4b]">Original Room Photograph (Reference)</span>
+                <span className="hidden sm:inline text-[10px] text-slate-500 font-bold">· Block C-402</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowPhotoLabels(!showPhotoLabels)}
+                  className={`px-3 py-1.5 rounded-2xl border text-xs font-bold backdrop-blur-md transition-all shadow-xs cursor-pointer ${
+                    showPhotoLabels
+                      ? 'bg-purple-50 text-[#7054E8] border-purple-200 shadow-purple-500/10'
+                      : 'bg-white/85 text-slate-600 border-white/80 hover:bg-white'
+                  }`}
+                >
+                  {showPhotoLabels ? "👁️ Hide Vision Tags" : "✦ Show Vision Tags"}
+                </button>
+
+                <button
+                  onClick={() => setViewMode("3d")}
+                  className="px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-black shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5 hover:scale-[1.02] active:scale-95"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Switch to 3D Twin</span>
+                </button>
+              </div>
             </div>
+
+            {/* Center Image Container with Responsive Fit & Hotspot Markers */}
+            <div className="relative flex-1 w-full max-h-[calc(100%-80px)] my-2 flex items-center justify-center min-h-0">
+              <div className="relative max-h-full max-w-full flex items-center justify-center">
+                <img
+                  src={photoUrl || "/assets/kanwal-room-original.jpg"}
+                  onError={(e) => {
+                    e.currentTarget.src = "/assets/kanwal-room-original.jpg";
+                  }}
+                  alt="Original Room Source Photograph"
+                  className="max-h-[380px] sm:max-h-[460px] md:max-h-[500px] w-auto max-w-full object-contain rounded-2xl shadow-xl border-2 border-white ring-1 ring-slate-900/10"
+                />
+
+                {/* Vision Tags Overlaid on the Real Photo */}
+                {showPhotoLabels && (
+                  <>
+                    {/* 1. Study Desk & Laptop */}
+                    <div 
+                      style={{ top: '44%', left: '33%' }} 
+                      className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-10"
+                      onClick={() => {
+                        setViewMode("3d");
+                        setCameraAngle("desk");
+                        setSelectedObj(roomItems.find(i => i.id === "laptop"));
+                      }}
+                    >
+                      <div className="px-2 py-0.5 rounded-lg bg-white/95 backdrop-blur-md border border-purple-300 text-[10px] font-black text-purple-700 shadow-md flex items-center gap-1 group-hover:scale-110 transition-transform">
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-ping" />
+                        💻 Laptop (Desk)
+                      </div>
+                    </div>
+
+                    {/* 2. Purple Ergonomic Chair */}
+                    <div 
+                      style={{ top: '56%', left: '36%' }} 
+                      className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-10"
+                      onClick={() => {
+                        setViewMode("3d");
+                        setCameraAngle("desk");
+                      }}
+                    >
+                      <div className="px-2 py-0.5 rounded-lg bg-white/95 backdrop-blur-md border border-indigo-300 text-[10px] font-black text-indigo-700 shadow-md flex items-center gap-1 group-hover:scale-110 transition-transform">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                        🪑 Purple Chair
+                      </div>
+                    </div>
+
+                    {/* 3. Black Backpack on Floor */}
+                    <div 
+                      style={{ top: '65%', left: '22%' }} 
+                      className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-10"
+                      onClick={() => {
+                        setViewMode("3d");
+                        setSelectedObj(roomItems.find(i => i.id === "backpack"));
+                      }}
+                    >
+                      <div className="px-2 py-0.5 rounded-lg bg-white/95 backdrop-blur-md border border-slate-400 text-[10px] font-black text-slate-800 shadow-md flex items-center gap-1 group-hover:scale-110 transition-transform ring-2 ring-purple-400/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-800" />
+                        🎒 Backpack (Floor)
+                      </div>
+                    </div>
+
+                    {/* 4. Wall Charger Alert */}
+                    <div 
+                      style={{ top: '35%', left: '40%' }} 
+                      className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-10"
+                      onClick={() => {
+                        setViewMode("3d");
+                        setCameraAngle("desk");
+                        setSelectedObj(roomItems.find(i => i.id === "charger"));
+                      }}
+                    >
+                      <div className="px-2 py-0.5 rounded-lg bg-rose-50/95 backdrop-blur-md border border-rose-300 text-[10px] font-black text-rose-700 shadow-md flex items-center gap-1 group-hover:scale-110 transition-transform ring-2 ring-rose-400/40">
+                        <AlertTriangle className="w-2.5 h-2.5 text-rose-500 shrink-0" />
+                        ⚡ 65W Charger
+                      </div>
+                    </div>
+
+                    {/* 5. Wall Shelf & Pothos */}
+                    <div 
+                      style={{ top: '16%', left: '35%' }} 
+                      className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-10"
+                    >
+                      <div className="px-2 py-0.5 rounded-lg bg-white/95 backdrop-blur-md border border-emerald-300 text-[10px] font-black text-emerald-700 shadow-md flex items-center gap-1 group-hover:scale-110 transition-transform">
+                        🌿 Shelf & Pothos
+                      </div>
+                    </div>
+
+                    {/* 6. Single Bed & Lavender Duvet */}
+                    <div 
+                      style={{ top: '56%', left: '80%' }} 
+                      className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-10"
+                      onClick={() => {
+                        setViewMode("3d");
+                        setCameraAngle("bed");
+                      }}
+                    >
+                      <div className="px-2 py-0.5 rounded-lg bg-white/95 backdrop-blur-md border border-purple-300 text-[10px] font-black text-purple-700 shadow-md flex items-center gap-1 group-hover:scale-110 transition-transform">
+                        🛏️ Lavender Bed
+                      </div>
+                    </div>
+
+                    {/* 7. Sunny Window */}
+                    <div 
+                      style={{ top: '22%', left: '63%' }} 
+                      className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-10"
+                    >
+                      <div className="px-2 py-0.5 rounded-lg bg-white/95 backdrop-blur-md border border-sky-300 text-[10px] font-black text-sky-700 shadow-md flex items-center gap-1 group-hover:scale-110 transition-transform">
+                        ☀️ Sunny Window
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Bottom Verified Belongings Strip */}
+            <div className="w-full flex items-center justify-center gap-1.5 flex-wrap z-20 pt-1 shrink-0">
+              <span className="text-[10px] font-extrabold text-slate-500 mr-1">Detected in Room:</span>
+              {[
+                { name: "MacBook", icon: "💻", id: "laptop", view: "desk" },
+                { name: "65W Charger", icon: "⚡", id: "charger", view: "desk", critical: true },
+                { name: "Backpack", icon: "🎒", id: "backpack", view: "iso" },
+                { name: "Purple Chair", icon: "🪑", id: null, view: "desk" },
+                { name: "Lavender Bed", icon: "🛏️", id: null, view: "bed" },
+              ].map((item, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setViewMode("3d");
+                    if (item.view) setCameraAngle(item.view);
+                    if (item.id) {
+                      const obj = roomItems.find(i => i.id === item.id);
+                      if (obj) {
+                        setSelectedObj(obj);
+                        onSelectItem?.(obj);
+                      }
+                    }
+                  }}
+                  className={`px-2 py-1 rounded-xl text-[10px] font-bold border transition-all cursor-pointer shadow-2xs hover:scale-105 ${
+                    item.critical
+                      ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                      : 'bg-white/90 text-slate-700 border-white/80 hover:bg-white hover:text-[#7054E8]'
+                  }`}
+                >
+                  {item.icon} {item.name}
+                </button>
+              ))}
+            </div>
+
           </div>
         )}
 

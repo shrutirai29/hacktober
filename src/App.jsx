@@ -55,7 +55,7 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   // 3D Room Twin State
-  const [roomPhotoUrl, setRoomPhotoUrl] = useState("/assets/hostel-desk-demo.jpg");
+  const [roomPhotoUrl, setRoomPhotoUrl] = useState("/assets/kanwal-room-original.jpg");
   const [roomTitle, setRoomTitle] = useState("Kanwal's Reconstructed Hostel Room (Block C-402)");
 
   // Audio / Voice State
