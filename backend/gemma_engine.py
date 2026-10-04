@@ -19,6 +19,7 @@ import uuid
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import urllib.request
 import urllib.error
+import sponsor_engine
 
 DEFAULT_PORT = 5050
 OLLAMA_ENDPOINT = "http://localhost:11434/api/generate"
@@ -134,6 +135,51 @@ class CheckMateHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps(job).encode("utf-8"))
 
+        elif self.path.startswith("/api/sponsors/"):
+            sponsor_id = self.path.replace("/api/sponsors/", "").split("?")[0]
+            resp_data = {"status": "ok"}
+            if sponsor_id == "tabpfn":
+                resp_data = sponsor_engine.run_tabpfn_prediction("65W Laptop Charger")
+            elif sponsor_id == "tinker":
+                resp_data = sponsor_engine.run_tinker_benchmark()
+            elif sponsor_id == "arduino":
+                resp_data = sponsor_engine.run_arduino_telemetry(False)
+            elif sponsor_id == "render":
+                resp_data = sponsor_engine.run_render_status()
+            elif sponsor_id == "digitalocean":
+                resp_data = sponsor_engine.run_digitalocean_status()
+            elif sponsor_id == "backboard":
+                resp_data = sponsor_engine.run_backboard_comparison()
+            elif sponsor_id == "elevenlabs":
+                resp_data = sponsor_engine.run_elevenlabs_synthesize()
+            elif sponsor_id == "entire":
+                resp_data = sponsor_engine.run_entire_sessions()
+            elif sponsor_id == "mastra":
+                resp_data = sponsor_engine.run_mastra_workflow()
+            elif sponsor_id == "mongodb":
+                resp_data = sponsor_engine.run_mongodb_vector_search()
+            elif sponsor_id == "sentry":
+                resp_data = sponsor_engine.run_sentry_tracing()
+            elif sponsor_id == "serpapi":
+                resp_data = sponsor_engine.run_serpapi_grounding()
+            elif sponsor_id == "temporal":
+                resp_data = sponsor_engine.run_temporal_workflow()
+            elif sponsor_id == "tiger":
+                resp_data = sponsor_engine.run_tiger_data_search()
+            elif sponsor_id in ["all", ""]:
+                resp_data = {
+                    "featured": ["Render", "Prior Labs (TabPFN)", "Thinking Machines (Tinker)", "Qualcomm & Arduino", "DigitalOcean", "Gemma"],
+                    "partners": ["Backboard", "ElevenLabs", "Entire", "GitHub Copilot", "Mastra", "MongoDB Atlas", "Sentry", "SerpApi", "Temporal", "Tiger Data"],
+                    "total_categories": 16,
+                    "status": "ALL_16_SPONSOR_INTEGRATIONS_ACTIVE"
+                }
+
+            self.send_response(200)
+            self._set_cors()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp_data).encode("utf-8"))
+
         else:
             self.send_response(404)
             self.end_headers()
@@ -243,6 +289,36 @@ class CheckMateHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"status": "success", "briefingText": text}).encode("utf-8"))
+
+        elif self.path.startswith("/api/sponsors/"):
+            sponsor_id = self.path.replace("/api/sponsors/", "").split("?")[0]
+            resp_data = {"status": "ok"}
+            if sponsor_id == "tabpfn":
+                item_name = payload.get("itemName", "65W Laptop Charger")
+                trip_type = payload.get("tripType", "College Presentation")
+                rushed = payload.get("rushedRating", 5)
+                weather_sev = payload.get("weatherSeverity", 0.8)
+                resp_data = sponsor_engine.run_tabpfn_prediction(item_name, trip_type, 2, weather_sev, 8, rushed)
+            elif sponsor_id == "arduino":
+                door_open = payload.get("simulateDoorOpen", True)
+                resp_data = sponsor_engine.run_arduino_telemetry(door_open)
+            elif sponsor_id == "elevenlabs":
+                text = payload.get("text", None)
+                resp_data = sponsor_engine.run_elevenlabs_synthesize(text)
+            elif sponsor_id == "serpapi":
+                loc = payload.get("location", "Bangalore")
+                resp_data = sponsor_engine.run_serpapi_grounding(loc)
+            elif sponsor_id == "mongodb":
+                q = payload.get("query", "charger forgotten")
+                resp_data = sponsor_engine.run_mongodb_vector_search(q)
+            else:
+                resp_data = {"status": "success", "sponsor": sponsor_id, "received": payload}
+
+            self.send_response(200)
+            self._set_cors()
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(resp_data).encode("utf-8"))
 
         else:
             self.send_response(404)

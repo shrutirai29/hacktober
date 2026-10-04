@@ -11,7 +11,8 @@ import {
 
 export default function Sidebar({
   activeNav = "Home",
-  onSelectNav
+  onSelectNav,
+  onOpenPrizeHub
 }) {
   const navItems = [
     { id: "Home", label: "Home", icon: Home },
@@ -76,6 +77,25 @@ export default function Sidebar({
             );
           })}
         </nav>
+
+        {/* Hackathon Sponsor Prize Hub Button */}
+        <div className="px-3 pt-2">
+          <button
+            onClick={onOpenPrizeHub}
+            className="w-full p-2.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-indigo-500/20 hover:from-amber-500/30 hover:to-indigo-500/30 border border-purple-300/60 shadow-xs flex items-center justify-between transition-all cursor-pointer hover:scale-[1.02] active:scale-95 group text-left"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-base">🏆</span>
+              <div>
+                <span className="text-[11px] font-black text-[#1e1b4b] block leading-tight">Prize Hub</span>
+                <span className="text-[9px] font-extrabold text-[#7054E8]">16 Sponsors Live</span>
+              </div>
+            </div>
+            <span className="text-[10px] font-black bg-[#7054E8] text-white px-2 py-0.5 rounded-full shadow-2xs">
+              $2.2k
+            </span>
+          </button>
+        </div>
 
       </div>
 

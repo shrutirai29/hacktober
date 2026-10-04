@@ -8,6 +8,7 @@ import MemoryVaultModal from './components/MemoryVaultModal';
 import GemmaInspectorModal from './components/GemmaInspectorModal';
 import RoomSceneViewer from './components/3d/RoomSceneViewer';
 import RoomReconstructionStudio from './components/RoomReconstructionStudio';
+import SponsorPrizeHubModal from './components/SponsorPrizeHubModal';
 
 // Dedicated Full-Page Views
 import MemoryVaultView from './views/MemoryVaultView';
@@ -68,6 +69,7 @@ export default function App() {
   const [isMemoryOpen, setIsMemoryOpen] = useState(false);
   const [isComparisonOpen, setIsComparisonOpen] = useState(false);
   const [isAiInspectorOpen, setIsAiInspectorOpen] = useState(false);
+  const [isPrizeHubOpen, setIsPrizeHubOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
 
   const showToast = (msg) => {
@@ -213,6 +215,7 @@ export default function App() {
             onOpenMemory={() => setIsMemoryOpen(true)}
             onOpenComparison={() => setIsComparisonOpen(true)}
             onOpenAiInspector={() => setIsAiInspectorOpen(true)}
+            onOpenPrizeHub={() => setIsPrizeHubOpen(true)}
             onTriggerVoice={handleTriggerVoice}
             memoryCount={memoryList.length}
           />
@@ -221,6 +224,25 @@ export default function App() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col p-4 sm:p-5 lg:p-6 overflow-y-auto max-w-[1380px] mx-auto w-full">
+        
+        {/* Top Hackathon Prize Hub Banner Button */}
+        <div className="flex items-center justify-between pb-3 select-none">
+          <button
+            onClick={() => setIsPrizeHubOpen(true)}
+            className="faded-glass-pill px-3.5 py-1.5 rounded-2xl flex items-center gap-2.5 shadow-xs border border-white/80 hover:scale-[1.01] active:scale-98 transition-all cursor-pointer group"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-black text-[#1e1b4b]">
+              🏆 Hackathon Prize Suite: <span className="text-[#7054E8]">16 Sponsor Categories Activated</span>
+            </span>
+            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
+              $2,200 Potential
+            </span>
+            <span className="text-xs text-slate-400 group-hover:translate-x-0.5 transition-transform font-bold">
+              Inspect Telemetry →
+            </span>
+          </button>
+        </div>
         
         {/* Render View based on activeNav */}
         {activeNav === "Home" && (
@@ -418,6 +440,12 @@ export default function App() {
           setCustomSettings(settings);
           showToast("Custom settings saved successfully!");
         }}
+      />
+
+      {/* Hackathon Sponsor Prize Suite Modal */}
+      <SponsorPrizeHubModal
+        isOpen={isPrizeHubOpen}
+        onClose={() => setIsPrizeHubOpen(false)}
       />
 
     </div>

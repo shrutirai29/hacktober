@@ -1,0 +1,34 @@
+# DigitalOcean App Platform & GPU Droplet Spec
+# Target Prize Category: Best Use of DigitalOcean ($200)
+
+name: checkmate-spatial-agent
+region: nyc
+features:
+  - buildpack-stack=ubuntu-22
+
+services:
+  - name: gemma-agent-api
+    github:
+      branch: master
+      deploy_on_push: true
+      repo: shruti-rai/friendly-hopper
+    source_dir: /
+    build_command: pip install -r requirements.txt
+    run_command: python backend/gemma_engine.py --port 8080
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    routes:
+      - path: /api
+
+static_sites:
+  - name: checkmate-frontend
+    github:
+      branch: master
+      deploy_on_push: true
+      repo: shruti-rai/friendly-hopper
+    source_dir: /
+    build_command: npm install && npm run build
+    output_dir: dist
+    routes:
+      - path: /
