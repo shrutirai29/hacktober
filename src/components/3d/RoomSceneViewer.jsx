@@ -40,7 +40,7 @@ export default function RoomSceneViewer({
   const [selectedObj, setSelectedObj] = useState(null);
   const [screenLabels, setScreenLabels] = useState([]);
   const [lightingMood, setLightingMood] = useState("golden"); // "golden" | "sunset" | "night"
-  const [isAutoRotating, setIsAutoRotating] = useState(false);
+  const [isAutoRotating, setIsAutoRotating] = useState(true);
 
   // Refs for 3D state
   const sceneRef = useRef(null);
@@ -205,9 +205,9 @@ export default function RoomSceneViewer({
     scene.background = null; // Transparent for seamless glassmorphic layering
     sceneRef.current = scene;
 
-    // 2. Camera (Isometric Perspective)
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
-    camera.position.set(13.5, 11, 13.5);
+    // 2. Camera (Cinematic Wide-Angle Perspective for Rich 3D Parallax)
+    const camera = new THREE.PerspectiveCamera(46, width / height, 0.1, 100);
+    camera.position.set(10.5, 8.6, 10.5);
     cameraRef.current = camera;
 
     // 3. Renderer
@@ -224,16 +224,19 @@ export default function RoomSceneViewer({
     mountRef.current.innerHTML = "";
     mountRef.current.appendChild(renderer.domElement);
 
-    // 4. Orbit Controls
+    // 4. Orbit Controls (Silky Smooth Full 360 Turntable & Parallax Orbit)
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.maxPolarAngle = Math.PI / 2.05; // Prevent going beneath floor
-    controls.minDistance = 5.5;
-    controls.maxDistance = 28;
+    controls.dampingFactor = 0.045;
+    controls.rotateSpeed = 0.85;
+    controls.zoomSpeed = 1.2;
+    controls.minPolarAngle = Math.PI / 10; // Allow looking from above
+    controls.maxPolarAngle = Math.PI / 2.05; // Prevent beneath floor
+    controls.minDistance = 4.2;
+    controls.maxDistance = 24;
     controls.target.set(0, 1.8, 0);
     controls.autoRotate = isAutoRotating;
-    controls.autoRotateSpeed = 1.1;
+    controls.autoRotateSpeed = 1.35; // Continuous smooth, mesmerizing spin
     controlsRef.current = controls;
 
     // 5. Cinematic Studio Lighting
@@ -919,6 +922,24 @@ export default function RoomSceneViewer({
 
     interactiveObjectsRef.current = interactiveMeshes;
     beaconRingsRef.current = beaconRings;
+
+    // 3D Floating Holographic Gemstone Pins above key belongings
+    const floatingPins = [];
+    const pinGeo = new THREE.OctahedronGeometry(0.12, 0);
+    roomItems.forEach(item => {
+      const pinMat = new THREE.MeshStandardMaterial({
+        color: item.color,
+        emissive: item.color,
+        emissiveIntensity: 0.7,
+        roughness: 0.15,
+        metalness: 0.85
+      });
+      const pinMesh = new THREE.Mesh(pinGeo, pinMat);
+      pinMesh.position.set(item.pos[0], item.pos[1] + 0.45, item.pos[2]);
+      roomGroup.add(pinMesh);
+      floatingPins.push({ mesh: pinMesh, baseY: item.pos[1] + 0.45 });
+    });
+
     materialsRef.current = {
       windowGlass: windowGlassMat,
       monGlow: monGlowMat,
@@ -1006,6 +1027,13 @@ export default function RoomSceneViewer({
         posArray[i * 3] += Math.sin(elapsed * 0.5 + i) * 0.001;
       }
       particleGeo.attributes.position.needsUpdate = true;
+
+      // Animate floating 3D gemstone pins (spin & bob in space)
+      floatingPins.forEach((p, idx) => {
+        p.mesh.rotation.y = elapsed * 2.2 + idx;
+        p.mesh.rotation.z = Math.sin(elapsed * 2 + idx) * 0.2;
+        p.mesh.position.y = p.baseY + Math.sin(elapsed * 3.2 + idx) * 0.05;
+      });
 
       controls.update();
       renderer.render(scene, camera);
@@ -1113,7 +1141,7 @@ export default function RoomSceneViewer({
       </div>
 
       {/* Main Viewport Container */}
-      <div className="relative w-full h-[370px] sm:h-[410px] md:h-[450px] rounded-2xl overflow-hidden bg-gradient-to-b from-white/75 via-slate-50/40 to-indigo-50/25 backdrop-blur-md border border-white/80 shadow-inner select-none">
+      <div className="relative w-full h-[430px] sm:h-[480px] md:h-[530px] rounded-2xl overflow-hidden bg-gradient-to-b from-white/75 via-slate-50/40 to-indigo-50/25 backdrop-blur-md border border-white/80 shadow-inner select-none">
         
         {viewMode === "3d" ? (
           <>
@@ -1200,18 +1228,18 @@ export default function RoomSceneViewer({
                 </button>
               </div>
 
-              {/* Auto Orbit Toggle */}
+              {/* Auto Orbit 360 Turntable Toggle */}
               <button
                 onClick={() => setIsAutoRotating(!isAutoRotating)}
-                title="Turntable Auto Rotation"
-                className={`p-1.5 sm:px-2.5 sm:py-1 rounded-2xl border text-[10px] font-bold backdrop-blur-md flex items-center gap-1 shadow-xs transition-all cursor-pointer ${
+                title="Continuous 360 Turntable Rotation"
+                className={`px-3 py-1.5 rounded-2xl border text-xs font-black backdrop-blur-md flex items-center gap-1.5 shadow-sm transition-all cursor-pointer ${
                   isAutoRotating
-                    ? 'bg-[#7054E8] text-white border-purple-400 shadow-indigo-600/20'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-400 shadow-indigo-600/30 scale-102'
                     : 'bg-white/85 text-slate-700 border-white/80 hover:bg-white'
                 }`}
               >
-                <Sparkles className={`w-3 h-3 ${isAutoRotating ? 'text-amber-300 animate-spin' : 'text-[#7054E8]'}`} />
-                <span className="hidden sm:inline">{isAutoRotating ? 'Auto-Orbiting' : 'Auto-Orbit'}</span>
+                <Sparkles className={`w-3.5 h-3.5 ${isAutoRotating ? 'text-amber-300 animate-spin' : 'text-[#7054E8]'}`} />
+                <span>{isAutoRotating ? '360° Rotating ✦' : 'Start 360° Spin'}</span>
               </button>
 
             </div>
