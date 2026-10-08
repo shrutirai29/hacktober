@@ -34,7 +34,7 @@ export class LocalAIProvider {
 export class WebLLMProvider extends LocalAIProvider {
   constructor() {
     const cfg = AI_CONFIG.webllm;
-    super(cfg.providerId, cfg.providerName, `${cfg.modelName} (${cfg.license})`, cfg.license);
+    super(cfg.providerId, cfg.providerName, cfg.modelName, cfg.license);
     this.modelId = cfg.modelId;
     this.engine = null;
     this.isWebGPUSupported = false;
@@ -159,7 +159,7 @@ Directives:
 export class LocalOllamaProvider extends LocalAIProvider {
   constructor() {
     const cfg = AI_CONFIG.ollama;
-    super(cfg.providerId, cfg.providerName, `${cfg.modelName} (${cfg.license})`, cfg.license);
+    super(cfg.providerId, cfg.providerName, cfg.modelName, cfg.license);
     this.backendUrl = cfg.endpoint;
     this.tagsUrl = cfg.tagsEndpoint;
   }
@@ -232,7 +232,7 @@ ${userQuery}
 export class MLPFallbackProvider extends LocalAIProvider {
   constructor() {
     const cfg = AI_CONFIG.mlp;
-    super(cfg.providerId, cfg.providerName, `${cfg.modelName} (${cfg.license})`, cfg.license);
+    super(cfg.providerId, cfg.providerName, cfg.modelName, cfg.license);
     this.isReady = true;
     this.status = 'READY';
     this.statusMessage = 'On-device neural fallback ready.';
