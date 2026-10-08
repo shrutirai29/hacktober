@@ -127,7 +127,7 @@ export function evaluateDeterministicSafety(userQuery, context, aiProposedRespon
     const critical = overrides.find(o => o.severity === 'CRITICAL') || overrides[0];
     
     // Check if the AI's proposed response was unsafe
-    const aiProposedYes = /\b(yes, you can continue|go ahead|safe to proceed|keep hiking)\b/i.test(aiProposedResponse);
+    const aiProposedYes = /\b(yes|continue|proceed|go ahead|safe to proceed|keep hiking|manageable|you can continue|totally safe)\b/i.test(aiProposedResponse);
 
     let safetyResponse = `⚠️ [DETERMINISTIC SAFETY OVERRIDE ACTIVE — ${critical.rule}]\n\n${critical.directive}\n\n• Current Altitude: ${context.elevation}\n• Ambient Temp: ${context.temperature}\n• Trail Risk Score: ${context.riskScore}/100\n• Turnaround Window: ${context.turnaroundTime} (Current: ${context.currentTime})\n• Terrain Hazard: ${context.terrain}\n\n💡 Backcountry Directive: Safe mountaineers turn back when conditions exceed cutoffs. The mountain will always be there tomorrow.`;
 

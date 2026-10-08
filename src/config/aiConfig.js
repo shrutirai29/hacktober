@@ -42,7 +42,7 @@ export const AI_CONFIG = {
     providerName: 'Canopy On-Device Emergency Net',
     modelId: 'canopy-backcountry-mlp-v1',
     modelName: 'Canopy Neural Fallback (3-Layer Deep MLP)',
-    modelType: 'open-weight',
+    modelType: 'custom on-device neural fallback',
     license: 'MIT',
     sourceUrl: 'https://github.com/shrutirai29/hacktober',
     runtime: 'WebAssembly / JavaScript CPU',

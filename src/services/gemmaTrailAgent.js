@@ -63,14 +63,16 @@ export async function askGemmaAgent(trail, userQuery, options = {}) {
     runtime: result.runtime,
     isLocal: result.isLocal,
     local: result.local,
-    offline: result.offline,
+    offlineCapable: result.offlineCapable ?? true,
+    offlineVerified: result.offlineVerified ?? false,
+    fallback: result.fallback,
     isFallback: result.isFallback,
     fallbackFrom: result.fallbackFrom,
+    fallbackReason: result.fallbackReason,
     latency: result.latency,
     isDeterministicOverride: result.isDeterministicOverride,
     safetyRuleTriggered: result.safetyRuleTriggered,
     contextUsed: result.contextUsed,
-    offlineVerified: true,
     neuralResult
   };
 }

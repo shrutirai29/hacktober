@@ -4,7 +4,7 @@
 
 > *"Build something with open-source/open-weight AI at its core that gets people off the screen and into the world."*
 
-[![Open-Weight AI](https://img.shields.io/badge/Open--Weight_AI-SmolLM2_%2F_Gemma_2_%2F_Deep_MLP-285943.svg)](https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct)
+[![Open-Weight AI](https://img.shields.io/badge/Open--Weight_AI-SmolLM2_%2F_Gemma_2-285943.svg)](https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct)
 [![Inference Runtime](https://img.shields.io/badge/Runtime-WebGPU_%2B_Local_Daemon-16a34a.svg)](#)
 [![Deterministic Safety](https://img.shields.io/badge/Safety_Layer-Deterministic_Hard_Overrides-dc2626.svg)](#)
 [![License: Apache 2.0 / MIT](https://img.shields.io/badge/License-Apache_2.0_%2F_MIT-blue.svg)](LICENSE)
@@ -26,7 +26,7 @@ REAL-WORLD SENSORS & ENVIRONMENT
              ↓
 CANOPY TELEMETRY CONTEXT ENGINE
              ↓
-OPEN-WEIGHT LOCAL AI (SmolLM2 / Gemma 2 / Deep MLP)
+OPEN-WEIGHT LOCAL AI (SmolLM2 / Gemma 2) + NEURAL FALLBACK (Canopy Net)
              ↓
 DETERMINISTIC SAFETY ENGINE (Final Authority)
              ↓
@@ -66,7 +66,7 @@ Canopy implements a strict, pluggable, multi-tiered local AI provider architectu
               │     Runtime: Localhost:11434 (Zero Cloud)               │
               │                                                         │
               │  3. EMERGENCY FALLBACK: Canopy Backcountry Net          │
-              │     Model: 3-Layer Deep Neural Net (MIT)                │
+              │     Model: Custom On-Device Neural Fallback (MIT)       │
               │     Runtime: Pure JavaScript CPU (Zero Dependencies)    │
               └────────────────────────────┬────────────────────────────┘
                                            │ Proposed Response
@@ -249,7 +249,7 @@ For judges and developer verification, Canopy includes an inspectable diagnostic
 
 | Challenge Criterion | Implementation Status | Technical Verification |
 | :--- | :---: | :--- |
-| **1. OPEN-WEIGHT AI** | Verified Active | `SmolLM2-135M-Instruct` (Apache 2.0), `Gemma 2 9B-IT` (Gemma License), and Canopy Net (MIT). |
+| **1. OPEN-WEIGHT AI** | Verified Active | Primary `SmolLM2-135M-Instruct` (Apache 2.0), optional `Gemma 2 9B-IT` (Gemma License), with Canopy Net on-device neural fallback (MIT). |
 | **2. LOCAL INFERENCE** | Verified Active | Browser WebGPU via `@mlc-ai/web-llm` with zero cloud tokens consumed. |
 | **3. OFFLINE SOVEREIGN** | Verified Active | Operates 100% disconnected after first-run model caching. |
 | **4. ZERO TELEMETRY LEAKS** | Verified Active | Zero external tracker endpoints or remote AI APIs. Coordinates and queries stay in device RAM. |

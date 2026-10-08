@@ -39,17 +39,25 @@ export class WebLLMProvider extends LocalAIProvider {
     this.engine = null;
     this.isWebGPUSupported = false;
     this.isLoading = false;
+    this.status = 'UNAVAILABLE'; // 'UNAVAILABLE' | 'CHECKING' | 'LOADING' | 'READY' | 'INFERENCE' | 'ERROR'
   }
 
   async init(onProgress) {
-    if (this.isReady && this.engine) return true;
+    if (this.isReady && this.engine) {
+      this.status = 'READY';
+      return true;
+    }
     if (this.isLoading) return false;
+
+    this.status = 'CHECKING';
+    this.statusMessage = 'Checking WebGPU capability...';
+    if (onProgress) onProgress({ progress: 0.05, text: this.statusMessage });
 
     // Check WebGPU availability
     if (typeof navigator === 'undefined' || !('gpu' in navigator)) {
       this.isWebGPUSupported = false;
-      this.status = 'OFFLINE_FALLBACK';
-      this.statusMessage = 'WebGPU is not supported in this browser. Running offline neural safety assistant.';
+      this.status = 'UNAVAILABLE';
+      this.statusMessage = 'WebGPU is not supported in this environment.';
       this.isReady = false;
       if (onProgress) onProgress({ progress: 1.0, text: this.statusMessage });
       return false;
@@ -67,6 +75,7 @@ export class WebLLMProvider extends LocalAIProvider {
       const progressCallback = (report) => {
         const rawProgress = report.progress || 0;
         this.loadProgress = Math.min(100, Math.round(rawProgress * 100));
+        this.status = 'LOADING';
         this.statusMessage = report.text || `Loading model: ${this.loadProgress}%`;
         if (onProgress) {
           onProgress({
@@ -91,8 +100,8 @@ export class WebLLMProvider extends LocalAIProvider {
       console.warn("WebLLM initialization failed or unsupported:", err);
       this.isReady = false;
       this.isLoading = false;
-      this.status = 'OFFLINE_FALLBACK';
-      this.statusMessage = 'Local AI unavailable — using offline safety assistant.';
+      this.status = 'ERROR';
+      this.statusMessage = err?.message || 'Local AI unavailable — using offline safety assistant.';
       if (onProgress) onProgress({ progress: 1.0, text: this.statusMessage, error: err });
       return false;
     }
@@ -103,6 +112,7 @@ export class WebLLMProvider extends LocalAIProvider {
       return null; // Will fallback through adapter hierarchy
     }
 
+    this.status = 'INFERENCE';
     const systemPrompt = `${AI_CONFIG.systemPrompt}
 Structured Canopy Telemetry Context:
 • Trail: ${context.trail} (${context.elevation})
@@ -129,6 +139,7 @@ Directives:
         max_tokens: 350
       });
 
+      this.status = 'READY';
       const latency = Math.round(performance.now() - startTime);
       const text = completion.choices?.[0]?.message?.content?.trim();
       return {
@@ -138,6 +149,7 @@ Directives:
       };
     } catch (err) {
       console.warn("WebLLM generation error:", err);
+      this.status = 'ERROR';
       return null;
     }
   }
@@ -151,7 +163,7 @@ Directives:
     }
     this.isReady = false;
     this.isLoading = false;
-    this.status = 'UNINITIALIZED';
+    this.status = 'UNAVAILABLE';
   }
 }
 
@@ -488,6 +500,7 @@ export class CanopyAIEngine {
     this.isFailureSimulated = false;
     this.loadProgress = { progress: 0, text: '' };
     this.listeners = [];
+    this.lastResponseMetadata = null;
   }
 
   subscribe(listener) {
@@ -504,15 +517,58 @@ export class CanopyAIEngine {
   }
 
   // Truthful status mapping as required by Touch Grass guidelines:
-  // 'LOADING' | 'LOCAL AI ACTIVE' | 'LOCAL AI ERROR' | 'OFFLINE FALLBACK' | 'OLLAMA ACTIVE'
   getStatus() {
     if (this.isFailureSimulated) {
       return {
         state: 'OFFLINE FALLBACK',
-        badge: 'OFFLINE SAFETY FALLBACK',
+        badge: 'MLP · Canopy Fallback',
+        subBadge: 'OFFLINE SAFETY FALLBACK',
         label: 'Local AI unavailable — using offline safety assistant.',
         provider: this.providers.mlp.name,
+        actualProvider: 'mlp',
+        actualModel: this.providers.mlp.modelName,
         isFallback: true
+      };
+    }
+
+    // If an inference was recently executed, report the ACTUAL provider that generated the answer
+    if (this.lastResponseMetadata) {
+      const { actualProvider, actualModel, fallback, fallbackFrom } = this.lastResponseMetadata;
+      if (actualProvider === 'webllm') {
+        return {
+          state: 'LOCAL AI ACTIVE',
+          badge: 'WEBLLM · SmolLM2-135M',
+          subBadge: 'LOCAL · WEBGPU',
+          label: `${actualModel} Running via WebGPU (100% On-Device)`,
+          provider: this.providers.webllm.name,
+          actualProvider: 'webllm',
+          actualModel,
+          isFallback: false
+        };
+      }
+      if (actualProvider === 'ollama') {
+        return {
+          state: 'OLLAMA ACTIVE',
+          badge: 'OLLAMA · Gemma 2 9B',
+          subBadge: 'LOCAL · FALLBACK',
+          label: `${actualModel} (Localhost:11434)`,
+          provider: this.providers.ollama.name,
+          actualProvider: 'ollama',
+          actualModel,
+          isFallback: fallback
+        };
+      }
+      return {
+        state: 'OFFLINE FALLBACK',
+        badge: 'MLP · Canopy Neural Fallback',
+        subBadge: fallback ? 'EMERGENCY FALLBACK' : 'ON-DEVICE NEURAL',
+        label: fallback
+          ? `Fell back from ${fallbackFrom || 'WebLLM'} to on-device neural assistant.`
+          : 'Canopy Neural Safety Net (Zero Dependencies)',
+        provider: this.providers.mlp.name,
+        actualProvider: 'mlp',
+        actualModel,
+        isFallback: fallback
       };
     }
 
@@ -522,56 +578,50 @@ export class CanopyAIEngine {
       if (active.isLoading) {
         return {
           state: 'LOADING',
-          badge: 'LOADING LOCAL AI',
+          badge: 'LOADING WEBLLM',
+          subBadge: `${active.loadProgress}%`,
           label: active.statusMessage || `Loading ${active.modelName} (${active.loadProgress}%)`,
           progress: active.loadProgress,
           provider: active.name,
+          actualProvider: 'webllm',
+          actualModel: active.modelName,
           isFallback: false
         };
       }
-      if (active.isReady) {
+      if (active.isReady && active.engine) {
         return {
           state: 'LOCAL AI ACTIVE',
-          badge: 'LOCAL AI ACTIVE',
+          badge: 'WEBLLM · SmolLM2-135M',
+          subBadge: 'LOCAL · WEBGPU',
           label: `${active.modelName} Running via WebGPU (100% On-Device)`,
           provider: active.name,
+          actualProvider: 'webllm',
+          actualModel: active.modelName,
           isFallback: false
         };
       }
-      if (active.status === 'UNINITIALIZED') {
-        const hasGpu = typeof navigator !== 'undefined' && 'gpu' in navigator;
-        if (!hasGpu) {
-          return {
-            state: 'OFFLINE FALLBACK',
-            badge: 'OFFLINE FALLBACK',
-            label: 'Local AI unavailable — using offline safety assistant.',
-            provider: this.providers.mlp.name,
-            isFallback: true
-          };
-        }
-        return {
-          state: 'LOCAL AI ACTIVE',
-          badge: 'LOCAL AI STANDBY',
-          label: `${active.modelName} (WebGPU Ready)`,
-          provider: active.name,
-          isFallback: false
-        };
-      }
-      if (active.status === 'OFFLINE_FALLBACK' || !active.isWebGPUSupported) {
+      const hasGpu = typeof navigator !== 'undefined' && 'gpu' in navigator;
+      if (!hasGpu || active.status === 'UNAVAILABLE' || active.status === 'ERROR') {
         return {
           state: 'OFFLINE FALLBACK',
-          badge: 'OFFLINE FALLBACK',
-          label: 'Local AI unavailable — using offline safety assistant.',
+          badge: 'MLP · Canopy Neural Fallback',
+          subBadge: 'EMERGENCY FALLBACK',
+          label: 'WebGPU unavailable — automatically using offline safety net.',
           provider: this.providers.mlp.name,
+          actualProvider: 'mlp',
+          actualModel: this.providers.mlp.modelName,
           isFallback: true
         };
       }
       return {
-        state: 'LOCAL AI ERROR',
-        badge: 'LOCAL AI ERROR',
-        label: active.statusMessage || 'WebLLM initialization error.',
+        state: 'LOCAL AI ACTIVE',
+        badge: 'WEBLLM · SmolLM2-135M',
+        subBadge: 'STANDBY · WEBGPU',
+        label: `${active.modelName} (WebGPU Ready to Load)`,
         provider: active.name,
-        isFallback: true
+        actualProvider: 'webllm',
+        actualModel: active.modelName,
+        isFallback: false
       };
     }
 
@@ -579,17 +629,23 @@ export class CanopyAIEngine {
       if (active.isReady) {
         return {
           state: 'OLLAMA ACTIVE',
-          badge: 'OLLAMA ACTIVE',
+          badge: 'OLLAMA · Gemma 2 9B',
+          subBadge: 'LOCAL · FALLBACK',
           label: `${active.modelName} (Localhost:11434)`,
           provider: active.name,
+          actualProvider: 'ollama',
+          actualModel: active.modelName,
           isFallback: false
         };
       }
       return {
         state: 'OFFLINE FALLBACK',
-        badge: 'OFFLINE FALLBACK',
-        label: 'Ollama daemon unreachable — using offline safety assistant.',
+        badge: 'MLP · Canopy Neural Fallback',
+        subBadge: 'EMERGENCY FALLBACK',
+        label: 'Ollama daemon unreachable — using offline safety net.',
         provider: this.providers.mlp.name,
+        actualProvider: 'mlp',
+        actualModel: this.providers.mlp.modelName,
         isFallback: true
       };
     }
@@ -597,9 +653,12 @@ export class CanopyAIEngine {
     // MLP Fallback
     return {
       state: 'OFFLINE FALLBACK',
-      badge: 'OFFLINE SAFETY ENGINE',
+      badge: 'MLP · Canopy Neural Fallback',
+      subBadge: 'EMERGENCY FALLBACK',
       label: 'Canopy Neural Safety Net (Zero Dependencies)',
       provider: this.providers.mlp.name,
+      actualProvider: 'mlp',
+      actualModel: this.providers.mlp.modelName,
       isFallback: true
     };
   }
@@ -631,108 +690,157 @@ export class CanopyAIEngine {
     // 1. Build Structured Canonical Canopy Context
     const context = buildCanopyContext(rawContext);
 
+    // Dynamic offline check: only true if network is explicitly offline
+    const isActuallyOffline = typeof navigator !== 'undefined' && 'onLine' in navigator
+      ? navigator.onLine === false
+      : false;
+
     // 2. Check if Failure Simulation is triggered
     if (this.isFailureSimulated) {
       this.notifyStatus(this.getStatus());
       const fallbackCheck = evaluateDeterministicSafety(userQuery, context, null);
       const fallbackMsg = `⚠️ LOCAL AI UNAVAILABLE — USING OFFLINE SAFETY ASSISTANT\n\n[Deterministic Safety Engine Active]\n• Trail: ${context.trail}\n• Checkpoint: ${context.location} (${context.elevation})\n• Risk Score: ${context.riskScore}/100\n• Turnaround Window: ${context.turnaroundTime}\n\nDeterministic Guidance:\n${fallbackCheck.finalResponse}`;
       
-      return {
-        response: fallbackMsg,
-        modelName: "Offline Deterministic Safety Fallback",
-        modelLicense: "MIT / Open-Source Heuristics",
-        providerName: "Deterministic Safety Fallback Engine",
+      const simMeta = {
         actualProvider: "mlp",
         actualModel: "Offline Deterministic Safety Fallback",
-        runtime: "Local Heuristics / Deterministic",
-        isLocal: true,
+        runtime: "Browser",
         local: true,
-        offline: true,
-        isFallback: true,
+        offlineCapable: true,
+        offlineVerified: isActuallyOffline,
+        fallback: true,
         fallbackFrom: this.activeProviderKey,
-        latency: 2,
+        fallbackReason: "Model failure simulation triggered by user/test harness",
+        latency: 2
+      };
+      this.lastResponseMetadata = simMeta;
+      this.notifyStatus(this.getStatus());
+
+      return {
+        response: fallbackMsg,
+        modelName: simMeta.actualModel,
+        modelLicense: "MIT / Open-Source Heuristics",
+        providerName: "Deterministic Safety Fallback Engine",
+        ...simMeta,
+        isLocal: true,
+        isFallback: true,
         isDeterministicOverride: true,
         safetyRuleTriggered: fallbackCheck.primaryRule || "MODEL_OFFLINE_FAILSAFE",
         contextUsed: context,
-        offlineVerified: true,
         isModelUnavailable: true
       };
     }
 
     // 3. Fallback Hierarchy Execution: WebLLM -> Ollama -> MLP
-    const hierarchy = [];
-    if (this.activeProviderKey === 'webllm') {
-      hierarchy.push({ key: 'webllm', provider: this.providers.webllm });
-      hierarchy.push({ key: 'ollama', provider: this.providers.ollama });
-      hierarchy.push({ key: 'mlp', provider: this.providers.mlp });
-    } else if (this.activeProviderKey === 'ollama') {
-      hierarchy.push({ key: 'ollama', provider: this.providers.ollama });
-      hierarchy.push({ key: 'mlp', provider: this.providers.mlp });
-    } else {
-      hierarchy.push({ key: 'mlp', provider: this.providers.mlp });
-    }
-
     let aiResult = null;
     let usedProvider = null;
-    let isFallback = false;
+    let fallback = false;
     let fallbackFrom = null;
+    let fallbackReason = null;
 
-    for (let i = 0; i < hierarchy.length; i++) {
-      const step = hierarchy[i];
-      const p = step.provider;
-
+    // STEP A: Try WebLLM if primary or active
+    if (this.activeProviderKey === 'webllm') {
+      const webllm = this.providers.webllm;
       try {
-        if (step.key === 'webllm') {
-          if (p.status === 'UNINITIALIZED') {
-            await p.init();
-          }
-          if (p.isReady && p.engine) {
-            aiResult = await p.generateResponse(userQuery, context);
-            if (aiResult && aiResult.text) {
-              usedProvider = p;
-              break;
-            }
-          }
-        } else if (step.key === 'ollama') {
-          if (p.status === 'UNINITIALIZED') {
-            await p.init();
-          }
-          if (p.isReady) {
-            aiResult = await p.generateResponse(userQuery, context);
-            if (aiResult && aiResult.text) {
-              usedProvider = p;
-              if (i > 0) {
-                isFallback = true;
-                fallbackFrom = hierarchy[0].key;
-              }
-              break;
-            }
-          }
-        } else if (step.key === 'mlp') {
-          if (!p.isReady) {
-            await p.init();
-          }
-          aiResult = await p.generateResponse(userQuery, context);
+        if (webllm.status === 'UNAVAILABLE' || webllm.status === 'CHECKING') {
+          await webllm.init();
+        }
+        if (webllm.isReady && webllm.engine) {
+          aiResult = await webllm.generateResponse(userQuery, context);
           if (aiResult && aiResult.text) {
-            usedProvider = p;
-            if (i > 0) {
-              isFallback = true;
-              fallbackFrom = hierarchy[0].key;
-            }
-            break;
+            usedProvider = webllm;
+            fallback = false;
           }
         }
       } catch (err) {
-        console.warn(`Provider [${step.key}] failed during inference:`, err);
+        fallbackReason = `WebLLM execution error: ${err?.message || err}`;
+      }
+
+      if (!usedProvider) {
+        fallback = true;
+        fallbackFrom = 'webllm';
+        if (!fallbackReason) {
+          fallbackReason = webllm.status === 'UNAVAILABLE'
+            ? 'WebGPU unavailable in environment'
+            : (webllm.statusMessage || 'WebLLM initialization or inference failed');
+        }
+      }
+    }
+
+    // STEP B: Try Ollama (if WebLLM failed or active is ollama)
+    // Only executed if WebLLM did NOT already produce an answer!
+    if (!usedProvider && (this.activeProviderKey === 'webllm' || this.activeProviderKey === 'ollama')) {
+      const ollama = this.providers.ollama;
+      try {
+        if (ollama.status === 'UNINITIALIZED' || ollama.status === 'OFFLINE_FALLBACK') {
+          await ollama.init();
+        }
+        if (ollama.isReady) {
+          aiResult = await ollama.generateResponse(userQuery, context);
+          if (aiResult && aiResult.text) {
+            usedProvider = ollama;
+            if (this.activeProviderKey === 'webllm') {
+              fallback = true;
+              fallbackFrom = 'webllm';
+            } else {
+              fallback = false;
+              fallbackFrom = null;
+              fallbackReason = null;
+            }
+          }
+        }
+      } catch (err) {
+        if (!fallbackReason) fallbackReason = `Ollama execution error: ${err?.message || err}`;
+      }
+
+      if (!usedProvider) {
+        if (this.activeProviderKey === 'webllm') {
+          fallback = true;
+          fallbackFrom = 'ollama'; // Fell through WebLLM and Ollama
+          fallbackReason = fallbackReason
+            ? `${fallbackReason}; Ollama daemon unreachable on port 11434`
+            : 'Ollama daemon unreachable on port 11434';
+        } else if (this.activeProviderKey === 'ollama') {
+          fallback = true;
+          fallbackFrom = 'ollama';
+          fallbackReason = 'Ollama daemon unreachable on port 11434';
+        }
+      }
+    }
+
+    // STEP C: Try MLP (Emergency Fallback or explicitly selected)
+    // Only executed if BOTH WebLLM and Ollama failed (or active is mlp)!
+    if (!usedProvider) {
+      const mlp = this.providers.mlp;
+      try {
+        if (!mlp.isReady) {
+          await mlp.init();
+        }
+        aiResult = await mlp.generateResponse(userQuery, context);
+        if (aiResult && aiResult.text) {
+          usedProvider = mlp;
+          if (this.activeProviderKey !== 'mlp') {
+            fallback = true;
+            if (!fallbackFrom) fallbackFrom = this.activeProviderKey;
+            if (!fallbackReason) fallbackReason = 'Primary providers unavailable — executing on-device neural fallback';
+          } else {
+            fallback = false;
+            fallbackFrom = null;
+            fallbackReason = null;
+          }
+        }
+      } catch (err) {
+        console.warn("MLP fallback execution error:", err);
       }
     }
 
     // Absolute failsafe if all returned empty
     if (!usedProvider || !aiResult || !aiResult.text) {
       usedProvider = this.providers.mlp;
-      aiResult = await this.providers.mlp.generateResponse(userQuery, context);
-      isFallback = true;
-      fallbackFrom = hierarchy[0].key;
+      aiResult = { text: "Safety protocol active: Halt ascent and evaluate mountain weather.", latency: 1 };
+      fallback = true;
+      fallbackFrom = fallbackFrom || 'system';
+      fallbackReason = 'All providers exhausted; deterministic fail-safe response generated.';
     }
 
     const rawResponse = aiResult?.text || "Safety protocol active: Halt ascent and evaluate mountain weather.";
@@ -746,29 +854,38 @@ export class CanopyAIEngine {
     }
 
     const runtimeDesc = usedProvider.id === 'webllm'
-      ? 'WebGPU (100% In-Browser)'
+      ? 'WebGPU'
       : usedProvider.id === 'ollama'
-      ? 'Localhost:11434 (Local Daemon)'
-      : 'Embedded In-Browser Neural Net';
+      ? 'Ollama (Localhost:11434)'
+      : 'Browser';
+
+    const metadata = {
+      actualProvider: usedProvider.id,
+      actualModel: usedProvider.modelName,
+      runtime: runtimeDesc,
+      local: true,
+      offlineCapable: true,
+      offlineVerified: isActuallyOffline,
+      fallback: fallback,
+      fallbackFrom: fallbackFrom,
+      fallbackReason: fallbackReason,
+      latency: aiResult?.latency || 10
+    };
+
+    this.lastResponseMetadata = metadata;
+    this.notifyStatus(this.getStatus());
 
     return {
       response: safetyCheck.finalResponse,
       modelName: usedProvider.modelName,
       modelLicense: usedProvider.license,
       providerName: usedProvider.name,
-      actualProvider: usedProvider.id,
-      actualModel: usedProvider.modelName,
-      runtime: runtimeDesc,
+      ...metadata,
       isLocal: true,
-      local: true,
-      offline: true,
-      isFallback: isFallback,
-      fallbackFrom: fallbackFrom,
-      latency: aiResult?.latency || 10,
+      isFallback: fallback,
       isDeterministicOverride: safetyCheck.hasOverride,
       safetyRuleTriggered: safetyCheck.primaryRule,
       contextUsed: context,
-      offlineVerified: true,
       isModelUnavailable: false
     };
   }

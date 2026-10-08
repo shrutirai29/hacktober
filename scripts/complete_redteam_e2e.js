@@ -68,7 +68,7 @@ async function runCompleteRedTeam() {
   const webllmInit = await webllm.init();
   const webllmStatus = webllm.status;
   logResult('03', 'Open-Weight AI Authenticity & WebGPU Detection', 
-    (webllmStatus === 'OFFLINE_FALLBACK' && !webllm.isWebGPUSupported) ? 'PASS_WITH_LIMITATION' : 'PASS',
+    (webllmStatus === 'UNAVAILABLE' && !webllm.isWebGPUSupported) ? 'PASS_WITH_LIMITATION' : 'PASS',
     `Configured model: ${webllm.modelName} (${webllm.license}). Status in Node: ${webllmStatus}`,
     'Browser WebGPU required for CreateMLCEngine. In headless Node.js, gracefully falls back to local MLP.');
 
@@ -78,9 +78,9 @@ async function runCompleteRedTeam() {
     userQuery: 'What should I carry?',
     rawContext: { trail: { name: 'Hampta Pass' }, elevation: '4,000m', temperature: '5°C' }
   });
-  const fallbackTruth = fbRes.actualProvider === 'mlp' && fbRes.isFallback === true && fbRes.fallbackFrom === 'webllm';
+  const fallbackTruth = fbRes.actualProvider === 'mlp' && (fbRes.fallback === true || fbRes.isFallback === true) && (fbRes.fallbackFrom === 'ollama' || fbRes.fallbackFrom === 'webllm');
   logResult('04', 'Provider Fallback & Truthful Metadata', fallbackTruth ? 'PASS' : 'FAIL',
-    `Active: webllm -> Actual: ${fbRes.actualProvider} | isFallback: ${fbRes.isFallback} | fallbackFrom: ${fbRes.fallbackFrom}`);
+    `Active: webllm -> Actual: ${fbRes.actualProvider} | fallback: ${fbRes.fallback} | fallbackFrom: ${fbRes.fallbackFrom} | reason: ${fbRes.fallbackReason}`);
 
   // --- 5. MODEL FAILURE SIMULATION TEST ---
   canopyAI.simulateFailure(true);

@@ -172,7 +172,7 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
           <div className="p-3.5 rounded-2xl bg-[#E2EFE5] border border-[#C8DEC8] flex flex-col items-center justify-center space-y-1">
             <span className="text-lg">📦</span>
             <strong className="text-xs text-[#1A2E22]">OPEN WEIGHTS</strong>
-            <span className="text-[10px] text-[#486350]">SmolLM2-135M / Deep MLP</span>
+            <span className="text-[10px] text-[#486350]">SmolLM2-135M / Gemma 2</span>
           </div>
 
           <div className="hidden md:flex items-center justify-center text-[#285943]">
@@ -423,9 +423,13 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
                 </div>
               ) : demoResponse ? (
                 <div>
-                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#C8DEC8] text-[10px] text-[#486350]">
-                    <span>Provider: {demoResponse.providerName} | Model: {demoResponse.modelName}</span>
-                    <span className={demoResponse.isDeterministicOverride ? "text-rose-700 font-bold" : "text-emerald-700 font-bold"}>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 mb-2 border-b border-[#C8DEC8] text-[10px] text-[#486350] gap-1">
+                    <span className="font-mono">
+                      <strong>Actual Provider:</strong> {demoResponse.actualProvider ? demoResponse.actualProvider.toUpperCase() : demoResponse.providerName}
+                      {' '}({demoResponse.actualModel || demoResponse.modelName})
+                      {demoResponse.fallback && <span className="ml-1 text-amber-700 font-bold">[FALLBACK from {demoResponse.fallbackFrom || 'WebLLM'}]</span>}
+                    </span>
+                    <span className={demoResponse.isDeterministicOverride ? "text-rose-700 font-bold font-mono" : "text-emerald-700 font-bold font-mono"}>
                       {demoResponse.isDeterministicOverride ? "⚠️ HARD OVERRIDE ACTIVE" : "✅ SAFETY APPROVED"}
                     </span>
                   </div>

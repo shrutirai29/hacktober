@@ -134,10 +134,56 @@ export default function DiagnosticsView({ currentTrail }) {
       }
     }
 
+    // WebGPU Hardware Check
+    const webgpuAvailable = hasGpu;
+    const webgpuLabel = hasGpu ? 'AVAILABLE (Hardware WebGPU detected in navigator)' : 'UNAVAILABLE (No WebGPU in environment)';
+    const webgpuLevel = hasGpu ? 'GREEN' : 'RED';
+
+    // Model Loading State
+    let modelLoadingLabel = 'Unloaded (Standby)';
+    let modelLoadingLevel = 'YELLOW';
+    if (webllmEngine.isReady) {
+      modelLoadingLabel = `Loaded & Compiled in VRAM (${webllmEngine.modelName})`;
+      modelLoadingLevel = 'GREEN';
+    } else if (webllmEngine.isLoading) {
+      modelLoadingLabel = `Loading weights: ${webllmEngine.loadProgress}%`;
+      modelLoadingLevel = 'YELLOW';
+    }
+
+    // Inference State
+    let inferenceLabel = 'Standby (Ready for queries)';
+    let inferenceLevel = 'GREEN';
+    if (webllmEngine.status === 'INFERENCE') {
+      inferenceLabel = 'INFERENCE ACTIVE (Generating tokens via WebGPU)';
+      inferenceLevel = 'GREEN';
+    } else if (canopyAI.lastResponseMetadata) {
+      const m = canopyAI.lastResponseMetadata;
+      inferenceLabel = `Last inference: ${m.latency}ms via ${m.actualProvider.toUpperCase()} (${m.runtime})`;
+      inferenceLevel = 'GREEN';
+    }
+
+    // Fallback Hierarchy State
+    let fallbackLabel = 'Hierarchy Operational (WebLLM -> Ollama -> MLP)';
+    let fallbackLevel = 'GREEN';
+    if (canopyAI.lastResponseMetadata?.fallback) {
+      const fb = canopyAI.lastResponseMetadata;
+      fallbackLabel = `Fallback Engaged: ${fb.fallbackFrom || 'WebLLM'} -> ${fb.actualProvider.toUpperCase()} (${fb.fallbackReason || 'Primary provider uninitialized'})`;
+      fallbackLevel = 'YELLOW';
+    }
+
     setRuntimeState({
       webllmLoaded: isWebllmActive,
       webllmStatus: webllmStateLabel,
       webllmLevel,
+      webgpuAvailable,
+      webgpuLabel,
+      webgpuLevel,
+      modelLoadingLabel,
+      modelLoadingLevel,
+      inferenceLabel,
+      inferenceLevel,
+      fallbackLabel,
+      fallbackLevel,
       activeProviderName: providerName,
       activeModelName: modelName,
       activeModelLicense: modelLicense,
@@ -338,12 +384,44 @@ export default function DiagnosticsView({ currentTrail }) {
 
   const diagnosticItems = [
     {
+      id: 'webgpu',
+      title: 'WebGPU Hardware Support',
+      description: 'Browser WebGPU API and hardware shader execution context',
+      value: runtimeState.webgpuLabel,
+      level: runtimeState.webgpuLevel,
+      icon: Cpu
+    },
+    {
       id: 'webllm',
       title: 'WebLLM Engine State',
       description: 'In-browser WebGPU runtime execution of open-weight instruct models',
       value: runtimeState.webllmStatus,
       level: runtimeState.webllmLevel,
       icon: Cpu
+    },
+    {
+      id: 'model_loading',
+      title: 'Model Loading & VRAM Weights',
+      description: 'Quantized MLC weight compilation into browser device memory',
+      value: runtimeState.modelLoadingLabel,
+      level: runtimeState.modelLoadingLevel,
+      icon: Database
+    },
+    {
+      id: 'inference_state',
+      title: 'Inference Status & Latency',
+      description: 'Active generation state and response timing across provider hierarchy',
+      value: runtimeState.inferenceLabel,
+      level: runtimeState.inferenceLevel,
+      icon: Zap
+    },
+    {
+      id: 'fallback_hierarchy',
+      title: 'Fallback Hierarchy Status',
+      description: 'Automatic cascading: WebLLM (Primary) -> Ollama (Local) -> Canopy MLP (Emergency)',
+      value: runtimeState.fallbackLabel,
+      level: runtimeState.fallbackLevel,
+      icon: RefreshCw
     },
     {
       id: 'model_name',

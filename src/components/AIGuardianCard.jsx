@@ -112,19 +112,24 @@ export default function AIGuardianCard({ currentTrail, onOpenPromptInspector, au
           >
             <Code2 className="w-3.5 h-3.5" />
           </button>
-          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 ${
+          <div className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border flex items-center gap-1.5 ${
             providerInfo?.isFallback 
-              ? 'bg-amber-100 text-amber-800 border-amber-300' 
+              ? 'bg-amber-100 text-amber-900 border-amber-300' 
               : providerInfo?.state === 'LOADING'
-              ? 'bg-blue-100 text-blue-800 border-blue-300'
+              ? 'bg-blue-100 text-blue-900 border-blue-300'
               : 'bg-[#DCEBDA] text-[#285943] border-[#A8C8AF]'
           }`} title={providerInfo?.label}>
-            <span className={`w-1.5 h-1.5 rounded-full ${
+            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
               providerInfo?.state === 'LOADING' ? 'bg-blue-600 animate-ping' :
               providerInfo?.isFallback ? 'bg-amber-600' : 'bg-emerald-600 animate-pulse'
             }`} />
-            {providerInfo?.badge || 'LOCAL AI ACTIVE'}
-          </span>
+            <div className="flex flex-col text-left leading-tight">
+              <span className="font-extrabold">{providerInfo?.badge || 'LOCAL AI ACTIVE'}</span>
+              {providerInfo?.subBadge && (
+                <span className="text-[9px] font-mono opacity-80">{providerInfo.subBadge}</span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
