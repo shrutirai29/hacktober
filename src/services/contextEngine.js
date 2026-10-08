@@ -16,7 +16,7 @@ export function buildCanopyContext({
   isHardwareTelemetry = false,
   microclimate = null
 }) {
-  const cleanElevStr = String(elevation || '4270').replace(/,/g, '').replace(/[^\d.-]/g, '');
+  const cleanElevStr = String(elevation !== undefined && elevation !== null ? elevation : '4270').replace(/,/g, '').replace(/[^\d.-]/g, '');
   const elevNum = typeof elevation === 'number' ? elevation : parseInt(cleanElevStr || '4270', 10);
   
   const cleanTempStr = String(temperature !== undefined && temperature !== null ? temperature : '8').replace(/[^\d.-]/g, '');

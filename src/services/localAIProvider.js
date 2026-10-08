@@ -300,9 +300,12 @@ Recognized trail waypoints with monitored telemetry:
 ${availableList}`;
         return { text, latency: Math.round(performance.now() - startTime), tokens: null };
       } else {
-        const wpElevNum = parseInt(String(matchedWp.elev || '3000').replace(/[^\d]/g, ''), 10);
-        const elevDiff = (wpElevNum - context.elevationNum) / 1000;
-        const adjustedTemp = Math.round((context.tempNum - (elevDiff * 6.5)) * 10) / 10;
+        const wpElevNum = parseInt(String(matchedWp.elev || '3000').replace(/[^\d]/g, ''), 10) || 3000;
+        const currentElev = !isNaN(context.elevationNum) ? context.elevationNum : 3000;
+        const currentTemp = !isNaN(context.tempNum) ? context.tempNum : 8;
+        const elevDiff = (wpElevNum - currentElev) / 1000;
+        const computedTemp = Math.round((currentTemp - (elevDiff * 6.5)) * 10) / 10;
+        const adjustedTemp = !isNaN(computedTemp) ? computedTemp : currentTemp;
         const text = `Estimated conditions for waypoint "${matchedWp.name}" (${matchedWp.elev}):
 • Temperature: ~${adjustedTemp}°C (computed via 6.5°C/km environmental lapse rate)
 • Elevation: ${matchedWp.elev}
