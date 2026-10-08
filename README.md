@@ -8,7 +8,7 @@
 [![Inference Runtime](https://img.shields.io/badge/Runtime-WebGPU_%2B_Local_Daemon-16a34a.svg)](#)
 [![Deterministic Safety](https://img.shields.io/badge/Safety_Layer-Deterministic_Hard_Overrides-dc2626.svg)](#)
 [![License: Apache 2.0 / MIT](https://img.shields.io/badge/License-Apache_2.0_%2F_MIT-blue.svg)](LICENSE)
-[![Touch Grass Score](https://img.shields.io/badge/Touch_Grass_Score-20%2F20_(100%25)-forestgreen.svg)](#-touch-grass-alignment-rubric-2020)
+[![Challenge Alignment](https://img.shields.io/badge/Touch_Grass_Challenge-Verified_Alignment-forestgreen.svg)](#-10-touch-grass-alignment-rubric--judging-verification)
 
 ---
 
@@ -215,12 +215,23 @@ ollama run gemma2:9b
 
 ---
 
-## 🧪 9. Red Team End-to-End Verification Scenarios
+## 🧪 9. Red Team End-to-End Verification & Developer Diagnostics
 
-Run the automated Red Team test suite directly via Node:
+### Automated Test Suites
+Run the automated Red Team verification suites directly via Node:
 ```bash
+# Core Red Team Test Suite
 node scripts/redteam_audit.js
+
+# Complete 28-Vector End-to-End Harness
+node scripts/complete_redteam_e2e.js
 ```
+
+### Developer Diagnostics Route (`/diagnostics`)
+For judges and developer verification, Canopy includes an inspectable diagnostics route:
+- **URL:** [http://localhost:5174/diagnostics](http://localhost:5174/diagnostics)
+- **Live Runtime State:** Real-time indicator for WebLLM engine status, active provider, WebGPU availability, deterministic safety engine, microclimate physics fallback, bioacoustic spectral analyzer, and PWA cache.
+- **Interactive Self-Test:** A "Run Self Test" button exercises the live fallback hierarchy, queries, and safety rules directly in your browser.
 
 ### Manual Interactive Scenarios (Sandbox in UI)
 
@@ -234,21 +245,20 @@ node scripts/redteam_audit.js
 
 ---
 
-## 🏆 10. Touch Grass Alignment Rubric (20/20)
+## 🏆 10. Touch Grass Alignment & Architecture Verification
 
-| Evaluation Rubric | Score | Verification & Proof |
+| Challenge Criterion | Implementation Status | Technical Verification |
 | :--- | :---: | :--- |
-| **1. OPEN-WEIGHT AI** | **2 / 2** | `SmolLM2-135M-Instruct` (Apache 2.0) and Canopy Net (MIT) are genuine open-weight models. |
-| **2. LOCAL INFERENCE** | **2 / 2** | Browser WebGPU via `@mlc-ai/web-llm` + pure JS CPU fallback; 0 cloud tokens. |
-| **3. OFFLINE** | **2 / 2** | Operates 100% disconnected; assets cached in browser memory. |
-| **4. PRIVACY** | **2 / 2** | Zero remote API endpoints; GPS and biometric data never leave device RAM. |
-| **5. OUTDOOR USE** | **2 / 2** | Built for remote backcountry passes with offline topo mapping and survival logic. |
-| **6. VOICE-FIRST** | **2 / 2** | Native Web Speech API + Web Audio chimes allow screen-free trail whispering. |
-| **7. REAL-WORLD DATA** | **2 / 2** | Telemetry pod integration via WebSerial (`LIVE SENSOR STREAM` vs `SIMULATED`). |
-| **8. SAFETY** | **2 / 2** | Deterministic safety engine hard cutoffs override model hallucinations. |
-| **9. SCREEN MINIMIZATION** | **2 / 2** | Minimalist high-contrast OLED Field Mode gets user off the screen and into nature. |
-| **10. OPEN INNOVATION** | **2 / 2** | Pluggable architecture with clear permissive licenses (Apache 2.0 & MIT). |
-| **TOTAL SCORE** | **20 / 20** | **100% Alignment with Touch Grass Challenge** |
+| **1. OPEN-WEIGHT AI** | Verified Active | `SmolLM2-135M-Instruct` (Apache 2.0), `Gemma 2 9B-IT` (Gemma License), and Canopy Net (MIT). |
+| **2. LOCAL INFERENCE** | Verified Active | Browser WebGPU via `@mlc-ai/web-llm` with zero cloud tokens consumed. |
+| **3. OFFLINE SOVEREIGN** | Verified Active | Operates 100% disconnected after first-run model caching. |
+| **4. ZERO TELEMETRY LEAKS** | Verified Active | Zero external tracker endpoints or remote AI APIs. Coordinates and queries stay in device RAM. |
+| **5. REAL-WORLD OUTDOOR USE** | Verified Active | Tailored for high-altitude backcountry passes with offline topo mapping and survival logic. |
+| **6. HANDS-FREE VOICE** | Verified Active | Native Web Speech API synthesis + procedural Web Audio harmonic chimes. |
+| **7. REAL SENSOR BRIDGING** | Verified Active | WebSerial sensor streaming with transparent fallback to simulated telemetry. |
+| **8. SAFETY SUPREMACY** | Verified Active | Deterministic safety rules hold absolute authority over open-weight outputs. |
+| **9. MINIMAL FIELD UI** | Verified Active | High-contrast OLED dark Field Mode designed to get users off the screen and into nature. |
+| **10. OPEN INNOVATION** | Verified Active | Cleanly decoupled provider adapter hierarchy under permissive Apache 2.0 and MIT licenses. |
 
 ---
 

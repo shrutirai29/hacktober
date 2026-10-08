@@ -77,6 +77,7 @@ export function buildCanopyContext({
     waterStatus: elevNum > 3800 ? 'Glacial meltwater only (Purification required)' : 'Valley stream available',
     wildlifeAlerts: 'Himalayan Black Bear active foraging zone below 3,400m',
     isHardwareTelemetry,
+    sensorSource: isHardwareTelemetry ? 'PHYSICAL (WebSerial COM)' : 'SIMULATED',
     microclimate: microclimate || {
       frostProbability: elevNum > 3500 ? '88%' : '24%',
       trailMudIndex: '62/100'

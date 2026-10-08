@@ -49,7 +49,7 @@ export const TRAINING_DATASET = [
   // 2. Altitude Sickness & AMS
   { text: "I have a throbbing headache and feel nauseous at high altitude", category: 'ALTITUDE_AMS' },
   { text: "What are the symptoms of Acute Mountain Sickness AMS?", category: 'ALTITUDE_AMS' },
-  { text: "Should I take Diamox or acetazolamide for acclimatization?", category: 'ALTITUDE_AMS' },
+  { text: "What is the safe acclimatization and ascent protocol for altitude sickness?", category: 'ALTITUDE_AMS' },
   { text: "My friend is coughing pink froth and stumbling on the pass", category: 'ALTITUDE_AMS' },
   { text: "High altitude pulmonary edema HAPE warning signs and descent", category: 'ALTITUDE_AMS' },
   { text: "How fast should I ascend above 3000 meters to avoid sickness?", category: 'ALTITUDE_AMS' },
@@ -201,7 +201,6 @@ const STEM_SYNONYMS = {
   'nauseous': 'nausea',
   'nausea': 'nausea',
   'ams': 'ams',
-  'diamox': 'diamox',
   'altitude': 'altitude',
   'elevation': 'altitude',
   'shiver': 'shiver',
@@ -687,7 +686,7 @@ export class TrailAIEngine {
     const hasTurnaround = /(turnaround|turn\s+back|cutoff|curfew|sunset|sundown|dark|night|andhera|wapas)/i.test(q);
     const hasWater = /(water|drink|hydration|pani|paani|thirst|piye|bottle|filter|how\s+much\s+water)/i.test(q);
     const hasHape = /(froth|pink|cough|ataxia|stumble|gasp|breathing\s+trouble)/i.test(q);
-    const hasAltitude = /(headache|nausea|dizzy|dizziness|vomit|ams|diamox|sar\s+dard|chakkar|altitude|high\s+elevation|hypoxia)/i.test(q);
+    const hasAltitude = /(headache|nausea|dizzy|dizziness|vomit|ams|sar\s+dard|chakkar|altitude|high\s+elevation|hypoxia)/i.test(q);
     const hasHypothermia = /(shiver|shivering|wet|soaked|numb|frostbite|thand|freeze|freezing)/i.test(q);
     const hasBear = /(bear|bhalu|wildlife|animal|leopard|janwar|snake|saanp)/i.test(q);
     const hasLost = /(lost|disoriented|rasta|bhool|fog|whiteout|cairn|marker|path|trail\s+markers)/i.test(q);

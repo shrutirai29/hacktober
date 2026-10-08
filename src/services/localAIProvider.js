@@ -642,8 +642,14 @@ export class CanopyAIEngine {
         modelName: "Offline Deterministic Safety Fallback",
         modelLicense: "MIT / Open-Source Heuristics",
         providerName: "Deterministic Safety Fallback Engine",
+        actualProvider: "mlp",
+        actualModel: "Offline Deterministic Safety Fallback",
+        runtime: "Local Heuristics / Deterministic",
         isLocal: true,
+        local: true,
+        offline: true,
         isFallback: true,
+        fallbackFrom: this.activeProviderKey,
         latency: 2,
         isDeterministicOverride: true,
         safetyRuleTriggered: fallbackCheck.primaryRule || "MODEL_OFFLINE_FAILSAFE",
@@ -653,31 +659,80 @@ export class CanopyAIEngine {
       };
     }
 
-    // 3. Inference through Active Local Provider
-    let active = this.getActiveProvider();
-    let aiResult = null;
-    let usedProvider = active;
-    let isFallback = false;
+    // 3. Fallback Hierarchy Execution: WebLLM -> Ollama -> MLP
+    const hierarchy = [];
+    if (this.activeProviderKey === 'webllm') {
+      hierarchy.push({ key: 'webllm', provider: this.providers.webllm });
+      hierarchy.push({ key: 'ollama', provider: this.providers.ollama });
+      hierarchy.push({ key: 'mlp', provider: this.providers.mlp });
+    } else if (this.activeProviderKey === 'ollama') {
+      hierarchy.push({ key: 'ollama', provider: this.providers.ollama });
+      hierarchy.push({ key: 'mlp', provider: this.providers.mlp });
+    } else {
+      hierarchy.push({ key: 'mlp', provider: this.providers.mlp });
+    }
 
-    if (active.status === 'UNINITIALIZED') {
+    let aiResult = null;
+    let usedProvider = null;
+    let isFallback = false;
+    let fallbackFrom = null;
+
+    for (let i = 0; i < hierarchy.length; i++) {
+      const step = hierarchy[i];
+      const p = step.provider;
+
       try {
-        await active.init((report) => this.notifyStatus(this.getStatus()));
-      } catch (e) {
-        console.warn("Active provider auto-init failed:", e);
+        if (step.key === 'webllm') {
+          if (p.status === 'UNINITIALIZED') {
+            await p.init();
+          }
+          if (p.isReady && p.engine) {
+            aiResult = await p.generateResponse(userQuery, context);
+            if (aiResult && aiResult.text) {
+              usedProvider = p;
+              break;
+            }
+          }
+        } else if (step.key === 'ollama') {
+          if (p.status === 'UNINITIALIZED') {
+            await p.init();
+          }
+          if (p.isReady) {
+            aiResult = await p.generateResponse(userQuery, context);
+            if (aiResult && aiResult.text) {
+              usedProvider = p;
+              if (i > 0) {
+                isFallback = true;
+                fallbackFrom = hierarchy[0].key;
+              }
+              break;
+            }
+          }
+        } else if (step.key === 'mlp') {
+          if (!p.isReady) {
+            await p.init();
+          }
+          aiResult = await p.generateResponse(userQuery, context);
+          if (aiResult && aiResult.text) {
+            usedProvider = p;
+            if (i > 0) {
+              isFallback = true;
+              fallbackFrom = hierarchy[0].key;
+            }
+            break;
+          }
+        }
+      } catch (err) {
+        console.warn(`Provider [${step.key}] failed during inference:`, err);
       }
     }
 
-    try {
-      aiResult = await active.generateResponse(userQuery, context);
-    } catch (err) {
-      console.warn(`Primary provider [${active.name}] threw exception:`, err);
-    }
-
-    // If Primary WebLLM / Ollama returned null or failed, fallback gracefully to MLP
-    if (!aiResult || !aiResult.text) {
-      isFallback = true;
+    // Absolute failsafe if all returned empty
+    if (!usedProvider || !aiResult || !aiResult.text) {
       usedProvider = this.providers.mlp;
       aiResult = await this.providers.mlp.generateResponse(userQuery, context);
+      isFallback = true;
+      fallbackFrom = hierarchy[0].key;
     }
 
     const rawResponse = aiResult?.text || "Safety protocol active: Halt ascent and evaluate mountain weather.";
@@ -690,13 +745,25 @@ export class CanopyAIEngine {
       onOverride(safetyCheck);
     }
 
+    const runtimeDesc = usedProvider.id === 'webllm'
+      ? 'WebGPU (100% In-Browser)'
+      : usedProvider.id === 'ollama'
+      ? 'Localhost:11434 (Local Daemon)'
+      : 'Embedded In-Browser Neural Net';
+
     return {
       response: safetyCheck.finalResponse,
       modelName: usedProvider.modelName,
       modelLicense: usedProvider.license,
       providerName: usedProvider.name,
+      actualProvider: usedProvider.id,
+      actualModel: usedProvider.modelName,
+      runtime: runtimeDesc,
       isLocal: true,
+      local: true,
+      offline: true,
       isFallback: isFallback,
+      fallbackFrom: fallbackFrom,
       latency: aiResult?.latency || 10,
       isDeterministicOverride: safetyCheck.hasOverride,
       safetyRuleTriggered: safetyCheck.primaryRule,

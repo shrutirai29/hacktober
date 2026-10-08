@@ -11,9 +11,11 @@ import {
   Volume2
 } from 'lucide-react';
 import { askGemmaAgent } from '../services/gemmaTrailAgent';
+import { canopyAI } from '../services/localAIProvider';
 import { speakTrailWhisper, playTrailChime } from '../services/voiceGuide';
 
 export default function AIGuardianCard({ currentTrail, onOpenPromptInspector, audioMuted }) {
+  const [providerInfo, setProviderInfo] = useState(() => canopyAI.getStatus());
   const [messages, setMessages] = useState([
     {
       role: 'user',
@@ -28,6 +30,13 @@ export default function AIGuardianCard({ currentTrail, onOpenPromptInspector, au
   const [inputQuery, setInputQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    const unsub = canopyAI.subscribe((status) => {
+      setProviderInfo(status);
+    });
+    return unsub;
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -103,9 +112,18 @@ export default function AIGuardianCard({ currentTrail, onOpenPromptInspector, au
           >
             <Code2 className="w-3.5 h-3.5" />
           </button>
-          <span className="px-2.5 py-0.5 rounded-full bg-[#DCEBDA] text-[#285943] text-[10px] font-bold border border-[#A8C8AF] flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-            Trained Neural Model
+          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 ${
+            providerInfo?.isFallback 
+              ? 'bg-amber-100 text-amber-800 border-amber-300' 
+              : providerInfo?.state === 'LOADING'
+              ? 'bg-blue-100 text-blue-800 border-blue-300'
+              : 'bg-[#DCEBDA] text-[#285943] border-[#A8C8AF]'
+          }`} title={providerInfo?.label}>
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              providerInfo?.state === 'LOADING' ? 'bg-blue-600 animate-ping' :
+              providerInfo?.isFallback ? 'bg-amber-600' : 'bg-emerald-600 animate-pulse'
+            }`} />
+            {providerInfo?.badge || 'LOCAL AI ACTIVE'}
           </span>
         </div>
       </div>
