@@ -2,8 +2,8 @@
 title: Touch Grass — AI for a Wilder You: The Offline AI Outdoor Companion Built with Gemma 2 & TabPFN
 published: true
 tags: devchallenge, hf26challenge, gemma, tabpfn
-canonical_url: https://github.com/shrut/friendly-hopper/tree/main/t2
-cover_image: https://raw.githubusercontent.com/shrut/friendly-hopper/main/t2/public/assets/website_bg.jpg
+canonical_url: https://github.com/shrutirai29/hacktober
+cover_image: https://raw.githubusercontent.com/shrutirai29/hacktober/main/public/assets/website_bg.jpg
 ---
 
 *This is a submission for the [Hacktoberfest Open-Source AI Challenge Week 1: Touch Grass](https://dev.to/challenges/hacktoberfest-week1-2026-10-05)*
@@ -65,7 +65,7 @@ I took Touch Grass out into the **Hudson Highlands State Park Reserve** along th
 ## 🚀 Live Demo & Visual Walkthrough
 
 - **Hosted Locally:** [http://localhost:5174/](http://localhost:5174/)
-- **Repository:** [friendly-hopper / t2](https://github.com/shrut/friendly-hopper/tree/main/t2)
+- **Repository:** [https://github.com/shrutirai29/hacktober](https://github.com/shrutirai29/hacktober)
 
 ### UI Highlights from the Production Dashboard:
 1. **Light-Mode Outdoor Aesthetic:** Soft glassmorphism using natural tones (`--forest: #245C45`, `--leaf: #4FAF72`, `--mint: #BDECCB`, `--sand: #F4EBDD`, `--amber: #F3A847`).
