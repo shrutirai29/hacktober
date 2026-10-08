@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, 
   Cpu, 
@@ -13,25 +13,30 @@ import {
   RefreshCw,
   Terminal,
   Activity,
-  Layers
+  Layers,
+  AlertTriangle
 } from 'lucide-react';
 import { canopyAI } from '../services/localAIProvider';
 import { speakTrailWhisper, playTrailChime } from '../services/voiceGuide';
 
 export default function OpenAIPanel({ currentTrail, audioMuted }) {
-  const [activeProvider, setActiveProvider] = useState('mlp');
+  const [activeProvider, setActiveProvider] = useState(canopyAI.activeProviderKey);
+  const [aiStatus, setAiStatus] = useState(canopyAI.getStatus());
   const [demoState, setDemoState] = useState('initial'); // 'initial' | 'unsafe' | 'safe'
   const [demoResponse, setDemoResponse] = useState(null);
   const [isDemoLoading, setIsDemoLoading] = useState(false);
+  const [isFailureSimulated, setIsFailureSimulated] = useState(false);
 
-  const providerInfo = canopyAI.getActiveProvider();
+  useEffect(() => {
+    return canopyAI.subscribe((status) => {
+      setAiStatus(status);
+    });
+  }, []);
 
   const handleSwitchProvider = async (key) => {
     setActiveProvider(key);
     await canopyAI.setProvider(key);
   };
-
-  const [isFailureSimulated, setIsFailureSimulated] = useState(false);
 
   const toggleModelFailure = () => {
     const nextState = !isFailureSimulated;
@@ -44,7 +49,7 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
     setDemoState(type);
 
     if (type === 'scenario_b') {
-      // SCENARIO B (Prompt Requirement 4 & 5): 4,270m, 2°C, Poor visibility, Risk 85, Time 4:00 PM, Turnaround 2:30 PM
+      // SCENARIO B: 4,270m, 2°C, Poor visibility, Risk 85, Time 4:00 PM, Turnaround 2:30 PM
       const res = await canopyAI.askCanopy({
         userQuery: "Should I continue?",
         rawContext: {
@@ -64,7 +69,7 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
         speakTrailWhisper("Deterministic Safety Override Active. Turn back immediately. You are beyond the mandatory turnaround window.", { chime: 'warning' });
       }
     } else if (type === 'scenario_a') {
-      // SCENARIO A (Prompt Requirement 4): 2,500m, 15°C, Good visibility, Risk 20, Time 10:00 AM, Turnaround 2:30 PM
+      // SCENARIO A: 2,500m, 15°C, Good visibility, Risk 20, Time 10:00 AM, Turnaround 2:30 PM
       const res = await canopyAI.askCanopy({
         userQuery: "Should I continue?",
         rawContext: {
@@ -84,7 +89,7 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
         speakTrailWhisper("Conditions are safe. Maintain conversational pace and monitor high pass weather.", { chime: 'nature' });
       }
     } else if (type === 'hallucination') {
-      // Requirement 6: Hallucination Test
+      // Zero Hallucination Test: unknown checkpoint
       const res = await canopyAI.askCanopy({
         userQuery: "What is the temperature at checkpoint XYZ?",
         rawContext: {
@@ -98,7 +103,7 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
       });
       setDemoResponse(res);
     } else if (type === 'unmonitored') {
-      // Requirement 6: Unknown Sensor Metric
+      // Unknown Sensor Metric Test
       const res = await canopyAI.askCanopy({
         userQuery: "What is the UV index at checkpoint 2?",
         rawContext: {
@@ -114,7 +119,7 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
 
   return (
     <div className="space-y-6 select-none animate-fadeIn">
-      {/* 1. Header Banner: Why Open AI */}
+      {/* 1. Header Banner: Why Open AI & Live Truthful Status */}
       <div className="outdoor-card p-6 bg-[#F2F8F4]/98 border-[#C8DEC8] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -122,26 +127,35 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
               <Cpu className="w-4 h-4 text-emerald-200" />
             </span>
             <h2 className="text-lg font-black text-[#1A2E22]">
-              Why Open AI & Local Inference Matters
+              Why Open-Weight AI & Local Inference Matters
             </h2>
             <span className="px-2.5 py-0.5 rounded-full bg-[#DCEBDA] text-[#285943] text-[10px] font-bold border border-[#A8C8AF]">
               Offline Sovereign AI
             </span>
           </div>
           <p className="text-xs text-[#486350] max-w-2xl leading-relaxed">
-            Canopy runs its intelligence directly on your device. Your real-time mountain location, sensor packets, and safety questions never leave your machine.
+            Canopy executes its intelligence directly on your device via browser WebGPU or local wasm. Your real-time mountain location, sensor packets, and safety questions never leave your machine.
           </p>
         </div>
 
-        {/* Live Status Pill */}
-        <div className="px-3 py-1.5 rounded-xl bg-[#E2EFE5] border border-[#C8DEC8] flex items-center gap-2 shrink-0">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse" />
+        {/* Live Truthful Status Pill */}
+        <div className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 shrink-0 ${
+          aiStatus?.isFallback
+            ? 'bg-amber-100 border-amber-300'
+            : aiStatus?.state === 'LOADING'
+            ? 'bg-blue-100 border-blue-300'
+            : 'bg-[#E2EFE5] border-[#C8DEC8]'
+        }`}>
+          <span className={`w-2.5 h-2.5 rounded-full ${
+            aiStatus?.state === 'LOADING' ? 'bg-blue-600 animate-ping' :
+            aiStatus?.isFallback ? 'bg-amber-600' : 'bg-emerald-600 animate-pulse'
+          }`} />
           <div className="text-left">
             <span className="text-[10px] font-bold block text-[#1A2E22] uppercase tracking-wider font-mono">
-              ● LOCAL AI ACTIVE
+              ● {aiStatus?.badge || 'LOCAL AI ACTIVE'}
             </span>
-            <span className="text-[9px] text-[#486350] block font-medium">
-              100% On-Device • Zero Cloud API
+            <span className="text-[9px] text-[#486350] block font-medium max-w-[220px] truncate" title={aiStatus?.label}>
+              {aiStatus?.label || '100% On-Device • Zero Cloud API'}
             </span>
           </div>
         </div>
@@ -157,8 +171,8 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-center">
           <div className="p-3.5 rounded-2xl bg-[#E2EFE5] border border-[#C8DEC8] flex flex-col items-center justify-center space-y-1">
             <span className="text-lg">📦</span>
-            <strong className="text-xs text-[#1A2E22]">OPEN MODEL</strong>
-            <span className="text-[10px] text-[#486350]">SmolLM2 / Gemma 2 / Deep MLP</span>
+            <strong className="text-xs text-[#1A2E22]">OPEN WEIGHTS</strong>
+            <span className="text-[10px] text-[#486350]">SmolLM2-135M / Deep MLP</span>
           </div>
 
           <div className="hidden md:flex items-center justify-center text-[#285943]">
@@ -187,21 +201,21 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
             <Lock className="w-4 h-4 text-[#285943] shrink-0 mt-0.5" />
             <div>
               <strong className="text-[#1A2E22] block font-bold">100% Private Data:</strong>
-              <span>GPS coords, heart rate, and queries remain in local RAM.</span>
+              <span>GPS coords, telemetry, and queries remain in device memory.</span>
             </div>
           </div>
           <div className="flex items-start gap-2">
             <Radio className="w-4 h-4 text-[#285943] shrink-0 mt-0.5" />
             <div>
               <strong className="text-[#1A2E22] block font-bold">Zero Cloud Cost:</strong>
-              <span>Runs with airplane mode on deep backcountry routes.</span>
+              <span>Runs with airplane mode active on remote backcountry passes.</span>
             </div>
           </div>
           <div className="flex items-start gap-2">
             <Zap className="w-4 h-4 text-[#285943] shrink-0 mt-0.5" />
             <div>
               <strong className="text-[#1A2E22] block font-bold">Model Swappable:</strong>
-              <span>Pluggable adapter interface without app rewrites.</span>
+              <span>Pluggable provider architecture with deterministic fallbacks.</span>
             </div>
           </div>
         </div>
@@ -216,34 +230,12 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
               <span>Pluggable Local AI Providers</span>
             </h3>
             <span className="text-[10px] font-mono text-[#285943] font-bold">
-              3 Adapters Loaded
+              3 Adapters Ready
             </span>
           </div>
 
           <div className="space-y-2.5">
-            {/* Provider 1: On-Device Deep MLP */}
-            <div 
-              onClick={() => handleSwitchProvider('mlp')}
-              className={`p-3 rounded-2xl border cursor-pointer transition ${
-                activeProvider === 'mlp'
-                  ? 'bg-[#E2EFE5] border-[#285943] shadow-xs'
-                  : 'bg-[#F2F8F4] border-[#C8DEC8] hover:bg-white'
-              }`}
-            >
-              <div className="flex items-center justify-between text-xs font-bold text-[#1A2E22] mb-1">
-                <span>Canopy Backcountry Net (On-Device MLP)</span>
-                {activeProvider === 'mlp' && <CheckCircle2 className="w-3.5 h-3.5 text-[#285943]" />}
-              </div>
-              <p className="text-[11px] text-[#486350] leading-snug">
-                3-Layer neural network trained in-browser with SGD backprop. 100% offline, zero download, instant response.
-              </p>
-              <div className="mt-2 flex items-center gap-2 text-[10px] font-mono text-[#285943]">
-                <span className="bg-[#DCEBDA] px-2 py-0.5 rounded font-bold">License: MIT (Permissive)</span>
-                <span>Latency: ~1.2ms</span>
-              </div>
-            </div>
-
-            {/* Provider 2: WebLLM Open-Weight Model */}
+            {/* Provider 1: WebLLM Open-Weight Model (Primary Challenge Architecture) */}
             <div 
               onClick={() => handleSwitchProvider('webllm')}
               className={`p-3 rounded-2xl border cursor-pointer transition ${
@@ -253,15 +245,43 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
               }`}
             >
               <div className="flex items-center justify-between text-xs font-bold text-[#1A2E22] mb-1">
-                <span>WebLLM SmolLM2-135M-Instruct</span>
+                <span className="flex items-center gap-1.5">
+                  <span>WebLLM SmolLM2-135M</span>
+                  <span className="px-1.5 py-0.2 rounded bg-emerald-800 text-[9px] text-emerald-100 font-bold uppercase">Primary</span>
+                </span>
                 {activeProvider === 'webllm' && <CheckCircle2 className="w-3.5 h-3.5 text-[#285943]" />}
               </div>
               <p className="text-[11px] text-[#486350] leading-snug">
-                Small instruction-tuned language model executed in-browser via WebGPU / WebAssembly with zero remote API.
+                Small instruction-tuned language model executed in-browser via WebGPU with zero remote API or backend dependency.
               </p>
               <div className="mt-2 flex items-center gap-2 text-[10px] font-mono text-[#285943]">
                 <span className="bg-[#DCEBDA] px-2 py-0.5 rounded font-bold">License: Apache 2.0</span>
-                <span>Hardware: WebGPU</span>
+                <span>Runtime: WebGPU / MLC</span>
+              </div>
+            </div>
+
+            {/* Provider 2: On-Device Deep MLP (Fallback) */}
+            <div 
+              onClick={() => handleSwitchProvider('mlp')}
+              className={`p-3 rounded-2xl border cursor-pointer transition ${
+                activeProvider === 'mlp'
+                  ? 'bg-[#E2EFE5] border-[#285943] shadow-xs'
+                  : 'bg-[#F2F8F4] border-[#C8DEC8] hover:bg-white'
+              }`}
+            >
+              <div className="flex items-center justify-between text-xs font-bold text-[#1A2E22] mb-1">
+                <span className="flex items-center gap-1.5">
+                  <span>Canopy Backcountry Net (On-Device MLP)</span>
+                  <span className="px-1.5 py-0.2 rounded bg-[#C8DEC8] text-[9px] text-[#1A2E22] font-bold uppercase">Fallback</span>
+                </span>
+                {activeProvider === 'mlp' && <CheckCircle2 className="w-3.5 h-3.5 text-[#285943]" />}
+              </div>
+              <p className="text-[11px] text-[#486350] leading-snug">
+                3-Layer neural network trained in-browser. 100% offline, zero download, instant deterministic response.
+              </p>
+              <div className="mt-2 flex items-center gap-2 text-[10px] font-mono text-[#285943]">
+                <span className="bg-[#DCEBDA] px-2 py-0.5 rounded font-bold">License: MIT</span>
+                <span>Latency: ~1.2ms</span>
               </div>
             </div>
 
@@ -279,7 +299,7 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
                 {activeProvider === 'ollama' && <CheckCircle2 className="w-3.5 h-3.5 text-[#285943]" />}
               </div>
               <p className="text-[11px] text-[#486350] leading-snug">
-                Localhost daemon connection (port 11434). True open-weight reasoning without remote cloud telemetry.
+                Localhost daemon connection (port 11434). Sovereign open-weight reasoning without remote cloud telemetry.
               </p>
               <div className="mt-2 flex items-center gap-2 text-[10px] font-mono text-[#285943]">
                 <span className="bg-[#DCEBDA] px-2 py-0.5 rounded font-bold">License: Gemma Open License</span>
@@ -289,7 +309,7 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
           </div>
         </div>
 
-        {/* 4. Deterministic Demo Verification Console (Acceptance Criteria #17) */}
+        {/* 4. Deterministic Demo Verification Console */}
         <div className="lg:col-span-7 outdoor-card p-5 bg-[#F2F8F4]/98 border-[#C8DEC8] flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -376,11 +396,11 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
               </button>
             </div>
 
-            {/* Model Failure Simulation Toggle (Requirement 15) */}
+            {/* Model Failure Simulation Toggle */}
             <div className="p-2.5 rounded-xl bg-[#E2EFE5] border border-[#C8DEC8] flex items-center justify-between gap-2 mb-3">
               <div className="text-[11px] text-[#1A2E22]">
-                <strong className="block font-bold">Model Failure Test (Req 15):</strong>
-                <span className="text-[10px] text-[#486350]">Simulate offline AI failure without app crash</span>
+                <strong className="block font-bold">Model Failure Failsafe Test:</strong>
+                <span className="text-[10px] text-[#486350]">Simulate AI unavailable and test deterministic safety engine fallback</span>
               </div>
               <button
                 onClick={toggleModelFailure}
@@ -404,7 +424,7 @@ export default function OpenAIPanel({ currentTrail, audioMuted }) {
               ) : demoResponse ? (
                 <div>
                   <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#C8DEC8] text-[10px] text-[#486350]">
-                    <span>Model: {demoResponse.modelName}</span>
+                    <span>Provider: {demoResponse.providerName} | Model: {demoResponse.modelName}</span>
                     <span className={demoResponse.isDeterministicOverride ? "text-rose-700 font-bold" : "text-emerald-700 font-bold"}>
                       {demoResponse.isDeterministicOverride ? "⚠️ HARD OVERRIDE ACTIVE" : "✅ SAFETY APPROVED"}
                     </span>

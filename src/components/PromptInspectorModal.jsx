@@ -61,7 +61,8 @@ Neural Classification: 🏔️ Altitude Sickness & AMS (95% Softmax Confidence |
 
 • Lake Louise Scoring: Halt ascent immediately.
 • Descent Threshold: Descend at least 500–1,000 meters if ataxia or pulmonary coughing occurs.
-• Hydration: Drink 3.5–4.0L fluid daily; carry Acetazolamide.
+• Protocol: Rest, hydrate (3.5–4.0L fluid daily), and prepare for descent. Consult medical personnel; do not self-prescribe medication.
+⚠️ Medical Disclaimer: Canopy provides backcountry safety information, not medical advice. Consult a healthcare professional. In an emergency, initiate evacuation.
 <end_of_turn>\`;
 
   const licenseText = \`=== OPEN-WEIGHT MODEL ARCHITECTURE & LICENSING ===

@@ -132,19 +132,22 @@ export default function Navbar({
               />
             </div>
 
-            {/* Model & Offline Status Badge (Sleek & Space-Efficient) */}
-            <div className={`hidden lg:flex items-center gap-1 px-2 py-1 rounded-xl border text-[10px] font-mono transition-colors shrink-0 ${
-              aiStatus === 'UNAVAILABLE'
+            {/* Model & Offline Status Badge (Truthful Provider State) */}
+            <div className={`hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-xl border text-[10px] font-mono transition-colors shrink-0 ${
+              aiStatus?.isFallback || aiStatus?.state === 'OFFLINE FALLBACK'
                 ? 'bg-amber-100 border-amber-300 text-amber-900 shadow-xs'
+                : aiStatus?.state === 'LOADING'
+                ? 'bg-blue-100 border-blue-300 text-blue-900 shadow-xs'
                 : 'bg-[#E2EFE5] border-[#C8DEC8] text-[#285943]'
-            }`}>
+            }`} title={aiStatus?.label || 'Canopy Intelligence'}>
               <span className={`w-1.5 h-1.5 rounded-full ${
-                aiStatus === 'UNAVAILABLE' ? 'bg-amber-600 animate-bounce' : 'bg-emerald-600 animate-pulse'
+                aiStatus?.state === 'LOADING' ? 'bg-blue-600 animate-ping' :
+                aiStatus?.isFallback ? 'bg-amber-600' : 'bg-emerald-600 animate-pulse'
               }`} />
               <span className="font-bold whitespace-nowrap">
-                {aiStatus === 'UNAVAILABLE' ? 'SAFETY ENGINE' : 'LOCAL AI'}
+                {aiStatus?.badge || (aiStatus?.isFallback ? 'OFFLINE FALLBACK' : 'LOCAL AI')}
               </span>
-              {aiStatus !== 'UNAVAILABLE' && <span className="text-[#6F7B72] hidden 2xl:inline">• Offline</span>}
+              <span className="text-[#6F7B72] hidden 2xl:inline">• 100% On-Device</span>
             </div>
 
             {/* Light / Theme Button */}

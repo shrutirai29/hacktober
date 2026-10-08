@@ -68,17 +68,28 @@ export default function SensorsView() {
           </p>
         </div>
 
-        <button
-          onClick={connectSerial}
-          className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-sm ${
+        <div className="flex items-center gap-2">
+          <span className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold border flex items-center gap-1.5 ${
             isConnected
-              ? 'bg-[#285943] text-[#FBF8EF]'
-              : 'bg-[#F2F8F4] border border-[#DCE7DF] text-[#20332A] hover:bg-[#EBF5EE]'
-          }`}
-        >
-          <Usb className="w-4 h-4 text-[#3F7D5A]" />
-          <span>{isConnected ? "Connected (COM4)" : "Connect WebSerial"}</span>
-        </button>
+              ? 'bg-emerald-100 border-emerald-300 text-emerald-800'
+              : 'bg-amber-50 border-amber-200 text-amber-800'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-emerald-600 animate-ping' : 'bg-amber-500'}`} />
+            <span>{isConnected ? "LIVE SENSOR STREAM" : "SIMULATED TELEMETRY"}</span>
+          </span>
+
+          <button
+            onClick={connectSerial}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm ${
+              isConnected
+                ? 'bg-[#285943] text-[#FBF8EF]'
+                : 'bg-[#F2F8F4] border border-[#DCE7DF] text-[#20332A] hover:bg-[#EBF5EE]'
+            }`}
+          >
+            <Usb className="w-4 h-4 text-[#3F7D5A]" />
+            <span>{isConnected ? "Connected (COM4)" : "Connect WebSerial"}</span>
+          </button>
+        </div>
       </div>
 
       {/* 5 Big Telemetry Gauges */}

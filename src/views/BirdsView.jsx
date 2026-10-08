@@ -67,11 +67,14 @@ export default function BirdsView({ onAddToJournal, audioMuted }) {
               <Bird className="w-4 h-4" />
             </span>
             <h1 className="text-xl font-black text-[#20332A]">
-              Offline Bioacoustic Species Vault
+              Spectral Audio Analysis & Species Vault
             </h1>
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#E2EFE5] text-[#285943] border border-[#C8DEC8] font-bold">
+              SPECTRAL AUDIO ANALYSIS
+            </span>
           </div>
           <p className="text-xs text-[#6F7B72]">
-            All spectral signatures and harmonic patterns are stored locally on-device. Zero network requests required on the trail.
+            Rule-based heuristic frequency matching and offline acoustic database. All spectral signatures are stored locally on-device with zero network requests.
           </p>
         </div>
 

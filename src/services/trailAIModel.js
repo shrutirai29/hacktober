@@ -3,7 +3,7 @@
 
 export const SAFETY_CATEGORIES = [
   { id: 'GEAR_CLOTHING', name: 'Clothing, Gear & Layering', icon: '🧥', color: '#0284c7', desc: 'Warm clothes, 3-layer system, jackets, thermals, footwear, rainwear, and pack essentials' },
-  { id: 'ALTITUDE_AMS', name: 'Altitude Sickness & AMS', icon: '🏔️', color: '#9333ea', desc: 'Acclimatization, Diamox, HAPE/HACE warning symptoms and descent protocols' },
+  { id: 'ALTITUDE_AMS', name: 'Altitude Sickness & AMS', icon: '🏔️', color: '#9333ea', desc: 'Acclimatization, symptom monitoring, HAPE/HACE warning symptoms and descent protocols' },
   { id: 'HYPOTHERMIA_COLD', name: 'Hypothermia & Frostbite', icon: '❄️', color: '#0ea5e9', desc: 'Sub-zero windchill, moisture management, emergency shivering stages, rewarming' },
   { id: 'NAVIGATION_LOST', name: 'Navigation & Lost Protocol', icon: '🧭', color: '#ea580c', desc: 'Off-trail disorientation, cairns, whiteout protocol, STOP technique' },
   { id: 'TURNAROUND_CURFEW', name: 'Turnaround Time & Sunset', icon: '⏰', color: '#dc2626', desc: 'Summit cutoffs, solar geometry, canopy twilight degradation, lightning avoidance' },
@@ -800,10 +800,10 @@ export class TrailAIEngine {
       contextReasoning = `Pink frothy cough, severe breathlessness at rest, and stumbling gait (ataxia) are definitive signs of High Altitude Pulmonary Edema (HAPE) and High Altitude Cerebral Edema (HACE) at ${elev}. Minutes matter.`;
       bullets = [
         `Immediate Descent: Descend at least 500 to 1,000 meters right now—do not wait for dawn or weather improvement.`,
-        `Supplemental Oxygen: Administer high-flow oxygen or place in a Hyperbaric Gamow Bag if available.`,
-        `Emergency Medication: Nifedipine (for HAPE) and Dexamethasone (for HACE) under medical protocol, while continuing immediate descent.`
+        `Supplemental Oxygen: Administer high-flow oxygen or place in a Hyperbaric Gamow Bag if available on expedition.`,
+        `Emergency Evacuation: Initiate satellite SOS / backcountry emergency beacon immediately while continuing rapid descent.`
       ];
-      tip = `Never leave an afflicted hiker alone. Descend with team members assisting immediately.`;
+      tip = `Never leave an afflicted hiker alone. Descend with team members assisting immediately.\n\n⚠️ Medical Disclaimer: Canopy provides backcountry safety information, not medical advice. Consult a healthcare professional. In an emergency, initiate evacuation.`;
     }
     else if (hasAltitude || categoryId === 'ALTITUDE_AMS') {
       headline = `AMS & Hypoxia Management for ${trailName} (${elev})`;
@@ -811,12 +811,12 @@ export class TrailAIEngine {
       directAnswer = `Halt your ascent immediately and rest. Do not climb any higher.`;
       contextReasoning = `At ${elev}, a throbbing headache accompanied by dizziness, nausea, or exhaustion is the classic symptom of Acute Mountain Sickness (AMS). Climbing higher with active symptoms drastically escalates the danger of pulmonary or cerebral edema.`;
       bullets = [
-        `Stop and Rest: Sit down in a sheltered spot, drink warm electrolyte water, and rest for 1 to 2 hours.`,
-        `Symptom Relief: Take Ibuprofen (400mg) or Paracetamol for headache relief.`,
-        `Acclimatization Medication: Acetazolamide (Diamox 125–250mg) aids respiration, but does not substitute for descent if symptoms persist.`,
-        `Descent Trigger: If the headache or dizziness does not improve within 2 hours, or if walking balance deteriorates, begin descending at least 500 meters immediately.`
+        `Stop and Rest: Sit down in a sheltered spot, drink warm electrolyte fluids, and rest for 1 to 2 hours.`,
+        `Conservative Protocol: Never climb higher while symptoms persist. Allow your respiratory system to adapt at current altitude.`,
+        `Hydration & Rest: Maintain 3.5–4.0L daily fluid intake with electrolytes. Avoid sedatives or alcohol.`,
+        `Descent Trigger: If the headache or dizziness does not improve within 2 hours, or if walking balance deteriorates, begin descending at least 500 to 1,000 meters immediately.`
       ];
-      tip = `The golden rule: Never ascend with symptoms of altitude sickness. Acclimatization cannot be forced.`;
+      tip = `The golden rule: Never ascend with symptoms of altitude sickness. Acclimatization cannot be forced.\n\n⚠️ Medical Disclaimer: Canopy provides backcountry safety information, not medical advice. Consult a healthcare professional. In an emergency, initiate evacuation.`;
     }
     else if (hasHypothermia || categoryId === 'HYPOTHERMIA_COLD') {
       headline = `Hypothermia & Cold Exposure Protocol (${temp})`;
