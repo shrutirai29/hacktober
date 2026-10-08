@@ -21,15 +21,57 @@ import JournalView from './views/JournalView';
 import TrailsView from './views/TrailsView';
 import Map3DView from './views/Map3DView';
 import FieldModeView from './views/FieldModeView';
+import DiagnosticsView from './views/DiagnosticsView';
 
 import { TRAILS_DATA } from './data/trailData';
 import { speakTrailWhisper, playTrailChime } from './services/voiceGuide';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home');
+  const getInitialTab = () => {
+    if (typeof window !== 'undefined') {
+      const p = window.location.pathname;
+      const h = window.location.hash;
+      if (p === '/diagnostics' || h === '#diagnostics' || h === '#/diagnostics') {
+        return 'diagnostics';
+      }
+    }
+    return 'home';
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTab());
   const [currentTrail, setCurrentTrail] = useState(TRAILS_DATA[0]);
   const [darkMode, setDarkMode] = useState(false);
   const [audioMuted, setAudioMuted] = useState(false);
+
+  // Sync /diagnostics route with browser URL history
+  useEffect(() => {
+    const handlePopState = () => {
+      const p = window.location.pathname;
+      const h = window.location.hash;
+      if (p === '/diagnostics' || h === '#diagnostics' || h === '#/diagnostics') {
+        setActiveTab('diagnostics');
+      } else if (activeTab === 'diagnostics') {
+        setActiveTab('home');
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [activeTab]);
+
+  const handleNavigateTab = (tab) => {
+    setActiveTab(tab);
+    if (typeof window !== 'undefined') {
+      if (tab === 'diagnostics') {
+        if (window.location.pathname !== '/diagnostics') {
+          window.history.pushState(null, '', '/diagnostics');
+        }
+      } else {
+        if (window.location.pathname === '/diagnostics') {
+          window.history.pushState(null, '', '/');
+        }
+      }
+    }
+  };
 
   // Modals
   const [isPocketModalOpen, setIsPocketModalOpen] = useState(false);
@@ -84,7 +126,7 @@ export default function App() {
       {/* Top Navigation */}
       <Navbar
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleNavigateTab}
         audioMuted={audioMuted}
         onToggleAudioMute={() => setAudioMuted(!audioMuted)}
         darkMode={darkMode}
@@ -215,8 +257,15 @@ export default function App() {
             currentTrail={currentTrail}
             onSelectTrail={(id) => {
               handleSelectTrailById(id);
-              setActiveTab('home');
+              handleNavigateTab('home');
             }}
+          />
+        )}
+
+        {/* TAB 9: DEVELOPER DIAGNOSTICS (/diagnostics Route) */}
+        {activeTab === 'diagnostics' && (
+          <DiagnosticsView
+            currentTrail={currentTrail}
           />
         )}
 
@@ -235,7 +284,13 @@ export default function App() {
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-bold">
+          <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
+            <button 
+              onClick={() => handleNavigateTab('diagnostics')} 
+              className="text-[#285943] hover:text-[#1A2E22] font-mono text-[11px] font-bold px-2 py-1 rounded bg-[#E2EFE5] border border-[#C8DEC8] hover:bg-white transition flex items-center gap-1 shadow-xs"
+            >
+              <span>🛠️ /diagnostics (Demo & Judge Mode)</span>
+            </button>
             <button 
               onClick={() => setIsPocketModalOpen(true)} 
               className="text-[#20332A] hover:text-[#285943] transition underline-offset-4 hover:underline"

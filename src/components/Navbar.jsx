@@ -132,14 +132,18 @@ export default function Navbar({
               />
             </div>
 
-            {/* Model & Offline Status Badge (Truthful Provider State) */}
-            <div className={`hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-xl border text-[10px] font-mono transition-colors shrink-0 ${
-              aiStatus?.isFallback || aiStatus?.state === 'OFFLINE FALLBACK'
-                ? 'bg-amber-100 border-amber-300 text-amber-900 shadow-xs'
-                : aiStatus?.state === 'LOADING'
-                ? 'bg-blue-100 border-blue-300 text-blue-900 shadow-xs'
-                : 'bg-[#E2EFE5] border-[#C8DEC8] text-[#285943]'
-            }`} title={aiStatus?.label || 'Canopy Intelligence'}>
+            {/* Model & Offline Status Badge (Truthful Provider State & Clickable /diagnostics shortcut) */}
+            <div 
+              onClick={() => setActiveTab('diagnostics')}
+              className={`hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-xl border text-[10px] font-mono transition-colors shrink-0 cursor-pointer hover:border-[#285943] hover:shadow-sm ${
+                aiStatus?.isFallback || aiStatus?.state === 'OFFLINE FALLBACK'
+                  ? 'bg-amber-100 border-amber-300 text-amber-900 shadow-xs'
+                  : aiStatus?.state === 'LOADING'
+                  ? 'bg-blue-100 border-blue-300 text-blue-900 shadow-xs'
+                  : 'bg-[#E2EFE5] border-[#C8DEC8] text-[#285943]'
+              }`} 
+              title="Click to view Developer Diagnostics (/diagnostics)"
+            >
               <span className={`w-1.5 h-1.5 rounded-full ${
                 aiStatus?.state === 'LOADING' ? 'bg-blue-600 animate-ping' :
                 aiStatus?.isFallback ? 'bg-amber-600' : 'bg-emerald-600 animate-pulse'
@@ -147,7 +151,7 @@ export default function Navbar({
               <span className="font-bold whitespace-nowrap">
                 {aiStatus?.badge || (aiStatus?.isFallback ? 'OFFLINE FALLBACK' : 'LOCAL AI')}
               </span>
-              <span className="text-[#6F7B72] hidden 2xl:inline">• 100% On-Device</span>
+              <span className="text-[#6F7B72] hidden 2xl:inline">• /diagnostics</span>
             </div>
 
             {/* Light / Theme Button */}
