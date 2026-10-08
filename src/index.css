@@ -1,103 +1,111 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #FFF9F2;
-  --text-primary: #241746;
-  --action-primary: #7054E8;
-  --secondary-lavender: #EAE3FF;
-  --peach-accent: #FFE3D7;
-  --success-mint: #DDF5E9;
-  --warning-coral: #FF777C;
-  --muted-text: #817A94;
+  /* User-Defined Core Palette with very light shade of green for all cards/divs */
+  --forest-deep: #285943;    /* Primary buttons, active states, logo */
+  --forest: #3F7D5A;         /* Secondary actions, icons */
+  --sage: #A8C5A0;           /* Soft accents, backgrounds */
+  --mint: #DCEBDA;           /* Active cards / success backgrounds */
+  --mist-blue: #DCEAF0;      /* Weather / map / sky sections */
+  --warm-cream: #FBF8EF;     /* Main page background */
+  --paper: #F2F8F4;          /* Very light tint of botanical green for cards */
+  --stone: #DCE7DF;          /* Soft sage stone borders / dividers */
+  --autumn-gold: #E7A94B;    /* Highlights */
+  --autumn-coral: #D97855;   /* Warnings / special accents */
+  --mountain-berry: #8B6474; /* Rare accent / charts */
+  --forest-ink: #20332A;     /* Main text - Deep dark high contrast */
+  --moss-gray: #6F7B72;      /* Secondary text */
 
-  --card-radius: 24px;
-  --control-radius: 14px;
-  --sidebar-width: 245px;
+  /* Aliases for backwards compatibility */
+  --cream: var(--warm-cream);
+  --sand: var(--stone);
+  --amber: var(--autumn-gold);
+  --autumn: var(--autumn-coral);
+  --berry: var(--mountain-berry);
+  --ink: var(--forest-ink);
+  --muted: var(--moss-gray);
+  --card: var(--paper);
+  --leaf: var(--forest);
+  --sky: var(--mist-blue);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
 }
 
 @layer base {
   body {
-    background-color: #F8F3EF;
-    color: var(--text-primary);
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    position: relative;
+    background-color: #FBF8EF;
+    color: #20332A;
     background-image: url('/assets/website_bg.png');
     background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background-position: center top;
     background-repeat: no-repeat;
+    background-attachment: fixed;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  #root {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-height: 100vh;
   }
 }
 
-/* Subtle float animation for 3D elements */
-@keyframes float-subtle {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-6px) rotate(1deg);
-  }
+/* Card soft frosted glassmorphism & gentle outdoor shadows using very light shade of green #F2F8F4 and #DCE7DF */
+.outdoor-card {
+  background: rgba(242, 248, 244, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid #DCE7DF;
+  box-shadow: 0 8px 30px -4px rgba(40, 89, 67, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.04);
+  border-radius: 20px;
 }
 
-.animate-float {
-  animation: float-subtle 4s ease-in-out infinite;
+.outdoor-card-interactive {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-/* Gentle pulse for radar & active indicators */
-@keyframes radar-pulse {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.4); opacity: 0.2; }
-  100% { transform: scale(1.8); opacity: 0; }
-}
-
-.animate-radar {
-  animation: radar-pulse 2.2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
-}
-
-/* Soft card & Faded Glass styling */
-.faded-glass,
-.soft-card {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow: 0 8px 32px 0 rgba(112, 84, 232, 0.05), 0 2px 10px 0 rgba(0, 0, 0, 0.02);
-  border-radius: var(--card-radius);
-}
-
-.faded-glass-sidebar {
-  background: rgba(251, 247, 245, 0.82);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow: 0 8px 32px 0 rgba(36, 23, 70, 0.06);
-}
-
-.faded-glass-pill {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-}
-
-.soft-card-hover {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.soft-card-hover:hover {
+.outdoor-card-interactive:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 12px 30px -4px rgba(112, 84, 232, 0.09), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+  background: rgba(235, 245, 238, 0.98);
+  box-shadow: 0 12px 36px -4px rgba(40, 89, 67, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.06);
 }
 
-/* Scrollbars */
-.scrollbar-none {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
+/* Pulse animation for radar & listening */
+@keyframes nature-pulse {
+  0% { transform: scale(0.96); opacity: 0.9; }
+  50% { transform: scale(1.15); opacity: 0.3; }
+  100% { transform: scale(1.3); opacity: 0; }
 }
 
+.animate-nature-pulse {
+  animation: nature-pulse 2.4s cubic-bezier(0.2, 0.8, 0.4, 1) infinite;
+}
+
+/* Sound wave animation */
+@keyframes soundwave-bar {
+  0%, 100% { height: 6px; }
+  50% { height: 22px; }
+}
+
+.animate-wave-1 { animation: soundwave-bar 1.2s ease-in-out infinite; }
+.animate-wave-2 { animation: soundwave-bar 0.9s ease-in-out infinite 0.2s; }
+.animate-wave-3 { animation: soundwave-bar 1.4s ease-in-out infinite 0.4s; }
+
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -106,18 +114,133 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D8D1EC;
+  background: #DCE7DF;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #7054E8;
+  background: #3F7D5A;
 }
 
-/* Reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+/* =========================================================
+   NOCTURNAL ALPINE DARK MODE STYLES
+   ========================================================= */
+html.dark body {
+  background-color: #0b1610 !important;
+  color: #E2EFE5 !important;
+  background-image: radial-gradient(circle at 50% 12%, #14281e 0%, #07110c 100%) !important;
+}
+
+html.dark .outdoor-card {
+  background: rgba(18, 32, 24, 0.96) !important;
+  border-color: #274535 !important;
+  color: #E2EFE5 !important;
+  box-shadow: 0 10px 32px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .outdoor-card-interactive:hover {
+  background: rgba(24, 42, 32, 0.98) !important;
+}
+
+html.dark header {
+  background-color: rgba(14, 25, 19, 0.95) !important;
+  border-color: #274535 !important;
+}
+
+html.dark nav {
+  background-color: #122218 !important;
+  border-color: #274535 !important;
+}
+
+html.dark .bg-\[\#F2F8F4\],
+html.dark .bg-\[\#F2F8F4\]\/90,
+html.dark .bg-\[\#F2F8F4\]\/95,
+html.dark .bg-\[\#F2F8F4\]\/98 {
+  background-color: #16261E !important;
+  color: #E2EFE5 !important;
+}
+
+html.dark .bg-\[\#EBF5EE\],
+html.dark .bg-\[\#EAF3EC\],
+html.dark .bg-\[\#E2EFE5\] {
+  background-color: #1d3328 !important;
+  color: #E2EFE5 !important;
+}
+
+html.dark .bg-\[\#DCEBDA\] {
+  background-color: #233e31 !important;
+  color: #E2EFE5 !important;
+}
+
+html.dark .border-\[\#C8DEC8\],
+html.dark .border-\[\#DCE7DF\],
+html.dark .border-\[\#A8C5A0\] {
+  border-color: #274535 !important;
+}
+
+html.dark .text-\[\#1A2E22\],
+html.dark .text-\[\#20332A\] {
+  color: #E2EFE5 !important;
+}
+
+html.dark .text-\[\#285943\],
+html.dark .text-\[\#486350\] {
+  color: #8EC49F !important;
+}
+
+html.dark .text-\[\#6F7B72\] {
+  color: #9DB5A4 !important;
+}
+
+html.dark hr {
+  border-color: #274535 !important;
+}
+
+html.dark input {
+  background-color: #13241b !important;
+  color: #E2EFE5 !important;
+  border-color: #274535 !important;
+}
+
+/* Custom Alpine Range Sliders */
+input[type="range"] {
+  outline: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type="range"]:focus,
+input[type="range"]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: currentColor;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  border: 2px solid #ffffff;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: currentColor;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  border: 2px solid #ffffff;
+}
+
+

@@ -1,72 +1,125 @@
-# 🎒 CheckMate — Nothing Gets Left Behind
+# 🌿 Canopy — Backcountry Guardian
+### Offline-First Open-Weight AI Outdoor Safety & Terrain Intelligence System
+**Built for the Touch Grass Open-Source AI Challenge**
 
-> **Hacktoberfest 2026 Weekend Challenge: Build for a Friend**  
-> An open-source spatial packing companion built with **Gemma 2**, **PaliGemma**, and **ElevenLabs**.
+> *"Build something with open-source AI at its core that gets people off the screen and into the world."*
 
-[![Hacktoberfest 2026](https://img.shields.io/badge/Hacktoberfest-2026-ff7849.svg)](https://hacktoberfest.com/)
-[![Built with Gemma](https://img.shields.io/badge/Model-Gemma%202%20%2F%20PaliGemma-4285F4.svg)](https://ai.google.dev/gemma)
-[![Voice by ElevenLabs](https://img.shields.io/badge/Voice-ElevenLabs-black.svg)](https://elevenlabs.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-
----
-
-## 💡 The Story
-Built for **Alex**, a university student who constantly travels between the college hostel, trips back home, and stage presentations — and notoriously forgets essential items (like the laptop charger plugged into the wall behind the desk or the HDMI adapter needed for stage slides).
-
-CheckMate replaces generic checklists with an **open-weight vision and reasoning system**:
-1. **Scans photos of the room/desk** to pinpoint objects and cables plugged into wall outlets.
-2. **Synthesizes personalized manifests** based on trip purpose, weather, and duration.
-3. **Learns from forgotten items** over time, escalating repeated mistakes into high-priority alerts with spatial checks.
-4. **Voice Exit Coach:** Speaks out audio warnings before zipping the luggage.
+[![Open-Weight AI](https://img.shields.io/badge/Open--Weight_AI-SmolLM2_%2F_Gemma_2_%2F_Deep_MLP-285943.svg)](https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct)
+[![Offline First](https://img.shields.io/badge/Inference-100%25_Browser_Local-16a34a.svg)](#)
+[![Deterministic Safety](https://img.shields.io/badge/Safety_Layer-Deterministic_Override_Engine-dc2626.svg)](#)
+[![License: Apache 2.0 / MIT](https://img.shields.io/badge/License-Apache_2.0_%2F_MIT-blue.svg)](LICENSE)
 
 ---
 
-## ✨ Features
+## 🏔️ Overview
 
-- 📸 **Room & Desk Spatial Scanner:** Overlays detected object pins and bounding coordinates directly on room photos.
-- 🧠 **Open-Weight Gemma Reasoning:** Uses Gemma 2 turn formatting to evaluate failure modes, prune clutter, and ground decisions in visual context.
-- 🔁 **The Memory Learning Loop:** Persistent memory vault of past forgotten items, auto-generating active countermeasures.
-- ⚡ **Side-by-Side Comparison Demo:** Instant 1-click comparison between *"Weekend at Home"* and *"College Presentation"*, with Gemma explaining the causal differences.
-- 🎙️ **Voice Exit Nudge:** Spoken audio briefing via ElevenLabs or offline Web Speech API.
-- 🔒 **100% Privacy & Offline Capable:** Runs entirely locally with zero cloud API token costs and zero room photos sent to external servers.
+**Canopy (Backcountry Guardian)** is an offline-first backcountry safety, microclimate, terrain intelligence, and outdoor guidance system. Designed to minimize screen time in the outdoors, Canopy provides hands-free voice-first guidance, real-time environmental telemetry grounding, and a multi-tiered open-weight AI architecture protected by a deterministic safety engine.
 
 ---
 
-## 🚀 Quick Start
+## 🏛️ System Architecture
 
-### 1. Frontend (Vite + React + Tailwind CSS)
+```text
+                        ┌────────────────────────────────────────────────────────┐
+                        │                    USER INTERFACE                      │
+                        │  Hands-Free Field Mode / Voice Outdoors / 3D Topo Map  │
+                        └───────────────────────────┬────────────────────────────┘
+                                                    │ User Prompt / Voice Query
+                                                    ▼
+                        ┌────────────────────────────────────────────────────────┐
+                        │             CANOPY TELEMETRY CONTEXT ENGINE            │
+                        │  Trail • Elevation • Slope • Weather • Risk • Curfew   │
+                        │  Water • Wildlife • Sensors (Simulated vs Live USB)    │
+                        └───────────────────────────┬────────────────────────────┘
+                                                    │ Grounded Structured Context
+                                                    ▼
+                        ┌────────────────────────────────────────────────────────┐
+                        │             OPEN-WEIGHT AI INFERENCE CORE              │
+                        │  Tier 1: WebLLM (SmolLM2-135M-IT via WebGPU)           │
+                        │  Tier 2: Localhost Daemon (Gemma 2 9B-IT via Ollama)   │
+                        │  Tier 3: Browser-Local Deep Neural MLP (Zero Cloud)    │
+                        └───────────────────────────┬────────────────────────────┘
+                                                    │ Model Proposal
+                                                    ▼
+                        ┌────────────────────────────────────────────────────────┐
+                        │              DETERMINISTIC SAFETY ENGINE               │
+                        │  Hard Cutoff Curfew • Extreme Risk Threshold (>75)     │
+                        │  Whiteout Disorientation • Sub-zero Thermal • Hypoxia  │
+                        └───────────────────────────┬────────────────────────────┘
+                                                    │ Intercept & Override (if unsafe)
+                                                    ▼
+                        ┌────────────────────────────────────────────────────────┐
+                        │                AUDIO / SPEECH SYNTHESIS                │
+                        │     Hands-Free Verbal Warnings & Route Navigation      │
+                        └────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ✨ Key Features
+
+1. **Open-Weight AI at the Core:**
+   - **Zero Cloud APIs, Zero API Keys:** Runs 100% on the user's device with zero telemetry leaving the browser.
+   - **Tiered Model Runtimes:**
+     - **WebLLM:** In-browser WebGPU execution of `SmolLM2-135M-Instruct` (Apache 2.0).
+     - **Local Ollama Daemon:** Localhost port 11434 connection for Google's `gemma2:9b-instruct` (Gemma Open License).
+     - **On-Device Deep MLP:** Pure JavaScript 3-layer neural network with backprop and strict telemetry grounding (MIT).
+2. **Deterministic Safety Engine:**
+   - Ensures the LLM is **never the sole safety authority**.
+   - Enforces 5 hard safety rules (Mandatory turnaround cutoff, extreme risk threshold, whiteout disorientation, sub-zero hypothermia, hypoxia protocols).
+   - If conditions violate hard safety thresholds, the safety engine overrides the model proposal with high-priority warnings.
+3. **Dedicated Hands-Free Field Mode:**
+   - High-contrast, minimal OLED interface designed to get users off the screen.
+   - Touch-to-speak voice copilot using native browser Speech Recognition and Speech Synthesis.
+   - One-tap Emergency SOS beacon and glanceable trail telemetry.
+4. **Interactive 3D Topographic Terrain:**
+   - Procedural PBR canvas normal and roughness maps (0 external texture downloads).
+   - Multi-touch orbit, pinch-zoom, and terrain raycasting to inspect elevation and slope angles.
+5. **Hardware Telemetry Bridge:**
+   - Chromium WebSerial API bridge connecting to physical Arduino / ESP32 sensor pods.
+   - Clear distinction between `LIVE SENSOR (Physical Hardware)` and `SIMULATED SENSOR (Synthetic Stream)`.
+6. **Microclimate & Bioacoustics:**
+   - Environmental lapse rate physics model ($\Delta T = -6.5^\circ\text{C} / 1000\text{m}$) with frost danger predictions (`PHYSICS FALLBACK`).
+   - Web Audio 512-pt FFT live spectral analysis with native species frequency matching (`SPECTRAL ANALYSIS`).
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- Modern Chromium browser (Chrome / Edge / Opera) with WebGPU and WebSerial support.
+
+### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/shrut/friendly-hopper.git
-cd friendly-hopper
+git clone https://github.com/shrutirai29/canopy-touch-grass.git
+cd canopy-touch-grass
 
 # Install dependencies
 npm install
 
-# Start local development server
+# Start Vite local development server
 npm run dev
 ```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### 2. Optional: Local Gemma 2 Backend (Ollama)
-If you wish to run with a live local Gemma 2 model via Ollama:
-```bash
-# 1. Pull Gemma 2 in Ollama
-ollama run gemma2
-
-# 2. Start the CheckMate Python bridge
-python backend/gemma_engine.py
-```
+The application will be live at **`http://localhost:5174/`**.
 
 ---
 
-## 🏆 Hacktoberfest Prize Categories Targeted
+## 🧪 Testing & Verification
 
-- 🌟 **Best Use of Gemma ($200):** Built from the ground up around Google's Gemma 2 and PaliGemma open weights.
-- 🎙️ **Best Use of ElevenLabs ($100):** Natural spoken exit briefings warning users of forgotten items.
-- 🏅 **Overall Winner ($250):** Authentic, high-impact friend project with open-source AI at its core.
+1. **Offline Mode:** Disconnect your internet connection or toggle DevTools to *Offline*. All 3D maps, AI guidance, voice synthesis, and safety checks remain 100% functional.
+2. **Open AI Verification Sandbox:** Navigate to **AI Guide** $\rightarrow$ **Open AI & Why** tab to test:
+   - **Scenario A (Safe Morning):** $2,500\text{m}$, $15^\circ\text{C}$, Risk 20 $\rightarrow$ Ascent permitted.
+   - **Scenario B (Dangerous Cutoff):** $4,270\text{m}$, $2^\circ\text{C}$, Past 2:30 PM cutoff, Risk 85 $\rightarrow$ Deterministic Override: **TURN BACK**.
+   - **Hallucination Protection:** Inquire about nonexistent checkpoints (e.g., *"Temp at checkpoint XYZ?"*) to observe strict grounding.
+   - **Model Failure Failsafe:** Click *"Simulate AI Failure"* to observe the deterministic safety engine take over without crashing.
 
 ---
 
-## 📄 License
-MIT License. Built for Hacktoberfest 2026.
+## 📜 Licensing
+
+- **Canopy Software & On-Device Models:** [MIT License](LICENSE)
+- **SmolLM2-135M-Instruct:** Apache 2.0 License
+- **Gemma 2 (9B-IT):** Gemma Terms of Use / Gemma Open License

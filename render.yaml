@@ -1,43 +1,28 @@
-# Render Blueprint Specification for CheckMate
-# Target Prize Category: Best Use of Render ($200)
-# Deploys Vite Frontend + Python Gemma AI Runtime Worker
-
 services:
-  # 1. Front-end Web Service
+  # Python FastAPI Backend for TabPFN & Gemma 2 Gateway
   - type: web
-    name: checkmate-frontend
+    name: canopy-ai-backend
+    env: python
+    region: oregon
+    plan: standard
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.canopy_server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ENVIRONMENT
+        value: production
+
+  # Static Frontend Site (React 19 + Vite + Tailwind CSS)
+  - type: web
+    name: canopy-ai-frontend
     env: static
+    region: oregon
+    plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
-    headers:
-      - path: /*
-        name: Cache-Control
-        value: public, max-age=0, must-revalidate
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
-    envVars:
-      - key: VITE_BACKEND_URL
-        fromService:
-          type: web
-          name: checkmate-ai-runtime
-          property: host
-
-  # 2. AI Runtime Engine (Gemma & TabPFN Backend)
-  - type: web
-    name: checkmate-ai-runtime
-    env: python
-    region: oregon
-    plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: python backend/gemma_engine.py
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
-      - key: OLLAMA_HOST
-        value: http://localhost:11434
-      - key: TABPFN_MODEL_MODE
-        value: in_context_foundation_prior
-      - key: SENTRY_ENVIRONMENT
-        value: production

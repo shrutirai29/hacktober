@@ -1,0 +1,52 @@
+[
+  {
+    "id": "hermit-thrush",
+    "name": "Hermit Thrush",
+    "scientific": "Catharus guttatus",
+    "min_freq_hz": 2800,
+    "max_freq_hz": 5200,
+    "dominant_harmonic_hz": 3450,
+    "vocal_pattern": "Pure whistle tone followed by ascending harmonic cascades",
+    "habitat": "Damp boreal and montane conifer forest ravines"
+  },
+  {
+    "id": "wood-duck",
+    "name": "Wood Duck",
+    "scientific": "Aix sponsa",
+    "min_freq_hz": 1400,
+    "max_freq_hz": 2900,
+    "dominant_harmonic_hz": 2100,
+    "vocal_pattern": "Rising squealing alarm whistle with broadband noise components",
+    "habitat": "Damp cedar wetlands and forested secluded creek bends"
+  },
+  {
+    "id": "red-tailed-hawk",
+    "name": "Red-tailed Hawk",
+    "scientific": "Buteo jamaicensis",
+    "min_freq_hz": 1900,
+    "max_freq_hz": 3400,
+    "dominant_harmonic_hz": 2400,
+    "vocal_pattern": "Downward slurred hoarse rasping scream",
+    "habitat": "Open cliff perches and thermal soaring ridges"
+  },
+  {
+    "id": "golden-crowned-kinglet",
+    "name": "Golden-crowned Kinglet",
+    "scientific": "Regulus satrapa",
+    "min_freq_hz": 7000,
+    "max_freq_hz": 9600,
+    "dominant_harmonic_hz": 8200,
+    "vocal_pattern": "Ultra-high needle-thin musical series above human speech range",
+    "habitat": "Deep coniferous canopy needles in cold alpine zones"
+  },
+  {
+    "id": "barred-owl",
+    "name": "Barred Owl",
+    "scientific": "Strix varia",
+    "min_freq_hz": 400,
+    "max_freq_hz": 1250,
+    "dominant_harmonic_hz": 780,
+    "vocal_pattern": "Low pitch 8-note rhythmic cadence 'Who cooks for you?'",
+    "habitat": "Old-growth dense deciduous woods and swamp margins"
+  }
+]

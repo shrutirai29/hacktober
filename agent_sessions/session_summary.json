@@ -1,0 +1,28 @@
+{
+  "project": "Canopy AI",
+  "challenge": "Hacktoberfest 2026 Open-Source AI Challenge: Week 1 - Touch Grass",
+  "theme": "Touch Grass",
+  "agent_runner": "Antigravity DevRelay Agent Session",
+  "steps": [
+    {
+      "phase": "Problem Definition & Touch Grass Philosophy",
+      "action": "Eliminate smartphone glare and screen dependency during outdoor hikes. Design a 'Pocket-First' architecture with tactile controls and audio whispers."
+    },
+    {
+      "phase": "Open-Source AI Foundation Selection",
+      "action": "Selected Google Gemma 2 (9B-IT) for backcountry survival and Leave-No-Trace reasoning, and Prior Labs TabPFN for zero-shot microclimate tabular forecasting."
+    },
+    {
+      "phase": "Zero-Signal Bioacoustic Engine",
+      "action": "Implemented Web Audio FFT spectral decomposition matching harmonic footprints of Hermit Thrush, Wood Duck, Red-tailed Hawk, and Barred Owl without network roundtrips."
+    },
+    {
+      "phase": "Screenless Audio Pipeline",
+      "action": "Integrated ElevenLabs speech synthesis for natural earbud whispers with automatic offline Web Speech API fallback for deep wilderness canyons."
+    },
+    {
+      "phase": "Hardware Telemetry Bridge",
+      "action": "Engineered Arduino UNO Q C++ firmware with BME280 sensor and Qualcomm AI Hub quantization support for real-time backpack telemetry."
+    }
+  ]
+}
