@@ -185,9 +185,12 @@ Directives:
     if (onProgress) onProgress(report);
 
     // 2. WebLLM engine initialization & 3. Model loading
+    let engineCreated = false;
+    let modelLoaded = false;
     try {
       const { CreateMLCEngine } = await import('@mlc-ai/web-llm');
       report.engine = 'PASS';
+      engineCreated = true;
       if (onProgress) onProgress(report);
 
       const progressCallback = (p) => {
@@ -200,46 +203,77 @@ Directives:
           initProgressCallback: progressCallback
         });
       }
-      this.isReady = true;
-      this.status = 'READY';
+      modelLoaded = true;
       report.model = 'PASS';
       if (onProgress) onProgress(report);
+    } catch (loadErr) {
+      this.isReady = false;
+      this.status = 'ERROR';
+      report.model = 'FAIL';
+      report.inference = 'FAIL';
+      report.provider = 'UNKNOWN';
+      report.error = `Model initialization failed: ${loadErr?.message || String(loadErr)}`;
+      if (onProgress) onProgress(report);
+      return report;
+    }
 
-      // 4. Test inference with exact test prompt
+    // 4. Test inference with exact test prompt & timeout protection
+    try {
       const t0 = performance.now();
       const testPrompt = "Reply with exactly: CANOPY_WEBLLM_OK";
-      const completion = await this.engine.chat.completions.create({
+      
+      // Bounded inference promise with 15s timeout
+      const inferencePromise = this.engine.chat.completions.create({
         messages: [
           { role: 'user', content: testPrompt }
         ],
         temperature: 0.1,
         max_tokens: 30
       });
-      const latency = Math.round(performance.now() - t0);
-      const text = completion.choices?.[0]?.message?.content?.trim() || '';
-      report.latency = latency;
-      report.generatedText = text;
+      
+      let timeoutId;
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error("Inference timeout: WebLLM did not respond within 15000ms")), 15000);
+      });
 
-      // 5. Response validation: MUST contain exact expected token CANOPY_WEBLLM_OK
-      // Do not accept arbitrary non-empty response
-      const hasExpectedToken = text.includes('CANOPY_WEBLLM_OK');
+      const completion = await Promise.race([inferencePromise, timeoutPromise]);
+      clearTimeout(timeoutId);
+
+      const latency = Math.round(performance.now() - t0);
+      const rawText = completion.choices?.[0]?.message?.content || '';
+      // Normalize whitespace and case for robust matching against the test contract token
+      const normalizedText = rawText.trim().replace(/\s+/g, ' ');
+      report.latency = latency;
+      report.generatedText = normalizedText;
+
+      // 5. Response validation: MUST match exact expected token CANOPY_WEBLLM_OK
+      // Contract: Response must equal CANOPY_WEBLLM_OK (case-insensitive, whitespace normalized).
+      // Embedded tokens in unrelated text (e.g. "Here is CANOPY_WEBLLM_OK for you") are strictly REJECTED.
+      const hasExactToken = typeof normalizedText === 'string' && /^CANOPY_WEBLLM_OK$/i.test(normalizedText);
       const hasActualProvider = this.id === 'webllm';
       
-      if (hasExpectedToken && hasActualProvider) {
+      if (hasExactToken && hasActualProvider) {
+        this.isReady = true;
+        this.status = 'READY';
         report.inference = 'PASS';
         report.provider = 'webllm';
       } else {
+        this.isReady = false;
+        this.status = 'ERROR';
         report.inference = 'FAIL';
         report.provider = hasActualProvider ? 'webllm' : 'UNKNOWN';
-        report.error = !hasExpectedToken
-          ? `Unexpected response: expected "CANOPY_WEBLLM_OK", received "${text}"`
+        report.error = !hasExactToken
+          ? `Unexpected response: expected exact "CANOPY_WEBLLM_OK", received "${normalizedText}"`
           : `Invalid actualProvider: expected "webllm", got "${this.id}"`;
       }
       if (onProgress) onProgress(report);
       return report;
-    } catch (err) {
+    } catch (inferErr) {
+      this.isReady = false;
+      this.status = 'ERROR';
       report.inference = 'FAIL';
-      report.error = err?.message || String(err);
+      report.provider = 'UNKNOWN';
+      report.error = `Inference failed: ${inferErr?.message || String(inferErr)}`;
       if (onProgress) onProgress(report);
       return report;
     }

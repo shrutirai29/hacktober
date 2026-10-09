@@ -39,11 +39,13 @@ export function validateAndSanitizeAIResponse(aiProposedResponse, context, userQ
   if (mentionsDrugs || mentionsDosage) {
     issues.push("MEDICATION_PRESCRIBING_FILTERED");
     wasSanitized = true;
-    // Replace drug prescribing lines with conservative mountain protocol
+    // Replace clauses or sentences referencing medications or dosages with conservative mountain protocol
     text = text.replace(
-      /(?:take|administer|use|prescribe|carry|dosage|dose of)?\s*(?:diamox|acetazolamide|ibuprofen|paracetamol|nifedipine|dexamethasone)[^.\n]*[.\n]?/gi,
+      /(?:take|administer|use|prescribe|carry|dosage|dose of)?\s*(?:\d+\s*(?:mg|milligrams?|tablets?|doses?)\s*(?:of\s*)?)?(?:diamox|acetazolamide|ibuprofen|paracetamol|nifedipine|dexamethasone)[^.\n]*[.\n]?/gi,
       "Conservative backcountry protocol: Rest, maintain hydration with electrolytes, halt ascent, and prepare for immediate descent if symptoms worsen.\n"
     );
+    // Strip any remaining orphaned dosages (e.g., "Take 250 mg twice daily")
+    text = text.replace(/\b\d+\s*(?:mg|milligrams?|tablets?|doses?)\b[^.\n]*[.\n]?/gi, "");
   }
 
   // 3. Ensure Medical Disclaimer is present on any altitude / symptom query or medical topic

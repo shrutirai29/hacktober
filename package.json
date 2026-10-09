@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node scripts/unit_regression_suite.js",
+    "test:audit": "node scripts/redteam_audit.js",
+    "test:e2e": "node scripts/complete_redteam_e2e.js"
   },
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.85",

@@ -37,6 +37,50 @@ USER GOES OUTSIDE & EXPLORES SAFELY
 
 ---
 
+## 📸 Visual Showcase & Application Gallery
+
+### 1. Interactive 3D Terrain & Dynamic Telemetry Dashboard
+High-resolution 3D mountain elevation mesh with raycasted trail splines, live slope angles, dynamic risk gauges, and context-aware guidance cards.
+
+![Canopy 3D Terrain & Live Dashboard](public/screenshots/hero_terrain_dashboard.jpg)
+
+<br/>
+
+### 2. High-Altitude Topographic Elevation & Ecosystem Mapping
+Himalayan topo visualizer rendering ridge contours, elevation profiles, water availability, and ecosystem indicators.
+
+![Himalayan Topographic Map](public/screenshots/topo_3d_landscape.png)
+
+<br/>
+
+### 3. Open-Weight AI Field Guardian & Context Reasoning
+Context-grounded assistant powered by SmolLM2-135M on WebGPU, supervised by the deterministic safety engine.
+
+![Safety Advisor Guidance](public/screenshots/safety_advisor_guidance.png)
+
+<br/>
+
+### 4. Minimalist High-Contrast OLED Field Mode
+Zero-distraction high-contrast interface designed for bright mountain sunlight or night hikes, maximizing battery life and field glanceability.
+
+![Minimalist OLED Field Mode](public/screenshots/field_mode_oled.png)
+
+<br/>
+
+### 5. Physical Sensor Telemetry Bridge (Arduino UNO Q / WebSerial)
+Real-time environmental sensor ingestion via WebSerial (BME280 temperature, pressure, humidity, peak microphone harmonics) with transparent synthetic simulation mode.
+
+![Arduino Physical Sensor Bridge](public/screenshots/sensors_arduino_telemetry.png)
+
+<br/>
+
+### 6. Developer & Judge Diagnostics Console (`/diagnostics`)
+Dedicated live runtime audit dashboard displaying real WebGPU device status, active model weights, deterministic safety health, and one-click self-test execution.
+
+![Developer Diagnostics](public/screenshots/developer_diagnostics.png)
+
+---
+
 ## 🏛️ 2. Open-Weight AI Architecture
 
 Canopy implements a strict, pluggable, multi-tiered local AI provider architecture with **zero reliance on proprietary cloud APIs** (no OpenAI, no Anthropic, no Gemini API keys):
@@ -208,22 +252,27 @@ ollama run gemma2:9b
 
 ---
 
-## 📶 8. Offline Operation & Model Caching Nuance
+## 📶 8. Offline Operation & Model Caching Prerequisites
 
-- **First Run (Model Asset Cache):** On initial launch with WebLLM selected, the browser downloads the quantized open-weight model weights (~140MB for SmolLM2) into browser `CacheStorage` / `IndexedDB`.
-- **Subsequent Runs (100% Offline):** Once cached, internet access can be completely disabled (Airplane Mode). Inference, 3D terrain, risk analysis, voice synthesis, and safety rules execute 100% locally.
+- **Initial Download (Requires Network):** On initial launch when selecting the WebLLM engine, the browser downloads the quantized open-weight model weights (~140MB for `SmolLM2-135M-Instruct-q0f16-MLC`) into the browser's `CacheStorage` / `IndexedDB`.
+- **Subsequent Operation (Offline-Capable):** Once weights and core PWA assets are cached, the application is designed to operate offline on-device without internet access.
+- **Hardware Prerequisite:** WebLLM requires a browser and GPU supporting the modern WebGPU standard. If WebGPU is unsupported or unavailable (e.g., in headless CI or older hardware), Canopy degrades gracefully to its on-device neural fallback (pure CPU JavaScript with zero external dependencies).
+- **Desktop Daemon (Ollama):** If using the secondary Ollama tier (Gemma 2 9B), the local Ollama daemon must be installed and running on `localhost:11434`.
 
 ---
 
-## 🧪 9. Red Team End-to-End Verification & Developer Diagnostics
+## 🧪 9. Red Team End-to-End Verification & Diagnostics
 
 ### Automated Test Suites
-Run the automated Red Team verification suites directly via Node:
+Run the verified test suites directly via Node:
 ```bash
-# Core Red Team Test Suite
+# 1. Dedicated Unit & Adversarial Regression Suite (16 checks)
+node scripts/unit_regression_suite.js
+
+# 2. Comprehensive Red Team Audit Suite (15 checks)
 node scripts/redteam_audit.js
 
-# Complete 28-Vector End-to-End Harness
+# 3. Complete 28-Vector End-to-End Harness
 node scripts/complete_redteam_e2e.js
 ```
 
@@ -253,7 +302,7 @@ For judges and developer verification, Canopy includes an inspectable diagnostic
 | :--- | :---: | :--- |
 | **1. OPEN-WEIGHT AI** | Verified Active | Primary `SmolLM2-135M-Instruct` (Apache 2.0), optional `Gemma 2 9B-IT` (Gemma License), with Canopy Net on-device neural fallback (MIT). |
 | **2. LOCAL INFERENCE** | Verified Active | Browser WebGPU via `@mlc-ai/web-llm` with zero cloud tokens consumed. |
-| **3. OFFLINE SOVEREIGN** | Verified Active | Operates 100% disconnected after first-run model caching. |
+| **3. OFFLINE CAPABLE** | Verified Active | Operates locally on-device after initial model weight caching. |
 | **4. ZERO TELEMETRY LEAKS** | Verified Active | Zero external tracker endpoints or remote AI APIs. Coordinates and queries stay in device RAM. |
 | **5. REAL-WORLD OUTDOOR USE** | Verified Active | Tailored for high-altitude backcountry passes with offline topo mapping and survival logic. |
 | **6. HANDS-FREE VOICE** | Verified Active | Native Web Speech API synthesis + procedural Web Audio harmonic chimes. |
