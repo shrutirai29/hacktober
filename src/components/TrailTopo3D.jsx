@@ -128,7 +128,7 @@ const TRAIL_CONFIGS = {
       { num: '05', name: 'Hampta Pass Crest', elev: '4,270 m', zone: 'Continental Divide Notch', terrain: 'Narrow Saddle & Exposed Flanks', difficulty: 'Pass Crest', tip: 'High winds channel through pass notch. 1:30 PM turnaround.' },
       { num: '06', name: 'Shea Goru (Spiti)', elev: '3,900 m', zone: 'Cold Rain-Shadow Desert', terrain: 'Barren Ochre Rock & Braided River', difficulty: 'Scree Descent', tip: 'Zero trees! Cold dry winds; rapid unseen dehydration.' }
     ],
-    defaultCam: { theta: 0.32, phi: 0.38, rad: 34, look: new THREE.Vector3(0.0, 9.0, 3.0) }
+    defaultCam: { theta: 0.04, phi: 0.42, rad: 32, look: new THREE.Vector3(0.0, 7.5, 1.0) }
   },
 
   'triund-ridge': {
@@ -153,7 +153,7 @@ const TRAIL_CONFIGS = {
       { num: '04', name: 'Steep Gully Staircase', elev: '3,950 m', zone: 'Class 3 Moraine', terrain: 'Steep Boulder Gully with High Exposure', difficulty: 'Severe Scramble', tip: 'Class 3 scrambling. 12:30 PM strict turnaround deadline.' },
       { num: '05', name: 'Indrahar Ridge Crest', elev: '4,342 m', zone: 'Knife-Edge Pass', terrain: 'Razor-Sharp Arete connecting Kangra & Chamba', difficulty: 'Summit Pass', tip: 'Fluttering prayer flags & cairn. 360° views of Mani Mahesh Kailash.' }
     ],
-    defaultCam: { theta: 0.32, phi: 0.38, rad: 32, look: new THREE.Vector3(0.0, 7.0, 4.0) }
+    defaultCam: { theta: 0.04, phi: 0.42, rad: 30, look: new THREE.Vector3(0.0, 6.5, 2.0) }
   },
 
   'chandrashila-peak': {
@@ -178,7 +178,7 @@ const TRAIL_CONFIGS = {
       { num: '04', name: 'Ravansheela Rock Overhang', elev: '3,840 m', zone: 'Upper Cliff Edge', terrain: 'Rugged Scree & Slate Steps', difficulty: 'Steep Rocky Scramble', tip: 'Dual trekking poles recommended on uneven rocky steps.' },
       { num: '05', name: 'Chandrashila Moon Rock Horn', elev: '4,000 m', zone: 'Summit Horn', terrain: 'Jagged Exposed Apex with 360° Panorama', difficulty: 'Alpine Summit Push', tip: '360° alpenglow views of Chaukhamba, Nanda Devi, and Trishul massifs.' }
     ],
-    defaultCam: { theta: 0.35, phi: 0.42, rad: 30, look: new THREE.Vector3(0.5, 7.5, 2.0) }
+    defaultCam: { theta: 0.04, phi: 0.42, rad: 30, look: new THREE.Vector3(0.0, 7.0, 1.5) }
   },
 
   'kedarnath-ridge': {
@@ -203,7 +203,7 @@ const TRAIL_CONFIGS = {
       { num: '04', name: 'Colossal South Wall', elev: '4,800 m', zone: 'Glacial Face', terrain: 'Towering Sheer Granite Wall & Hanging Seracs', difficulty: 'Extreme Mountaineering', tip: 'Severe avalanche hazard from hanging glacial ice seracs.' },
       { num: '05', name: 'Kedarnath Summit Ridge', elev: '6,940 m', zone: 'High Himalayan Horn', terrain: 'Razor-Sharp Arete & Perpetual Glacial Ice', difficulty: 'Extreme 6,940 m Apex', tip: 'Severe sub-zero freeze and howling hurricane-force jetstream winds.' }
     ],
-    defaultCam: { theta: 0.28, phi: 0.36, rad: 36, look: new THREE.Vector3(0.0, 9.5, 2.0) }
+    defaultCam: { theta: 0.02, phi: 0.44, rad: 34, look: new THREE.Vector3(0.0, 7.5, -1.0) }
   }
 };
 
@@ -540,24 +540,28 @@ export default function TrailTopo3D({ currentTrail, audioMuted, onSelectTrail, i
       return Math.max(0.6, h);
     } 
     else {
-      // Kedarnath Ridge: Sacred Mandakini gorge (z > 12), Kedarnath temple terrace (z = 13), Chorabari glacier (z = 6), Colossal 6,940 m south wall
-      let h = (18.0 - z) * 0.52;
-      const wallDist = Math.hypot(x - 0.5, z + 13.0);
-      const wallCone = Math.max(0, 1.0 - wallDist / 13.0);
-      h += Math.pow(wallCone, 1.8) * 15.5;
+      // Kedarnath Ridge: Sacred Mandakini gorge (z > 12), Kedarnath temple terrace (z = 13), Chorabari glacier (z = 6), Colossal south wall
+      let h = (18.0 - z) * 0.42;
+      // Broad majestic mountain ridge mass rather than an extreme single-vertex cone
+      const wallDist = Math.hypot(x - 0.5, z + 11.0);
+      const wallCone = Math.max(0, 1.0 - wallDist / 16.0);
+      h += Math.pow(wallCone, 1.3) * 12.0;
+
+      const ridgeSpine = Math.max(0, 1.0 - Math.abs(x - 0.5) / 5.5) * Math.max(0, (5.0 - z) / 18.0);
+      h += Math.pow(ridgeSpine, 1.2) * 5.5;
 
       const templeBase = Math.hypot(x, z - 13.0);
-      if (templeBase < 4.5) {
-        const kw = Math.cos((templeBase / 4.5) * (Math.PI / 2));
-        h = h * (1 - kw * 0.55) + 4.2 * (kw * 0.55);
+      if (templeBase < 5.5) {
+        const kw = Math.cos((templeBase / 5.5) * (Math.PI / 2));
+        h = h * (1 - kw * 0.5) + 3.8 * (kw * 0.5);
       }
       const choraDist = Math.hypot(x + 1.2, z - 6.0);
-      if (choraDist < 4.5) {
-        h -= Math.cos((choraDist / 4.5) * (Math.PI / 2)) * 2.2;
+      if (choraDist < 5.0) {
+        h -= Math.cos((choraDist / 5.0) * (Math.PI / 2)) * 1.8;
       }
-      h += Math.sin(x * 0.4 + z * 0.3) * Math.cos(z * 0.35) * 1.4;
-      h += Math.sin(x * 0.8 + 1.0) * Math.cos(z * 0.6) * 0.6;
-      return Math.max(0.5, h);
+      h += Math.sin(x * 0.35 + z * 0.25) * Math.cos(z * 0.3) * 1.2;
+      h += Math.sin(x * 0.7 + 1.0) * Math.cos(z * 0.5) * 0.5;
+      return Math.max(0.6, h);
     }
   };
 
@@ -1363,9 +1367,9 @@ export default function TrailTopo3D({ currentTrail, audioMuted, onSelectTrail, i
       const xVal = Math.sin(validIdx * 1.2) * 1.8;
       const yVal = getElevation(xVal, zVal, trailId);
 
-      cp.targetTheta = 0.32 - validIdx * 0.12;
-      cp.targetPhi = 0.40;
-      cp.targetRadius = 16.0;
+      cp.targetTheta = 0.06 - (validIdx / Math.max(1, totalCps - 1)) * 0.08;
+      cp.targetPhi = 0.42;
+      cp.targetRadius = 18.0;
       cp.targetLook.set(xVal, yVal + 1.2, zVal);
     }
 
