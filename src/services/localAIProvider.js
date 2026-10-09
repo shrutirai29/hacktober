@@ -170,6 +170,12 @@ Directives:
     // 1. WebGPU detection
     const hasGpu = typeof navigator !== 'undefined' && 'gpu' in navigator && !!navigator.gpu;
     if (!hasGpu) {
+      report.webgpu = 'ENVIRONMENT-LIMITED';
+      report.engine = 'ENVIRONMENT-LIMITED';
+      report.model = 'ENVIRONMENT-LIMITED';
+      report.inference = 'ENVIRONMENT-LIMITED';
+      report.provider = 'ENVIRONMENT-LIMITED';
+      report.local = 'ENVIRONMENT-LIMITED';
       report.error = 'WebGPU is not supported in this runtime environment';
       if (onProgress) onProgress(report);
       return report;
@@ -188,6 +194,7 @@ Directives:
         if (onProgress) onProgress({ ...report, loadProgress: Math.round((p.progress || 0) * 100), loadText: p.text });
       };
 
+      // Reuse existing engine instance to prevent competing resource contention
       if (!this.engine) {
         this.engine = await CreateMLCEngine(this.modelId, {
           initProgressCallback: progressCallback
@@ -196,10 +203,9 @@ Directives:
       this.isReady = true;
       this.status = 'READY';
       report.model = 'PASS';
-      report.provider = 'WEBLLM';
       if (onProgress) onProgress(report);
 
-      // 4. Test inference
+      // 4. Test inference with exact test prompt
       const t0 = performance.now();
       const testPrompt = "Reply with exactly: CANOPY_WEBLLM_OK";
       const completion = await this.engine.chat.completions.create({
@@ -214,16 +220,25 @@ Directives:
       report.latency = latency;
       report.generatedText = text;
 
-      // 5. Response validation
-      if (text.includes('CANOPY_WEBLLM_OK') || text.length > 0) {
+      // 5. Response validation: MUST contain exact expected token CANOPY_WEBLLM_OK
+      // Do not accept arbitrary non-empty response
+      const hasExpectedToken = text.includes('CANOPY_WEBLLM_OK');
+      const hasActualProvider = this.id === 'webllm';
+      
+      if (hasExpectedToken && hasActualProvider) {
         report.inference = 'PASS';
+        report.provider = 'webllm';
       } else {
         report.inference = 'FAIL';
-        report.error = `Response did not contain CANOPY_WEBLLM_OK (got: "${text}")`;
+        report.provider = hasActualProvider ? 'webllm' : 'UNKNOWN';
+        report.error = !hasExpectedToken
+          ? `Unexpected response: expected "CANOPY_WEBLLM_OK", received "${text}"`
+          : `Invalid actualProvider: expected "webllm", got "${this.id}"`;
       }
       if (onProgress) onProgress(report);
       return report;
     } catch (err) {
+      report.inference = 'FAIL';
       report.error = err?.message || String(err);
       if (onProgress) onProgress(report);
       return report;
@@ -450,8 +465,8 @@ Recommended Layering:
       const text = `Backcountry Essential Gear for ${context.trail} (${context.elevation}, ${context.temperature}):
 
 1. Thermal & Weather Protection: 3-layer system (base, fleece/down mid-layer, waterproof shell), warm beanie, and windproof gloves.
-2. Hydration: 2.5–3.0 liters of water plus electrolyte packets (ORS).
-3. Nutrition: 2,500+ kcal of high-density energy bars, nuts, and dried fruit.
+2. Hydration (Planning Benchmark): Plan for adequate fluids (typically 2.0–3.0L for a full-day mountain route, adjusted for personal exertion and trail refill availability) plus electrolyte replenishment.
+3. Nutrition (Planning Benchmark): High-density caloric rations (energy bars, nuts, dried fruit) scaled to route length, temperature, and terrain intensity.
 4. Navigation: Offline GPX topo map on phone, physical compass, and headlamp with spare batteries.
 5. First Aid & Safety: Foil space bivy/blanket, whistle (3 blasts for emergency), blister pads, and elastic support bandages.
 6. Footwear: High-traction waterproof trekking boots with ankle support (microspikes for ice/snow sections).`;
@@ -508,13 +523,14 @@ ${context.isPastTurnaround
 
     // H. "HOW MUCH WATER SHOULD I CARRY?"
     if (/\b(how much water|water to carry|hydration|drink water|kitna paani)\b/i.test(q)) {
-      const text = `You should carry between 2.5 and 3.0 liters of water for ${context.trail}.
+      const text = `General Educational Hydration Guidelines for ${context.trail}:
+(Individual fluid needs vary significantly based on personal physiology, exertion, climb pace, and ambient temperature)
 
-Hydration Strategy at ${context.elevation}:
-• Ambient conditions: ${context.temperature}, dry mountain air causes accelerated fluid loss through heavy breathing.
-• Active Burn: Sip 300 to 400 ml of fluid for every hour of uphill ascent.
-• Water Sources: ${context.waterStatus}. Always filter or boil natural meltwater before drinking.
-• Add Electrolytes: Dissolve ORS electrolytes into at least 1 liter to prevent debilitating quadricep cramping and hyponatremia.`;
+• Planning Benchmark: Typically 2.0 to 3.0 liters for an extended mountain ascent where natural refills are spaced out.
+• Altitude & Air: At ${context.elevation} (${context.temperature}), dry high-altitude air accelerates respiratory fluid loss.
+• Pacing: Sip fluid steadily during sustained climbs rather than drinking large quantities intermittently.
+• Water Sources: ${context.waterStatus}. Always filter, purify, or boil natural backcountry meltwater.
+• Electrolytes: Replenish electrolytes during heavy exertion in warm conditions or long days, according to individual sweat rates and dietary tolerance.`;
       return { text, latency: Math.round(performance.now() - startTime), tokens: null };
     }
 

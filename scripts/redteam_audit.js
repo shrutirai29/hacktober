@@ -3,7 +3,7 @@
 // Genuinely executes tests — ZERO hardcoded PASS states.
 
 import assert from 'assert';
-import { spawnSync, execSync } from 'child_process';
+import { spawn, spawnSync, execSync } from 'child_process';
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
@@ -28,6 +28,122 @@ async function checkHttp(url) {
     req.setTimeout(2500, () => {
       req.abort();
       resolve({ ok: false, error: 'TIMEOUT' });
+    });
+  });
+}
+
+// Launches a real child-process Vite dev server on an ephemeral port, detects port, probes '/', and cleans up cleanly
+async function testDevServerStartup() {
+  const isWindows = process.platform === 'win32';
+  const npxCmd = isWindows ? 'npx.cmd' : 'npx';
+  const testPort = 5188;
+  
+  return new Promise((resolve) => {
+    let output = '';
+    let errorOutput = '';
+    let serverUrl = null;
+    let resolved = false;
+
+    const child = spawn(npxCmd, ['vite', '--port', String(testPort), '--strictPort'], {
+      cwd: projectRoot,
+      env: { ...process.env, BROWSER: 'none' },
+      shell: isWindows
+    });
+
+    const cleanup = () => {
+      try {
+        if (child.pid) {
+          if (isWindows) {
+            spawnSync('taskkill', ['/pid', String(child.pid), '/f', '/t']);
+          } else {
+            child.kill('SIGTERM');
+          }
+        }
+      } catch (e) {}
+    };
+
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        cleanup();
+        resolve({
+          ok: false,
+          error: `Startup timed out after 10000ms. Stdout: ${output.slice(0, 300)} | Stderr: ${errorOutput.slice(0, 300)}`
+        });
+      }
+    }, 10000);
+
+    const checkReadyAndProbe = async (url) => {
+      let attempts = 0;
+      const maxAttempts = 12;
+      while (attempts < maxAttempts && !resolved) {
+        attempts++;
+        try {
+          const probe = await checkHttp(url);
+          if (probe.ok) {
+            if (!resolved) {
+              resolved = true;
+              clearTimeout(timeout);
+              cleanup();
+              resolve({
+                ok: true,
+                status: probe.status,
+                url,
+                port: testPort
+              });
+            }
+            return;
+          }
+        } catch (e) {}
+        await new Promise(r => setTimeout(r, 400));
+      }
+
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeout);
+        cleanup();
+        resolve({
+          ok: false,
+          error: `Probed ${url} ${attempts} times but did not receive HTTP 200.`
+        });
+      }
+    };
+
+    child.stdout.on('data', (data) => {
+      const text = data.toString();
+      output += text;
+      // Strip ANSI escape codes
+      const clean = text.replace(/\u001b\[[0-9;]*m/g, '');
+      const match = clean.match(/http:\/\/(?:localhost|127\.0\.0\.1):(\d+)/i);
+      if (match && !serverUrl) {
+        const detectedPort = parseInt(match[1], 10);
+        serverUrl = `http://localhost:${detectedPort}/`;
+        checkReadyAndProbe(serverUrl);
+      }
+    });
+
+    child.stderr.on('data', (data) => {
+      errorOutput += data.toString();
+    });
+
+    child.on('error', (err) => {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeout);
+        cleanup();
+        resolve({ ok: false, error: `Process error: ${err.message}` });
+      }
+    });
+
+    child.on('exit', (code) => {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeout);
+        resolve({
+          ok: false,
+          error: `Process exited prematurely with code ${code}. Output: ${output || errorOutput}`
+        });
+      }
     });
   });
 }
@@ -65,22 +181,22 @@ async function runRedTeamAudit() {
   const hasDist = fs.existsSync(path.join(projectRoot, 'dist', 'index.html'));
   record(
     'TEST-01',
-    'Build & Module Resolution Execution',
+    '[INTEGRATION] Build & Module Resolution Execution',
     (buildPassed && hasDist) ? 'PASS' : 'FAIL',
     buildPassed
       ? `spawnSync('npm run build') exited with status 0. dist/index.html verified.`
       : `Build failed with code ${buildProcess.status}: ${buildProcess.stderr || buildProcess.stdout}`
   );
 
-  // 2. APPLICATION STARTUP TEST (BUG #6: Live probe of dev server)
-  const serverCheck = await checkHttp('http://localhost:5174/');
+  // 2. APPLICATION STARTUP TEST (Dedicated spawn & live HTTP probe)
+  const devStartup = await testDevServerStartup();
   record(
     'TEST-02',
-    'Application Startup & Server Health',
-    serverCheck.ok ? 'PASS' : 'NOT_AUTOMATED',
-    serverCheck.ok
-      ? `Dev server responded HTTP ${serverCheck.status} at http://localhost:5174/`
-      : `No dev server found at port 5174 (${serverCheck.error || serverCheck.status}). Browser dev server required for live HTTP probe.`
+    '[INTEGRATION] Development Server Startup & Live HTTP Probe',
+    devStartup.ok ? 'PASS' : 'FAIL',
+    devStartup.ok
+      ? `Spawned Vite dev server on dedicated test port ${devStartup.port}; received HTTP ${devStartup.status} OK at ${devStartup.url}. Child process tree terminated cleanly.`
+      : `Vite dev server failed to start or probe timed out: ${devStartup.error}`
   );
 
   // 3. OPEN-WEIGHT AI AUTHENTICITY TEST (BUG #7: Distinguish configured vs initialized vs inferred)
@@ -90,7 +206,7 @@ async function runRedTeamAudit() {
   const statusInNode = webllm.status; // 'UNAVAILABLE'
   record(
     'TEST-03',
-    'Open-Weight AI Authenticity & WebGPU Detection',
+    '[ENVIRONMENT-LIMITED] Open-Weight AI Authenticity & WebGPU Detection',
     (isConfigured && statusInNode === 'UNAVAILABLE') ? 'ENVIRONMENT-LIMITED' : 'FAIL',
     `Configured: ${isConfigured} (${webllm.modelName}, ${webllm.license}) | Node WebGPU status: ${statusInNode} | Engine in Node: ${webllm.engine ? 'Loaded' : 'Deferred'}`,
     'WebLLM CreateMLCEngine requires browser WebGPU runtime. In headless Node, status is truthfully reported as UNAVAILABLE. Authoritative runtime test is available on /diagnostics via "Run WebLLM Self Test".'
@@ -158,9 +274,9 @@ async function runRedTeamAudit() {
                 resA.fallbackChain[0] === 'webllm';
   canopyAI.providers.webllm = origWebLLM; // Restore real provider immediately
 
-  record(
+    record(
     'TEST-04',
-    '3-Tier Fallback Hierarchy (WebLLM -> Ollama -> MLP)',
+    '[INTEGRATION] 3-Tier Fallback Hierarchy (WebLLM -> Ollama -> MLP)',
     (passA && passB && passC) ? 'PASS' : 'FAIL',
     `Scenario A (WebLLM Success): actual=${resA.actualProvider}, chain=[${resA.fallbackChain}] | Scenario B (Ollama Fallback): actual=${fallbackResB.actualProvider}, chain=[${fallbackResB.fallbackChain}] | Scenario C (MLP Fallback): actual=${fallbackResC.actualProvider}, chain=[${fallbackResC.fallbackChain}]`,
     'Verified: WebLLM success stops immediately without calling secondary tiers; WebLLM failure cascades cleanly through Ollama then MLP.'
@@ -176,7 +292,7 @@ async function runRedTeamAudit() {
                  (fallbackResC.offlineVerified === true || fallbackResC.offlineVerified === false || fallbackResC.offlineVerified === 'unknown');
   record(
     'TEST-05',
-    'Actual Provider Response Metadata Verification',
+    '[UNIT] Actual Provider Response Metadata Verification',
     metaOk ? 'PASS' : 'FAIL',
     `Metadata fields verified: actualProvider, actualModel, runtime, local, offlineCapable, offlineVerified (${fallbackResC.offlineVerified}), fallback, fallbackChain ([${fallbackResC.fallbackChain}]), fallbackReason, latency.`
   );
@@ -192,7 +308,7 @@ async function runRedTeamAudit() {
   const failHandled = failRes.isModelUnavailable && failRes.response.includes('LOCAL AI UNAVAILABLE');
   record(
     'TEST-06',
-    'Model Failure Failsafe & Non-Crashing Fallback',
+    '[UNIT] Model Failure Failsafe & Non-Crashing Fallback',
     failHandled ? 'PASS' : 'FAIL',
     `Status: ${failStatus.state} (${failStatus.label}) | Deterministic Response: ${failRes.response.split('\n')[0]}`
   );
@@ -222,7 +338,7 @@ async function runRedTeamAudit() {
   }
   record(
     'TEST-07',
-    'Offline First & Zero Cloud AI API Keys',
+    '[OFFLINE AUDIT] Offline First & Zero Cloud AI API Keys',
     !foundCloudAiApi ? 'PASS' : 'FAIL',
     `Scanned ${srcFiles.length} source files: 0 external cloud AI API endpoints found. 100% on-device sovereign.`
   );
@@ -261,7 +377,7 @@ async function runRedTeamAudit() {
                                     scA.response !== scB.response;
   record(
     'TEST-08',
-    'AI Context Pipeline & Scenario Discrepancy',
+    '[INTEGRATION] AI Context Pipeline & Scenario Discrepancy',
     contextMateriallyDifferent ? 'PASS' : 'FAIL',
     `Scenario A: Safe (Override: ${scA.isDeterministicOverride}) vs Scenario B: Danger (Override: ${scB.isDeterministicOverride}, Rule: ${scB.safetyRuleTriggered})`
   );
@@ -282,7 +398,7 @@ async function runRedTeamAudit() {
                           safetyOverrideCheck.finalResponse.includes("Turn back immediately");
   record(
     'TEST-09',
-    'Deterministic Safety Engine Hard Override of Rogue AI',
+    '[UNIT] Deterministic Safety Engine Hard Override of Rogue AI',
     rogueSuppressed ? 'PASS' : 'FAIL',
     `Override Rule: ${safetyOverrideCheck.primaryRule} | AI Suppressed: ${safetyOverrideCheck.aiWasSuppressed} | Directive contains "Turn back immediately": ${rogueSuppressed}`
   );
@@ -300,7 +416,7 @@ async function runRedTeamAudit() {
                           unmonRes.response.includes("don't have UV data");
   record(
     'TEST-10',
-    'Zero Telemetry Fabrication & Unknown Sensor Refusal',
+    '[UNIT] Zero Telemetry Fabrication & Unknown Sensor Refusal',
     noHallucination ? 'PASS' : 'FAIL',
     `Checkpoint XYZ: Refused with recognized list | UV metric: Explicit unmonitored metric refusal`
   );
@@ -318,7 +434,7 @@ async function runRedTeamAudit() {
                                   medRes.response.toLowerCase().includes('disclaimer');
   record(
     'TEST-11',
-    'Medical Safety Compliance & Prescription Sanitization',
+    '[UNIT] Medical Safety Compliance & Prescription Sanitization',
     (noDosagePrescribed && noDrugsInResponse && hasConservativeProtocol) ? 'PASS' : 'FAIL',
     `No dosages: ${noDosagePrescribed} | Drug mentions stripped: ${noDrugsInResponse} | Conservative protocol: ${hasConservativeProtocol}`
   );
@@ -328,7 +444,7 @@ async function runRedTeamAudit() {
   const highRiskCtx = buildCanopyContext({ riskScore: 88, visibility: 'Whiteout', weatherCondition: 'Blizzard', elevation: 4300, temperature: -5 });
   record(
     'TEST-12',
-    'Risk Engine Logic & Compound Hazard Differentiation',
+    '[UNIT] Risk Engine Logic & Compound Hazard Differentiation',
     (lowRiskCtx.isSevereRisk === false && highRiskCtx.isSevereRisk === true && highRiskCtx.isFreezing === true) ? 'PASS' : 'FAIL',
     `Low Hazard (Risk 18): Severe=${lowRiskCtx.isSevereRisk} | High Hazard (Risk 88): Severe=${highRiskCtx.isSevereRisk}, Freezing=${highRiskCtx.isFreezing}`
   );
@@ -339,7 +455,7 @@ async function runRedTeamAudit() {
   const microclimateWorks = pLow.frostProbabilityPct < pHigh.frostProbabilityPct && pHigh.isPhysicsFallback === true;
   record(
     'TEST-13',
-    'Microclimate Service & Physics Fallback Model',
+    '[UNIT] Microclimate Service & Physics Fallback Model',
     microclimateWorks ? 'PASS' : 'FAIL',
     `200m Frost: ${pLow.frostProbabilityPct}% vs 1400m Frost: ${pHigh.frostProbabilityPct}% | Source: ${pHigh.source}`
   );
@@ -353,7 +469,7 @@ async function runRedTeamAudit() {
                 !isNaN(extCtx3.elevationNum) && !isNaN(extCtx3.tempNum) && !isNaN(extCtx3.riskScore);
   record(
     'TEST-14',
-    'Extreme Input Handling (0, 10000m, -50C, 50C, empty)',
+    '[UNIT] Extreme Input Handling (0, 10000m, -50C, 50C, empty)',
     noNaN ? 'PASS' : 'FAIL',
     `Ext 1: Elev=${extCtx1.elevation}, Temp=${extCtx1.temperature} | Ext 2: Elev=${extCtx2.elevation}, Temp=${extCtx2.temperature} | Ext 3: Elev=${extCtx3.elevation}`
   );
@@ -362,25 +478,38 @@ async function runRedTeamAudit() {
   const diagCheck = await checkHttp('http://localhost:5174/diagnostics');
   record(
     'TEST-15',
-    'Developer Diagnostics Route (/diagnostics)',
+    '[BROWSER] Developer Diagnostics Route (/diagnostics)',
     diagCheck.ok ? 'PASS' : 'NOT_AUTOMATED',
     diagCheck.ok
       ? `Route /diagnostics responded HTTP ${diagCheck.status} OK.`
-      : `Route /diagnostics check returned: ${diagCheck.error || diagCheck.status}`
+      : `Route /diagnostics check returned: ${diagCheck.error || diagCheck.status}. Requires dev server on port 5174 or browser navigation.`
   );
 
   console.log('\n================================================================');
   console.log('📋 AUDIT EXECUTION SUMMARY');
   console.log('================================================================');
+  const unitTests = results.filter(r => r.name.startsWith('[UNIT]'));
+  const integrationTests = results.filter(r => r.name.startsWith('[INTEGRATION]'));
+  const envLimitedTests = results.filter(r => r.name.startsWith('[ENVIRONMENT-LIMITED]') || r.status === 'ENVIRONMENT-LIMITED');
+  const offlineTests = results.filter(r => r.name.startsWith('[OFFLINE AUDIT]'));
+  const browserTests = results.filter(r => r.name.startsWith('[BROWSER]') || r.status === 'NOT_AUTOMATED');
+
   const passCount = results.filter(r => r.status === 'PASS').length;
   const limitationCount = results.filter(r => r.status === 'PASS_WITH_LIMITATION' || r.status === 'ENVIRONMENT-LIMITED').length;
   const notAutomatedCount = results.filter(r => r.status === 'NOT_AUTOMATED').length;
   const failCount = results.filter(r => r.status === 'FAIL').length;
-  console.log(`Total Checks:   ${results.length}`);
-  console.log(`Passed:         ${passCount}`);
-  console.log(`With Limits:    ${limitationCount}`);
-  console.log(`Not Automated:  ${notAutomatedCount}`);
-  console.log(`Failed:         ${failCount}\n`);
+
+  console.log(`Total Checks:         ${results.length}`);
+  console.log(`  - Unit Tests:       ${unitTests.length} (${unitTests.filter(t => t.status === 'PASS').length} Passed)`);
+  console.log(`  - Integration:      ${integrationTests.length} (${integrationTests.filter(t => t.status === 'PASS').length} Passed)`);
+  console.log(`  - Offline Audit:    ${offlineTests.length} (${offlineTests.filter(t => t.status === 'PASS').length} Passed)`);
+  console.log(`  - Env-Limited:      ${envLimitedTests.length} (${envLimitedTests.filter(t => t.status === 'ENVIRONMENT-LIMITED').length} Handled)`);
+  console.log(`  - Browser Tests:    ${browserTests.length}`);
+  console.log('----------------------------------------------------------------');
+  console.log(`Overall PASS:         ${passCount}`);
+  console.log(`ENVIRONMENT-LIMITED:  ${limitationCount}`);
+  console.log(`NOT AUTOMATED:        ${notAutomatedCount}`);
+  console.log(`FAILURES:             ${failCount}\n`);
 
   if (failCount > 0) {
     console.error('❌ Audit detected failures. Please inspect logs above.');
