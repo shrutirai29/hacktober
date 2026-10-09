@@ -39,45 +39,45 @@ USER GOES OUTSIDE & EXPLORES SAFELY
 
 ## 📸 Visual Showcase & Application Gallery
 
-### 1. Interactive 3D Terrain & Dynamic Telemetry Dashboard
-High-resolution 3D mountain elevation mesh with raycasted trail splines, live slope angles, dynamic risk gauges, and context-aware guidance cards.
+<p align="center">
+  <img src="docs/screenshots/hero_terrain_dashboard.jpg" alt="Canopy 3D Terrain & Live Dashboard" width="100%" />
+</p>
+<p align="center"><em>1. Interactive 3D Mountain Elevation Mesh with Raycasted Trail Splines, Live Slope Angles & Compound Hazard Telemetry</em></p>
 
-![Canopy 3D Terrain & Live Dashboard](public/screenshots/hero_terrain_dashboard.jpg)
+---
 
-<br/>
+<p align="center">
+  <img src="docs/screenshots/topo_3d_landscape.png" alt="Himalayan Topographic Map" width="100%" />
+</p>
+<p align="center"><em>2. High-Altitude Topographic Elevation & Ecosystem Mapping along Himalayan Alpine Bugyals</em></p>
 
-### 2. High-Altitude Topographic Elevation & Ecosystem Mapping
-Himalayan topo visualizer rendering ridge contours, elevation profiles, water availability, and ecosystem indicators.
+---
 
-![Himalayan Topographic Map](public/screenshots/topo_3d_landscape.png)
+<p align="center">
+  <img src="docs/screenshots/safety_advisor_guidance.png" alt="Safety Advisor Guidance" width="100%" />
+</p>
+<p align="center"><em>3. Open-Weight AI Field Guardian & Context Reasoning (Supervised by Deterministic Safety Engine)</em></p>
 
-<br/>
+---
 
-### 3. Open-Weight AI Field Guardian & Context Reasoning
-Context-grounded assistant powered by SmolLM2-135M on WebGPU, supervised by the deterministic safety engine.
+<p align="center">
+  <img src="docs/screenshots/field_mode_oled.png" alt="Minimalist OLED Field Mode" width="100%" />
+</p>
+<p align="center"><em>4. Minimalist High-Contrast OLED Field Mode for Direct Mountain Sunlight and Night Glances</em></p>
 
-![Safety Advisor Guidance](public/screenshots/safety_advisor_guidance.png)
+---
 
-<br/>
+<p align="center">
+  <img src="docs/screenshots/sensors_arduino_telemetry.png" alt="Arduino Physical Sensor Bridge" width="100%" />
+</p>
+<p align="center"><em>5. Physical WebSerial Sensor Bridge (Arduino UNO Q / ESP32 with BME280 & Peak Audio Harmonics)</em></p>
 
-### 4. Minimalist High-Contrast OLED Field Mode
-Zero-distraction high-contrast interface designed for bright mountain sunlight or night hikes, maximizing battery life and field glanceability.
+---
 
-![Minimalist OLED Field Mode](public/screenshots/field_mode_oled.png)
-
-<br/>
-
-### 5. Physical Sensor Telemetry Bridge (Arduino UNO Q / WebSerial)
-Real-time environmental sensor ingestion via WebSerial (BME280 temperature, pressure, humidity, peak microphone harmonics) with transparent synthetic simulation mode.
-
-![Arduino Physical Sensor Bridge](public/screenshots/sensors_arduino_telemetry.png)
-
-<br/>
-
-### 6. Developer & Judge Diagnostics Console (`/diagnostics`)
-Dedicated live runtime audit dashboard displaying real WebGPU device status, active model weights, deterministic safety health, and one-click self-test execution.
-
-![Developer Diagnostics](public/screenshots/developer_diagnostics.png)
+<p align="center">
+  <img src="docs/screenshots/developer_diagnostics.png" alt="Developer Diagnostics" width="100%" />
+</p>
+<p align="center"><em>6. Developer & Judge Diagnostics Console (/diagnostics) with Live WebGPU State and Automated Self-Tests</em></p>
 
 ---
 
