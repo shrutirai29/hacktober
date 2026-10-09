@@ -67,6 +67,7 @@ export async function askGemmaAgent(trail, userQuery, options = {}) {
     offlineVerified: result.offlineVerified ?? false,
     fallback: result.fallback,
     isFallback: result.isFallback,
+    fallbackChain: result.fallbackChain || [result.actualProvider],
     fallbackFrom: result.fallbackFrom,
     fallbackReason: result.fallbackReason,
     latency: result.latency,

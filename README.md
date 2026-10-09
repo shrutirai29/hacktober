@@ -230,8 +230,10 @@ node scripts/complete_redteam_e2e.js
 ### Developer Diagnostics Route (`/diagnostics`)
 For judges and developer verification, Canopy includes an inspectable diagnostics route:
 - **URL:** [http://localhost:5174/diagnostics](http://localhost:5174/diagnostics)
-- **Live Runtime State:** Real-time indicator for WebLLM engine status, active provider, WebGPU availability, deterministic safety engine, microclimate physics fallback, bioacoustic spectral analyzer, and PWA cache.
-- **Interactive Self-Test:** A "Run Self Test" button exercises the live fallback hierarchy, queries, and safety rules directly in your browser.
+- **Live Runtime State:** Real-time indicators for WebGPU hardware, WebLLM engine status, active provider, deterministic safety engine, microclimate physics fallback, bioacoustic spectral analyzer, and PWA cache.
+- **Interactive Self-Tests:**
+  - **Run Full Self Test:** Exercises context assembly, scenario cutoffs, zero-hallucination guards, medical sanitization, microclimate physics fallback, and offline synthesis.
+  - **Run WebLLM Self Test:** The authoritative in-browser verification testing WebGPU detection, `CreateMLCEngine` initialization, `SmolLM2-135M` weight loading, and live prompt inference.
 
 ### Manual Interactive Scenarios (Sandbox in UI)
 

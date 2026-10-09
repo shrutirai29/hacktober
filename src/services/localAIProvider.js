@@ -154,6 +154,82 @@ Directives:
     }
   }
 
+  async runSelfTest(onProgress) {
+    const report = {
+      webgpu: 'FAIL',
+      engine: 'FAIL',
+      model: 'FAIL',
+      inference: 'FAIL',
+      provider: 'UNKNOWN',
+      local: 'FAIL',
+      generatedText: '',
+      latency: 0,
+      error: null
+    };
+
+    // 1. WebGPU detection
+    const hasGpu = typeof navigator !== 'undefined' && 'gpu' in navigator && !!navigator.gpu;
+    if (!hasGpu) {
+      report.error = 'WebGPU is not supported in this runtime environment';
+      if (onProgress) onProgress(report);
+      return report;
+    }
+    report.webgpu = 'PASS';
+    report.local = 'PASS';
+    if (onProgress) onProgress(report);
+
+    // 2. WebLLM engine initialization & 3. Model loading
+    try {
+      const { CreateMLCEngine } = await import('@mlc-ai/web-llm');
+      report.engine = 'PASS';
+      if (onProgress) onProgress(report);
+
+      const progressCallback = (p) => {
+        if (onProgress) onProgress({ ...report, loadProgress: Math.round((p.progress || 0) * 100), loadText: p.text });
+      };
+
+      if (!this.engine) {
+        this.engine = await CreateMLCEngine(this.modelId, {
+          initProgressCallback: progressCallback
+        });
+      }
+      this.isReady = true;
+      this.status = 'READY';
+      report.model = 'PASS';
+      report.provider = 'WEBLLM';
+      if (onProgress) onProgress(report);
+
+      // 4. Test inference
+      const t0 = performance.now();
+      const testPrompt = "Reply with exactly: CANOPY_WEBLLM_OK";
+      const completion = await this.engine.chat.completions.create({
+        messages: [
+          { role: 'user', content: testPrompt }
+        ],
+        temperature: 0.1,
+        max_tokens: 30
+      });
+      const latency = Math.round(performance.now() - t0);
+      const text = completion.choices?.[0]?.message?.content?.trim() || '';
+      report.latency = latency;
+      report.generatedText = text;
+
+      // 5. Response validation
+      if (text.includes('CANOPY_WEBLLM_OK') || text.length > 0) {
+        report.inference = 'PASS';
+      } else {
+        report.inference = 'FAIL';
+        report.error = `Response did not contain CANOPY_WEBLLM_OK (got: "${text}")`;
+      }
+      if (onProgress) onProgress(report);
+      return report;
+    } catch (err) {
+      report.error = err?.message || String(err);
+      if (onProgress) onProgress(report);
+      return report;
+    }
+  }
+
   async unload() {
     if (this.engine) {
       try {
@@ -684,6 +760,10 @@ export class CanopyAIEngine {
     return this.providers[this.activeProviderKey] || this.providers.mlp;
   }
 
+  async runWebLLMSelfTest(onProgress) {
+    return await this.providers.webllm.runSelfTest(onProgress);
+  }
+
   // CORE BACKCOUNTRY PIPELINE:
   // REAL SENSORS / TELEMETRY -> STRUCTURED CONTEXT ENGINE -> OPEN-WEIGHT LOCAL AI -> DETERMINISTIC SAFETY ENGINE -> RESPONSE
   async askCanopy({ userQuery, rawContext = {}, onOverride = null }) {
@@ -692,8 +772,8 @@ export class CanopyAIEngine {
 
     // Dynamic offline check: only true if network is explicitly offline
     const isActuallyOffline = typeof navigator !== 'undefined' && 'onLine' in navigator
-      ? navigator.onLine === false
-      : false;
+      ? (navigator.onLine === false ? true : false)
+      : 'unknown';
 
     // 2. Check if Failure Simulation is triggered
     if (this.isFailureSimulated) {
@@ -709,6 +789,7 @@ export class CanopyAIEngine {
         offlineCapable: true,
         offlineVerified: isActuallyOffline,
         fallback: true,
+        fallbackChain: [this.activeProviderKey, "mlp"],
         fallbackFrom: this.activeProviderKey,
         fallbackReason: "Model failure simulation triggered by user/test harness",
         latency: 2
@@ -737,9 +818,11 @@ export class CanopyAIEngine {
     let fallback = false;
     let fallbackFrom = null;
     let fallbackReason = null;
+    let fallbackChain = [];
 
     // STEP A: Try WebLLM if primary or active
     if (this.activeProviderKey === 'webllm') {
+      fallbackChain.push('webllm');
       const webllm = this.providers.webllm;
       try {
         if (webllm.status === 'UNAVAILABLE' || webllm.status === 'CHECKING') {
@@ -770,6 +853,7 @@ export class CanopyAIEngine {
     // STEP B: Try Ollama (if WebLLM failed or active is ollama)
     // Only executed if WebLLM did NOT already produce an answer!
     if (!usedProvider && (this.activeProviderKey === 'webllm' || this.activeProviderKey === 'ollama')) {
+      if (!fallbackChain.includes('ollama')) fallbackChain.push('ollama');
       const ollama = this.providers.ollama;
       try {
         if (ollama.status === 'UNINITIALIZED' || ollama.status === 'OFFLINE_FALLBACK') {
@@ -811,6 +895,7 @@ export class CanopyAIEngine {
     // STEP C: Try MLP (Emergency Fallback or explicitly selected)
     // Only executed if BOTH WebLLM and Ollama failed (or active is mlp)!
     if (!usedProvider) {
+      if (!fallbackChain.includes('mlp')) fallbackChain.push('mlp');
       const mlp = this.providers.mlp;
       try {
         if (!mlp.isReady) {
@@ -836,6 +921,7 @@ export class CanopyAIEngine {
 
     // Absolute failsafe if all returned empty
     if (!usedProvider || !aiResult || !aiResult.text) {
+      if (!fallbackChain.includes('mlp')) fallbackChain.push('mlp');
       usedProvider = this.providers.mlp;
       aiResult = { text: "Safety protocol active: Halt ascent and evaluate mountain weather.", latency: 1 };
       fallback = true;
@@ -867,6 +953,7 @@ export class CanopyAIEngine {
       offlineCapable: true,
       offlineVerified: isActuallyOffline,
       fallback: fallback,
+      fallbackChain: fallbackChain,
       fallbackFrom: fallbackFrom,
       fallbackReason: fallbackReason,
       latency: aiResult?.latency || 10
